@@ -301,3 +301,5 @@ D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Model.pdb
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Entity.pdb
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Repository.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Repository.pdb
+D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Mapper.dll
+D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Mapper.pdb
