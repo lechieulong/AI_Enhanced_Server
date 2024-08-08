@@ -1,0 +1,88 @@
+# Binaries
+bin/
+obj/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+**/packages/*
+# The packages folder can be ignored because of the presence of the .nuspec file in the project.
+
+# MSTest test results
+TestResults/
+*.trx
+*.coverage
+
+# Visual Studio artifacts
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# DotNet specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/global.json
+**/project.json
+**/project.fragment.json
+
+# Logs
+*.log
+logs/
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+
+# Rider and ReSharper
+.idea/
+*.sln.iml
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Coverage Reports
+coverage*
+coverage-report/
+*.codecov
+
+# Publish directory
+publish/
+*.Publish.xml
+
+# Dump files
+*.dmp
+*.stackdump
+
+# Local history for IDE
+.localhistory/
+
+# git config
+.idea/
+
+# Backup files
+*~ 
+# .NET Core specific files
+project.lock.json
+project.fragment.lock.json
+artifacts/

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj": {}
+    "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj": {}
   },
   "projects": {
-    "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj": {
+    "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
+        "projectUniqueName": "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj",
         "projectName": "Auth",
-        "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
-        "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
-        "outputPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\obj\\",
+        "projectPath": "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj",
+        "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
+        "outputPath": "D:\\Capstone\\TutorMe_Server\\Auth\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,6 +35,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -94,7 +100,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
