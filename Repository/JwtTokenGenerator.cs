@@ -1,12 +1,13 @@
-﻿using Auth.Models;
-using Auth.Server.IServer;
+﻿using Entity;
+using IRepository;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Auth.Server
+namespace Repository
 {
     public class JwtTokenGenerator : IJwtTokenGenerator
     {

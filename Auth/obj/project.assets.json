@@ -1681,6 +1681,59 @@
             "rid": "win"
           }
         }
+      },
+      "Entity/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.7",
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.7"
+        },
+        "compile": {
+          "bin/placeholder/Entity.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Entity.dll": {}
+        }
+      },
+      "IRepository/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Entity": "1.0.0",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.7",
+          "Model": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/IRepository.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/IRepository.dll": {}
+        }
+      },
+      "Model/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/Model.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Model.dll": {}
+        }
+      },
+      "Repository/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Entity": "1.0.0",
+          "IRepository": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Repository.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Repository.dll": {}
+        }
       }
     }
   },
@@ -4493,34 +4546,57 @@
         "system.windows.extensions.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "Entity/1.0.0": {
+      "type": "project",
+      "path": "../Entity/Entity.csproj",
+      "msbuildProject": "../Entity/Entity.csproj"
+    },
+    "IRepository/1.0.0": {
+      "type": "project",
+      "path": "../IRepository/IRepository.csproj",
+      "msbuildProject": "../IRepository/IRepository.csproj"
+    },
+    "Model/1.0.0": {
+      "type": "project",
+      "path": "../Model/Model.csproj",
+      "msbuildProject": "../Model/Model.csproj"
+    },
+    "Repository/1.0.0": {
+      "type": "project",
+      "path": "../repository/Repository.csproj",
+      "msbuildProject": "../repository/Repository.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
       "AutoMapper >= 13.0.1",
       "AutoMapper.Extensions.Microsoft.DependencyInjection >= 12.0.0",
+      "IRepository >= 1.0.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.7",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.7",
       "Microsoft.AspNetCore.OpenApi >= 8.0.7",
       "Microsoft.EntityFrameworkCore.SqlServer >= 8.0.7",
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.7",
+      "Model >= 1.0.0",
+      "Repository >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ADMIN\\.nuget\\packages\\": {}
+    "C:\\Users\\acer\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj",
+      "projectUniqueName": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
       "projectName": "Auth",
-      "projectPath": "D:\\Capstone\\TutorMe_Server\\Auth\\Auth.csproj",
-      "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-      "outputPath": "D:\\Capstone\\TutorMe_Server\\Auth\\obj\\",
+      "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
+      "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
+      "outputPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\ADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -4528,24 +4604,28 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Capstone_Project\\TutorMe_Server\\IRepository\\IRepository.csproj": {
+              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\IRepository\\IRepository.csproj"
+            },
+            "D:\\Capstone_Project\\TutorMe_Server\\Model\\Model.csproj": {
+              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Model\\Model.csproj"
+            },
+            "D:\\Capstone_Project\\TutorMe_Server\\repository\\Repository.csproj": {
+              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\repository\\Repository.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -4606,7 +4686,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

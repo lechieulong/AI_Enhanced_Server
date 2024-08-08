@@ -1,10 +1,10 @@
-﻿using Auth.Models;
+﻿using Entity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 
-namespace Auth.Data
+namespace Model.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {

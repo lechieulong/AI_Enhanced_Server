@@ -1,6 +1,6 @@
-﻿namespace Auth.Models.Dto
+﻿namespace Model
 {
-    public class RegistrationRequestDto
+    public class RegistrationRequestModel
     {
         public string Email { get; set; }
         public string Name { get; set; }

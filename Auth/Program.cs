@@ -1,9 +1,10 @@
-using Auth.Data;
-using Auth.Models;
-using Auth.Server.IServer;
-using Auth.Server;
+using Entity;
+using IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Model;
+using Model.Data;
+using Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,17 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+// Register CORS services
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMyOrigin",
+        policy => policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -36,6 +47,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Use CORS policy
+app.UseCors("AllowMyOrigin");
 
 app.UseAuthentication();
 

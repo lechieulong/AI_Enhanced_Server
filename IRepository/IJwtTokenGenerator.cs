@@ -1,8 +1,6 @@
-﻿
+﻿using Entity;
 
-using Auth.Models;
-
-namespace Auth.Server.IServer
+namespace IRepository
 {
     public interface IJwtTokenGenerator
     {

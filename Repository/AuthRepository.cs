@@ -1,19 +1,24 @@
-﻿using Auth.Data;
-using Auth.Models;
-using Auth.Models.Dto;
-using Auth.Server.IServer;
+﻿using Entity;
+using IRepository;
 using Microsoft.AspNetCore.Identity;
+using Model;
+using Model.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Auth.Server
+namespace Repository
 {
-    public class AuthService : IAuthService
+    public class AuthRepository : IAuthRepository
     {
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
-        public AuthService(AppDbContext appDbContext, IJwtTokenGenerator jwtTokenGenerator, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AuthRepository(AppDbContext appDbContext, IJwtTokenGenerator jwtTokenGenerator, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _db = appDbContext;
             _jwtTokenGenerator = jwtTokenGenerator;
@@ -36,20 +41,20 @@ namespace Auth.Server
             return false;
         }
 
-        public async Task<LoginReponseDto> Login(LoginRequestDto loginRequestDto)
+        public async Task<LoginReponseModel> Login(LoginRequestModel loginRequestDto)
         {
             var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == loginRequestDto.Username.ToLower());
             bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
 
             if (user == null || isValid == false)
             {
-                return new LoginReponseDto() { User = null, Token = "" };
+                return new LoginReponseModel() { User = null, Token = "" };
             }
             //if user found, generate JWT
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
-            UserDto userDto = new()
+            UserModel userDto = new()
             {
                 ID = user.Id,
                 Email = user.Email,
@@ -57,7 +62,7 @@ namespace Auth.Server
                 PhoneNumber = user.PhoneNumber
             };
 
-            LoginReponseDto loginReponseDto = new LoginReponseDto()
+            LoginReponseModel loginReponseDto = new LoginReponseModel()
             {
                 User = userDto,
                 Token = token
@@ -66,7 +71,7 @@ namespace Auth.Server
             return loginReponseDto;
         }
 
-        public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
+        public async Task<string> Register(RegistrationRequestModel registrationRequestDto)
         {
             ApplicationUser user = new()
             {
@@ -83,7 +88,7 @@ namespace Auth.Server
                 {
                     var userToReturn = _db.ApplicationUsers.First(u => u.UserName == registrationRequestDto.Email);
 
-                    UserDto userDto = new()
+                    UserModel userDto = new()
                     {
                         ID = userToReturn.Id,
                         Email = userToReturn.Email,

@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Auth.Migrations
+namespace Entity.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCraeteUser : Migration
+    public partial class AddTableUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
