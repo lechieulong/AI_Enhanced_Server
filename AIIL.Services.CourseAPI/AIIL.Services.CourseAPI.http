@@ -1,6 +1,0 @@
-@AIIL.Services.CourseAPI_HostAddress = http://localhost:5274
-
-GET {{AIIL.Services.CourseAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
