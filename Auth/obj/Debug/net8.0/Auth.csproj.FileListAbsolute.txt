@@ -205,7 +205,6 @@ D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Memory.Data.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Runtime.Caching.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Security.Permissions.dll
-D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Text.Json.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\System.Windows.Extensions.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
@@ -287,7 +286,6 @@ D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\staticwebassets\msbuild
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.Auth.props
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\staticwebassets.pack.json
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\scopedcss\bundle\Auth.styles.css
-D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\Auth.csproj.CopyComplete
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\Auth.dll
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\refint\Auth.dll
 D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\Auth.pdb
@@ -303,3 +301,4 @@ D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Repository.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Repository.pdb
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Mapper.dll
 D:\Capstone_Project\TutorMe_Server\Auth\bin\Debug\net8.0\Mapper.pdb
+D:\Capstone_Project\TutorMe_Server\Auth\obj\Debug\net8.0\Auth.csproj.Up2Date
