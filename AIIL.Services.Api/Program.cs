@@ -1,11 +1,11 @@
 using AutoMapper;
 using Entity;
+using Entity.Data;
 using IRepository;
 using Mapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
-using Model.Data;
 using Repository;
 using System;
 
