@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entity
+namespace Model
 {
-    public class Class
+    public class ClassDto
     {
-        [Key]
         public int Id { get; set; }
         public string ClassName { get; set; }
         public string ClassDescription { get; set; }

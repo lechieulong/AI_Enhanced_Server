@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Model.Utility;
 
 namespace Repository
 {
@@ -41,14 +42,14 @@ namespace Repository
             return false;
         }
 
-        public async Task<LoginReponseModel> Login(LoginRequestModel loginRequestDto)
+        public async Task<LoginReponseDto> Login(LoginRequestDto loginRequestDto)
         {
             var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == loginRequestDto.Username.ToLower());
             bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
 
             if (user == null || isValid == false)
             {
-                return new LoginReponseModel() { User = null, Token = "" };
+                return new LoginReponseDto() { User = null, Token = "" };
             }
             //if user found, generate JWT
             var roles = await _userManager.GetRolesAsync(user);
@@ -62,7 +63,7 @@ namespace Repository
                 PhoneNumber = user.PhoneNumber
             };
 
-            LoginReponseModel loginReponseDto = new LoginReponseModel()
+            LoginReponseDto loginReponseDto = new LoginReponseDto()
             {
                 User = userDto,
                 Token = token
@@ -71,7 +72,7 @@ namespace Repository
             return loginReponseDto;
         }
 
-        public async Task<string> Register(RegistrationRequestModel registrationRequestDto)
+        public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
         {
             ApplicationUser user = new()
             {
@@ -86,6 +87,9 @@ namespace Repository
                 var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
                 if (result.Succeeded)
                 {
+                    //Assign rolle "USER" auto
+                    await AssignRole(user.Email, SD.User);
+
                     var userToReturn = _db.ApplicationUsers.First(u => u.UserName == registrationRequestDto.Email);
 
                     UserModel userDto = new()
@@ -99,12 +103,12 @@ namespace Repository
                 }
                 else
                 {
-                    return result.Errors.FirstOrDefault().Description;
+                    return result.Errors.FirstOrDefault()?.Description ?? "Registration failed";
                 }
             }
             catch (Exception ex)
             {
-
+                
             }
             return "Error Encountered";
         }

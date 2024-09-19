@@ -9,6 +9,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Entity\Entity.csproj" />
 		<ProjectReference Include="..\IRepository\IRepository.csproj" />
+		<ProjectReference Include="..\Mapper\Mapper.csproj" />
+		<ProjectReference Include="..\Model\Model.csproj" />
 	</ItemGroup>
 
 </Project>
