@@ -978,12 +978,6 @@
       "System.Text.Json/8.0.4": {
         "dependencies": {
           "System.Text.Encodings.Web": "8.0.0"
-        },
-        "runtime": {
-          "lib/net8.0/System.Text.Json.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.724.31311"
-          }
         }
       },
       "System.Threading.Channels/6.0.0": {},
@@ -1010,10 +1004,14 @@
       "Entity/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.7",
-          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.7"
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.7",
+          "Model": "1.0.0"
         },
         "runtime": {
-          "Entity.dll": {}
+          "Entity.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "IRepository/1.0.0": {
@@ -1023,7 +1021,10 @@
           "Model": "1.0.0"
         },
         "runtime": {
-          "IRepository.dll": {}
+          "IRepository.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Mapper/1.0.0": {
@@ -1032,12 +1033,18 @@
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "12.0.0"
         },
         "runtime": {
-          "Mapper.dll": {}
+          "Mapper.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Model/1.0.0": {
         "runtime": {
-          "Model.dll": {}
+          "Model.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Repository/1.0.0": {
@@ -1046,7 +1053,10 @@
           "IRepository": "1.0.0"
         },
         "runtime": {
-          "Repository.dll": {}
+          "Repository.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

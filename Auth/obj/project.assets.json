@@ -1696,7 +1696,8 @@
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.7",
-          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.7"
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.7",
+          "Model": "1.0.0"
         },
         "compile": {
           "bin/placeholder/Entity.dll": {}
@@ -4682,19 +4683,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\acer\\.nuget\\packages\\": {}
+    "C:\\Users\\ASUS\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
+      "projectUniqueName": "D:\\TuTorMe\\TutorMe_Server\\Auth\\Auth.csproj",
       "projectName": "Auth",
-      "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\Auth.csproj",
-      "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
-      "outputPath": "D:\\Capstone_Project\\TutorMe_Server\\Auth\\obj\\",
+      "projectPath": "D:\\TuTorMe\\TutorMe_Server\\Auth\\Auth.csproj",
+      "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
+      "outputPath": "D:\\TuTorMe\\TutorMe_Server\\Auth\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -4702,23 +4708,24 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Capstone_Project\\TutorMe_Server\\IRepository\\IRepository.csproj": {
-              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\IRepository\\IRepository.csproj"
+            "D:\\TuTorMe\\TutorMe_Server\\IRepository\\IRepository.csproj": {
+              "projectPath": "D:\\TuTorMe\\TutorMe_Server\\IRepository\\IRepository.csproj"
             },
-            "D:\\Capstone_Project\\TutorMe_Server\\Mapper\\Mapper.csproj": {
-              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Mapper\\Mapper.csproj"
+            "D:\\TuTorMe\\TutorMe_Server\\Mapper\\Mapper.csproj": {
+              "projectPath": "D:\\TuTorMe\\TutorMe_Server\\Mapper\\Mapper.csproj"
             },
-            "D:\\Capstone_Project\\TutorMe_Server\\Model\\Model.csproj": {
-              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\Model\\Model.csproj"
+            "D:\\TuTorMe\\TutorMe_Server\\Model\\Model.csproj": {
+              "projectPath": "D:\\TuTorMe\\TutorMe_Server\\Model\\Model.csproj"
             },
-            "D:\\Capstone_Project\\TutorMe_Server\\repository\\Repository.csproj": {
-              "projectPath": "D:\\Capstone_Project\\TutorMe_Server\\repository\\Repository.csproj"
+            "D:\\TuTorMe\\TutorMe_Server\\repository\\Repository.csproj": {
+              "projectPath": "D:\\TuTorMe\\TutorMe_Server\\repository\\Repository.csproj"
             }
           }
         }
@@ -4727,6 +4734,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -4787,7 +4799,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
