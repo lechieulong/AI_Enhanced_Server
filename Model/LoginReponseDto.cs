@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public class LoginReponseModel
+    public class LoginReponseDto
     {
         public UserModel User { get; set; }
         public string Token { get; set; }

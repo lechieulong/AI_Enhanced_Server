@@ -9,8 +9,8 @@ namespace IRepository
 {
     public interface IAuthRepository
     {
-        Task<string> Register(RegistrationRequestModel registrationRequestModel);
-        Task<LoginReponseModel> Login(LoginRequestModel loginRequestModel);
+        Task<string> Register(RegistrationRequestDto registrationRequestModel);
+        Task<LoginReponseDto> Login(LoginRequestDto loginRequestModel);
         Task<bool> AssignRole(string email, string roleName);
     }
 }
