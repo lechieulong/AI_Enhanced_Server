@@ -1,8 +1,8 @@
 ﻿using Entity;
+using Entity.Data;
 using IRepository;
 using Microsoft.AspNetCore.Identity;
 using Model;
-using Model.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
