@@ -1,8 +1,7 @@
-﻿using Entity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Model.Data
+namespace Entity.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -11,6 +10,11 @@ namespace Model.Data
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<TestExam> TestExam { get; set; }
+        public DbSet<PartSkill> PartSkill { get; set; }
+        public DbSet<QuestionTypePart> QuestionTypePart { get; set; }
+        public DbSet<Question> Question { get; set; }
+
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseTimeline> CourseTimelines { get; set; }
         public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }
