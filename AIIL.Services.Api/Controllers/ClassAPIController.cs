@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
-using Model.Data;
+using Entity.Data;
 
 namespace AIIL.Services.Api.Controllers
 {

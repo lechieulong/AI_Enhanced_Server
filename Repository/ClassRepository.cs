@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Model.Data;
+using Entity.Data;
 using Entity;
 
 namespace Repository
