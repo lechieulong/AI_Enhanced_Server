@@ -34,12 +34,6 @@ namespace Auth.Controllers
             return Ok(course);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create(Course course)
-        //{
-        //    await _repository.AddAsync(course);
-        //    return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
-        //}
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Course course)
         {
