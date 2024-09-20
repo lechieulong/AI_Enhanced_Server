@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Model;
 
 namespace Entity.Data
 {
@@ -19,6 +20,9 @@ namespace Entity.Data
         public DbSet<PartSkill> PartSkill { get; set; }
         public DbSet<QuestionTypePart> QuestionTypePart { get; set; }
         public DbSet<Question> Question { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseTimeline> CourseTimelines { get; set; }
+        public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
