@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Model
 {
-    public class Course
+    public class CourseDto
     {
         public int Id { get; set; }
         public string CourseName { get; set; }
@@ -16,6 +16,6 @@ namespace Model
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         [JsonIgnore] // Bỏ qua khi tạo Course
-        public ICollection<CourseTimeline>? CourseTimelines { get; set; }
+        public ICollection<CourseTimelineDto>? CourseTimelines { get; set; }
     }
 }

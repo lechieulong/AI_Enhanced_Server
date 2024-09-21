@@ -1,6 +1,6 @@
 ﻿using IRepository;
 using Microsoft.AspNetCore.Mvc;
-using Model;
+using Entity;
 using System.Linq;
 using System.Threading.Tasks;
 

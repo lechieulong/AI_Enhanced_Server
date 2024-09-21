@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public class CourseTimelineDetail
+    public class CourseTimelineDetailDto
     {
         public int Id { get; set; }
 
         // Khóa ngoại liên kết với CourseTimeline
         public int TimelineId { get; set; }
-        public CourseTimeline CourseTimeline { get; set; }
+        public CourseTimelineDto CourseTimeline { get; set; }
 
         public string Title { get; set; }
 

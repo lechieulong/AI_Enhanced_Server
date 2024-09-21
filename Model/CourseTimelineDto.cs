@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Model
 {
-    public class CourseTimeline
+    public class CourseTimelineDto
     {
         public int Id { get; set; }
 
@@ -13,7 +13,7 @@ namespace Model
 
         // Bỏ qua thuộc tính Course khi tạo CourseTimeline
         [JsonIgnore]
-        public Course? Course { get; set; } // Có thể giữ lại nhưng không yêu cầu trong việc tạo
+        public CourseDto? Course { get; set; } // Có thể giữ lại nhưng không yêu cầu trong việc tạo
 
         public DateTime EventDate { get; set; }
         public string Title { get; set; }
@@ -21,6 +21,6 @@ namespace Model
         public string Author { get; set; }
 
         [JsonIgnore]
-        public ICollection<CourseTimelineDetail>? CourseTimelineDetails { get; set; }
+        public ICollection<CourseTimelineDetailDto>? CourseTimelineDetails { get; set; }
     }
 }

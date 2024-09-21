@@ -1,4 +1,4 @@
-﻿using Model;
+﻿using Entity;
 
 public interface ICourseTimelineRepository
 {

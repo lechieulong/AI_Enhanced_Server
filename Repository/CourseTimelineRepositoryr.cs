@@ -2,7 +2,7 @@
 using IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Model;
+using Entity;
 using Entity.Data;
 using System;
 using System.Collections.Generic;
