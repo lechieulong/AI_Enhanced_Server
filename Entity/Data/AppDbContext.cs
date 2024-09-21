@@ -19,7 +19,7 @@ namespace Entity.Data
         public DbSet<PartSkill> PartSkill { get; set; }
         public DbSet<QuestionTypePart> QuestionTypePart { get; set; }
         public DbSet<Question> Question { get; set; }
-
+        public DbSet<EmailLog> EmailLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
