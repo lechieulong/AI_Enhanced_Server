@@ -31,6 +31,10 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
+builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
+
 // Register CORS services
 builder.Services.AddCors(options =>
 {
