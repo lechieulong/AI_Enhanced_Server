@@ -115,5 +115,23 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
+        //[HttpGet]
+        //[Route("by-course")]
+        //public ResponseDto GetByCourseId([FromQuery] int courseId)
+        //{
+        //    try
+        //    {
+        //        IEnumerable<Class> classList = _db.Classes.Where(c => c.CourseId == courseId).ToList();
+
+        //        _response.Result = _mapper.Map<IEnumerable<ClassDto>>(classList);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _response.IsSuccess = false;
+        //        _response.Message = ex.Message;
+        //    }
+        //    return _response;
+        //}
     }
 }

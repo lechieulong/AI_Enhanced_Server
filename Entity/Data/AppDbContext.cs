@@ -23,6 +23,7 @@ namespace Entity.Data
         public DbSet<CourseTimeline> CourseTimelines { get; set; }
         public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }
 
+        public DbSet<EmailLog> EmailLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
