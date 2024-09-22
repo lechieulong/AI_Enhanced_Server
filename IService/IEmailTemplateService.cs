@@ -12,5 +12,6 @@ namespace IService
         EmailTemplate RemindMember(string recipientName, string reminder);
         EmailTemplate GetOtpEmailTemplate(string recipientName, string otpCode);
         EmailTemplate GetPasswordResetEmailTemplate(string recipientName, string resetLink);
+        EmailTemplate AccountRegistrationEmail(string recipientName, string username);
     }
 }

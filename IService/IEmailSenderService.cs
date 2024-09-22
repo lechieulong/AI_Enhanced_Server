@@ -9,5 +9,6 @@ namespace IService
     public interface IEmailSenderService
     {
         Task SendEmailRemindMemberAsync(string recipientEmail, string reminder);
+        Task SendRegistrationSuccessEmail(string recipientEmail, string recipientName, string username);
     }
 }

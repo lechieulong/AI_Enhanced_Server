@@ -61,5 +61,24 @@ namespace Service
             };
         }
 
+        public EmailTemplate AccountRegistrationEmail(string recipientName, string username)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Welcome to Our Platform!",
+                Body = $@"
+                <h1>Registration Successful!</h1>
+                <p>Dear {recipientName},</p>
+                <p>Thank you for registering an account with us.</p>
+                <p>Your username is: <strong>{username}</strong></p>
+                <p>We are excited to have you on board and hope you enjoy your experience with our platform!</p>
+                <p>If you have any questions, feel free to reach out to our support team.</p>
+                <br/>
+                <p>Best Regards,</p>
+                <p>The Platform Team</p>
+            "
+            };
+        }
+
     }
 }
