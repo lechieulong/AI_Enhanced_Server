@@ -35,6 +35,13 @@ namespace Service
             var remindEmail = _emailTemplateService.RemindMember(recipientEmail, reminder);
             await _emailSender.SendEmailAsync(recipientEmail, remindEmail.Subject, remindEmail.Body);
         }
+
+        public async Task SendRegistrationSuccessEmail(string recipientEmail, string recipientName, string username)
+        {
+            var emailTemplate = _emailTemplateService.AccountRegistrationEmail(recipientName, username);
+            await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
+        }
+
     }
 
 }

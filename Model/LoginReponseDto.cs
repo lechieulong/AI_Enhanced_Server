@@ -8,7 +8,7 @@ namespace Model
 {
     public class LoginReponseDto
     {
-        public UserModel User { get; set; }
+        public UserDto User { get; set; }
         public string Token { get; set; }
     }
 }
