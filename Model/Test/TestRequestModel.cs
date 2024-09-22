@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Model.Test
+{
+    public class TestRequestModel
+    {
+        public string TestName { get; set; }
+        public List<Guid> ClassIds { get; set; } = new List<Guid>();
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public List<SkillRequest> Skills { get; set; } = new List<SkillRequest>();
+    }
+}
