@@ -22,9 +22,11 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\IRepository\IRepository.csproj" />
+		<ProjectReference Include="..\IService\IService.csproj" />
 		<ProjectReference Include="..\Mapper\Mapper.csproj" />
 		<ProjectReference Include="..\Model\Model.csproj" />
 		<ProjectReference Include="..\repository\Repository.csproj" />
+		<ProjectReference Include="..\Service\Service.csproj" />
 	</ItemGroup>
 
 </Project>

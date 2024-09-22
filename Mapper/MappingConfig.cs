@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Entity;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +16,8 @@ namespace Mapper
             var mappingConfig = new MapperConfiguration(config =>
             {
                 //Register mapper here nhe:))
-                //config.CreateMap<CouponDto, Coupon>();
-                //config.CreateMap<Coupon, CouponDto>();
+                config.CreateMap<Class, ClassDto>();
+                config.CreateMap<ClassDto, Class>();
             });
             return mappingConfig;
         }

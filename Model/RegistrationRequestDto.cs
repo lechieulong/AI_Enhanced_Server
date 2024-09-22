@@ -1,6 +1,6 @@
 ﻿namespace Model
 {
-    public class RegistrationRequestModel
+    public class RegistrationRequestDto
     {
         public string Email { get; set; }
         public string Name { get; set; }

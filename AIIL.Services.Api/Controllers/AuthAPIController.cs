@@ -9,18 +9,18 @@ namespace AIIL.Services.Api.Controllers
     [ApiController]
     public class AuthAPIController : ControllerBase
     {
-        private readonly IAuthRepository _authService;
-        private readonly ResponseModel _response;
+        private readonly IAuthRepository _authRepository;
+        private readonly ResponseDto _response;
         public AuthAPIController(IAuthRepository authService)
         {
-            _authService = authService;
+            _authRepository = authService;
             _response = new();
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationRequestModel model)
+        public async Task<IActionResult> Register([FromBody] RegistrationRequestDto model)
         {
-            var errorMessage = await _authService.Register(model);
+            var errorMessage = await _authRepository.Register(model);
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 _response.IsSuccess = false;
@@ -31,9 +31,9 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
         {
-            var loginResponse = await _authService.Login(model);
+            var loginResponse = await _authRepository.Login(model);
             if (loginResponse.User == null)
             {
                 _response.IsSuccess = false;
@@ -45,9 +45,9 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("AssignRole")]
-        public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestModel model)
+        public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDto model)
         {
-            var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.Role.ToUpper());
+            var assignRoleSuccessful = await _authRepository.AssignRole(model.Email, model.Role.ToUpper());
             if (!assignRoleSuccessful)
             {
                 _response.IsSuccess = false;
