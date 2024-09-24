@@ -12,5 +12,8 @@ namespace IRepository
         Task<string> Register(RegistrationRequestDto registrationRequestModel);
         Task<LoginReponseDto> Login(LoginRequestDto loginRequestModel);
         Task<bool> AssignRole(string email, string roleName);
+        Task<bool> CheckEmailExists(string email);
+        Task<string> RegisterWithGoogle(string email, string token);
+        Task<LoginReponseDto> LoginWithGoogle(string token);
     }
 }

@@ -80,5 +80,27 @@ namespace Service
             };
         }
 
+        public EmailTemplate AccountRegistrationGGEmail(string recipientName, string username, string password)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Welcome to Our Platform!",
+                Body = $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                    <h1 style='color: #4CAF50;'>Registration Successful!</h1>
+                    <p>Dear <strong>{recipientName}</strong>,</p>
+                    <p>Thank you for registering an account with us.</p>
+                    <p>Your username is: <strong style='color: #007BFF;'>{username}</strong></p>
+                    <p>This is your Password: <strong style='color: #FF5722;'>{password}</strong></p>
+                    <p style='font-weight: bold; color: #FF5722;'>For security purposes, please change your password after registering an account!</p>
+                    <p>We are excited to have you on board and hope you enjoy your experience with our platform!</p>
+                    <p>If you have any questions, feel free to reach out to our support team.</p>
+                    <br/>
+                    <p>Best Regards,</p>
+                    <p>The Platform Team</p>
+                </div>
+                "
+            };
+        }
     }
 }
