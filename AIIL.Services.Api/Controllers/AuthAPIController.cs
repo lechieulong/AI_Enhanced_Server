@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using Model.LoginGoogle;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -54,6 +55,42 @@ namespace AIIL.Services.Api.Controllers
                 _response.Message = "Error Encountered.";
                 return BadRequest(_response);
             }
+            return Ok(_response);
+        }
+
+        [HttpPost("check-email")]
+        public async Task<IActionResult> CheckEmailExists([FromBody] CheckEmailRequestDto model)
+        {
+            var emailExists = await _authRepository.CheckEmailExists(model.Email);
+            _response.IsSuccess = emailExists;
+            _response.Message = emailExists ? "Email exists." : "Email does not exist.";
+            return Ok(_response);
+        }
+
+        [HttpPost("register-google")]
+        public async Task<IActionResult> RegisterGoogleUser([FromBody] GoogleRegistrationRequestDto model)
+        {
+            var errorMessage = await _authRepository.RegisterWithGoogle(model.Email, model.Token);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                _response.IsSuccess = false;
+                _response.Message = errorMessage;
+                return BadRequest(_response);
+            }
+            return Ok(_response);
+        }
+
+        [HttpPost("login-google")]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequestDto model)
+        {
+            var loginResponse = await _authRepository.LoginWithGoogle(model.Token);
+            if (loginResponse.User == null)
+            {
+                _response.IsSuccess = false;
+                _response.Message = "Google Login Failed!";
+                return BadRequest(_response);
+            }
+            _response.Result = loginResponse;
             return Ok(_response);
         }
     }

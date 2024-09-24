@@ -45,6 +45,12 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 
+//builder.Services.AddAuthentication().AddGoogle(x =>
+//{
+//    x.ClientId = "553052882546-kmot9sitmhmu5ahgt47p07j96vagbqim.apps.googleusercontent.com";
+//    x.ClientSecret = "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";
+//});
+
 // Register CORS services
 builder.Services.AddCors(options =>
 {
