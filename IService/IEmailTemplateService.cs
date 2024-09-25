@@ -13,5 +13,6 @@ namespace IService
         EmailTemplate GetOtpEmailTemplate(string recipientName, string otpCode);
         EmailTemplate GetPasswordResetEmailTemplate(string recipientName, string resetLink);
         EmailTemplate AccountRegistrationEmail(string recipientName, string username);
+        EmailTemplate AccountRegistrationGGEmail(string recipientName, string username, string password);
     }
 }

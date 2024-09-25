@@ -42,6 +42,11 @@ namespace Service
             await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
         }
 
+        public async Task SendRegistrationGGSuccessEmail(string recipientEmail, string recipientName, string username, string password)
+        {
+            var emailTemplate = _emailTemplateService.AccountRegistrationGGEmail(recipientName, username, password);
+            await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
+        }
     }
 
 }
