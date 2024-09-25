@@ -1,5 +1,6 @@
 ﻿using Entity;
 using Entity.Data;
+using Entity.Test;
 using IRepository;
 using Model.Test;
 
@@ -20,60 +21,26 @@ namespace Repository
             {
                 try
                 {
+                    // Add the TestExam entity
                     var testEntity = new TestExam
                     {
+                        Id = new Guid(),
                         TestName = model.TestName,
-                        Duration = model.Duration,
+                        Duration = 60,
                         StartTime = model.StartTime,
                         EndTime = model.EndTime,
+                        CreateAt = DateTime.UtcNow,
+                        UpdateAt = DateTime.UtcNow
                     };
 
                     _context.TestExam.Add(testEntity);
                     await _context.SaveChangesAsync();
 
-                    // Add related entities like PartSkill and Question
-                    foreach (var part in model.Parts)
+                    // Add related SkillTestExam entities
+                    foreach (var skillTestModel in model.Skills)
                     {
-                        var partSkill = new PartSkill
-                        {
-                            Id = testEntity.Id,
-                            PartNumber = part.PartNumber,
-                            SkillTest = part.SkillTest,
-                            ContentText = part.ContentText,
-                            AudioURL = part.AudioUrl
-                        };
-
-                        _context.PartSkill.Add(partSkill);
-                        await _context.SaveChangesAsync();
-
-                        foreach (var typePart in part.QuestionTypeParts)
-                        {
-                            var questionTypePart = new QuestionTypePart
-                            {
-                                Id = partSkill.Id,
-                                QuestionGuide = typePart.QuestionGuide,
-                                QuestionType = typePart.QuestionType
-                            };
-
-                            _context.QuestionTypePart.Add(questionTypePart);
-                            await _context.SaveChangesAsync();
-
-                            foreach (var question in typePart.Questions)
-                            {
-                                var questionEntity = new Question
-                                {
-                                    Id = questionTypePart.Id,
-                                    QuestionName = question.QuestionName,
-                                    Answer = question.Answer,
-                                    MaxMarks = question.MaxMarks
-                                };
-
-                                _context.Question.Add(questionEntity);
-                            }
-                        }
+                        await AddSkillTestAsync(testEntity.Id, skillTestModel);
                     }
-
-                    await _context.SaveChangesAsync();
 
                     await transaction.CommitAsync();
 
@@ -84,7 +51,7 @@ namespace Repository
                         Duration = testEntity.Duration,
                         StartTime = testEntity.StartTime,
                         EndTime = testEntity.EndTime,
-                        // Mapping other properties
+                        // You can map other properties as needed
                     };
                 }
                 catch (Exception)
@@ -93,6 +60,126 @@ namespace Repository
                     throw;
                 }
             }
+        }
+
+        private async Task AddSkillTestAsync(Guid testId, SkillRequest skillTestModel)
+        {
+            // Add SkillTestExam entity
+            var skillTest = new SkillTestExam
+            {
+                TestId = testId,
+                SkillType = (int)skillTestModel.SKillType,
+                Duration = skillTestModel.Duration
+            };
+
+            _context.SkillTestExam.Add(skillTest);
+            await _context.SaveChangesAsync();
+
+            // Add PartSkill entities
+            foreach (var partSkillModel in skillTestModel.PartSkills)
+            {
+                await AddPartSkillAsync(skillTest.Id, partSkillModel);
+            }
+        }
+
+        private async Task AddPartSkillAsync(Guid skillTestId, PartRequestModel partSkillModel)
+        {
+            var partSkill = new PartSkill
+            {
+                SkillId = skillTestId,
+                PartNumber = partSkillModel.PartNumber,
+                ContentText = partSkillModel.ContentText
+            };
+
+            _context.PartSkill.Add(partSkill);
+            await _context.SaveChangesAsync();
+
+            // Add QuestionTypePart entities
+            foreach (var questionTypePartModel in partSkillModel.QuestionTypeParts)
+            {
+                await AddQuestionTypePartAsync(partSkill.Id, questionTypePartModel);
+            }
+        }
+
+        private async Task AddQuestionTypePartAsync(Guid partSkillId, QuestionTypePartRequestModel questionTypePartModel)
+        {
+            var questionTypePart = new QuestionTypePart
+            {
+                PartId = partSkillId,
+                QuestionGuide = questionTypePartModel.QuestionGuide,
+                QuestionType = (int)questionTypePartModel.QuestionType
+            };
+
+            _context.QuestionTypePart.Add(questionTypePart);
+            await _context.SaveChangesAsync();
+
+            foreach (var questionModel in questionTypePartModel.Questions)
+            {
+                await AddQuestionAsync(questionTypePart.Id, questionModel);
+            }
+        }
+
+        private async Task AddQuestionAsync(Guid questionTypePartId, QuestionRequestModel questionModel)
+        {
+            // Add Question entity
+            var question = new Question
+            {
+                TypePartId = questionTypePartId,
+                QuestionName = questionModel.QuestionName,
+                MaxMarks = questionModel.MaxMarks
+            };
+
+            _context.Question.Add(question);
+            await _context.SaveChangesAsync();
+
+            // Add related Answers
+            foreach (var answerModel in questionModel.Answers)
+            {
+                await AddAnswerAsync(question.Id, answerModel);
+            }
+        }
+
+        private async Task AddAnswerAsync(Guid questionId, AnswerRequest answerModel)
+        {
+            // Add Answer entity
+            var answer = new Answer
+            {
+                QuestionId = questionId,
+                AnswerFilling = answerModel.AnswerFilling,
+                AnswerTrueFalse = answerModel.AnswerTrueFalse,
+            };
+
+            _context.Answer.Add(answer);
+            await _context.SaveChangesAsync();
+
+            // Add AnswerOptions
+            foreach (var optionModel in answerModel.AnswerOptionsRequest)
+            {
+                var answerOption = new AnswerOptions
+                {
+                    Id  = new Guid(),
+                    AnswerId = answer.Id,
+                    AnswerText = optionModel.AnswerText,
+                    IsCorrect = optionModel.IsCorrect,
+                };
+
+                _context.AnswerOptions.Add(answerOption);
+            }
+
+            // Add AnswerMatching
+            foreach (var matchingModel in answerModel.AnswerMatchingRequest)
+            {
+                var answerMatching = new AnswerMatching
+                {
+                    AnswerId = answer.Id,
+                    Heading = matchingModel.Heading,
+                    Matching = matchingModel.Matching
+                };
+
+                _context.AnswerMatching.Add(answerMatching);
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<TestResponseModel> GetTestByIdAsync(Guid id)
@@ -107,6 +194,7 @@ namespace Repository
                 Duration = testEntity.Duration,
                 StartTime = testEntity.StartTime,
                 EndTime = testEntity.EndTime,
+                // Map other properties as needed
             };
         }
 
@@ -117,10 +205,10 @@ namespace Repository
 
             // Update properties
             testEntity.TestName = model.TestName;
-            testEntity.Duration = model.Duration;
+            testEntity.Duration = 60;
             testEntity.StartTime = model.StartTime;
             testEntity.EndTime = model.EndTime;
-            // Update other properties
+            testEntity.UpdateAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
         }
