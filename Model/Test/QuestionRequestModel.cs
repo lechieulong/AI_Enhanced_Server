@@ -10,7 +10,7 @@ namespace Model.Test
     {
         public string QuestionName { get; set; }
         public int MaxMarks { get; set; }
-        public List<Answe> Questions { get; set; } = new List<QuestionRequestModel>();
+        public List<AnswerRequest> Answers { get; set; } = new List<AnswerRequest>();
 
     }
 }

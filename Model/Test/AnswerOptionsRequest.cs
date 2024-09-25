@@ -8,10 +8,7 @@ namespace Model.Test
 {
     public class AnswerOptionsRequest
     {
-        public int PartNumber { get; set; }
-        public int SkillTest { get; set; }
-        public string ContentText { get; set; }
-        public string AudioUrl { get; set; }
-        public List<QuestionTypePartRequestModel> QuestionTypeParts { get; set; } = new List<QuestionTypePartRequestModel>();
+        public string AnswerText { get; set; }
+        public string IsCorrect { get; set; }
     }
 }

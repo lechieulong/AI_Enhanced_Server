@@ -3,21 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIIL.Services.Api", "AIIL.Services.Api\AIIL.Services.Api.csproj", "{5B1BAEFB-67F7-4553-ABD5-2E9642E8E000}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIIL.Services.Api", "AIIL.Services.Api\AIIL.Services.Api.csproj", "{5B1BAEFB-67F7-4553-ABD5-2E9642E8E000}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entity", "Entity\Entity.csproj", "{90AFB433-EC2A-47B0-A6F8-847E72D815D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entity", "Entity\Entity.csproj", "{90AFB433-EC2A-47B0-A6F8-847E72D815D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRepository", "IRepository\IRepository.csproj", "{26AEAE12-C1AE-47EB-93DD-C3C5CFC0B4D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRepository", "IRepository\IRepository.csproj", "{26AEAE12-C1AE-47EB-93DD-C3C5CFC0B4D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IService", "IService\IService.csproj", "{0F8EF2D1-32B5-4BB3-9027-75B8A30540D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IService", "IService\IService.csproj", "{0F8EF2D1-32B5-4BB3-9027-75B8A30540D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapper", "Mapper\Mapper.csproj", "{B2C22930-F20D-41CF-9BF9-544FB2A993F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mapper", "Mapper\Mapper.csproj", "{B2C22930-F20D-41CF-9BF9-544FB2A993F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{769B517D-408C-4AA7-BE68-0A3DABE83788}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj", "{769B517D-408C-4AA7-BE68-0A3DABE83788}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{2D43A848-D8DB-47FB-90D6-C0B390EDF4D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "Repository\Repository.csproj", "{2D43A848-D8DB-47FB-90D6-C0B390EDF4D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{9CDDB3C5-0D6B-4182-A54A-4B334424F214}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service", "Service\Service.csproj", "{9CDDB3C5-0D6B-4182-A54A-4B334424F214}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{A3E4478B-DB03-4C6C-B753-1122E5C2447D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{9CDDB3C5-0D6B-4182-A54A-4B334424F214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CDDB3C5-0D6B-4182-A54A-4B334424F214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CDDB3C5-0D6B-4182-A54A-4B334424F214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3E4478B-DB03-4C6C-B753-1122E5C2447D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3E4478B-DB03-4C6C-B753-1122E5C2447D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3E4478B-DB03-4C6C-B753-1122E5C2447D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3E4478B-DB03-4C6C-B753-1122E5C2447D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

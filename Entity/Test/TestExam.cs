@@ -1,5 +1,4 @@
-﻿
-namespace Entity
+﻿namespace Entity.Test
 {
     public class TestExam
     {
@@ -11,8 +10,6 @@ namespace Entity
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
 
-        public ICollection<PartSkill> PartSkills { get; set; }
-        public ICollection<QuestionTypePart> QuestionTypeParts { get; set; }
+        public ICollection<SkillTestExam> SkillTests { get; set; } = new List<SkillTestExam>();
     }
-
 }

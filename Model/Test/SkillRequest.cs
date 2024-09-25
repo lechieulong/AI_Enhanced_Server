@@ -11,6 +11,6 @@ namespace Model.Test
     {
         public SkillTypeEnum SKillType { get; set; }
         public int Duration { get; set; }
-        public List<PartRequestModel> QuestionTypeParts { get; set; } = new List<QuestionTypePartRequestModel>();
+        public List<PartRequestModel> PartSkills { get; set; } = new List<PartRequestModel>();
     }
 }
