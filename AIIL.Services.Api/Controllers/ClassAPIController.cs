@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Entity.Data;
+using Repository;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -14,14 +15,16 @@ namespace AIIL.Services.Api.Controllers
     public class ClassAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly IClassRepository _classRepository;
         private readonly ResponseDto _response;
         IMapper _mapper;
 
-        public ClassAPIController(AppDbContext db, IMapper mapper)
+        public ClassAPIController(IClassRepository classRepository, AppDbContext db, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;
             _response = new ResponseDto();
+            _classRepository = classRepository;
         }
 
         [HttpGet]
@@ -116,22 +119,29 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
 
-        //[HttpGet]
-        //[Route("by-course")]
-        //public ResponseDto GetByCourseId([FromQuery] int courseId)
-        //{
-        //    try
-        //    {
-        //        IEnumerable<Class> classList = _db.Classes.Where(c => c.CourseId == courseId).ToList();
+        [HttpGet("course/{courseId:int}/classes")]
+        public async Task<ActionResult<ResponseDto>> GetByCourseId(int courseId)
+        {
+            var response = new ResponseDto();
+            try
+            {
+                var classList = await _classRepository.GetByCourseIdAsync(courseId);
+                if (classList == null || !classList.Any())
+                {
+                    response.IsSuccess = false;
+                    response.Message = "No classes found for the specified course ID.";
+                    return NotFound(response);
+                }
+                response.Result = classList;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
 
-        //        _response.Result = _mapper.Map<IEnumerable<ClassDto>>(classList);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _response.IsSuccess = false;
-        //        _response.Message = ex.Message;
-        //    }
-        //    return _response;
-        //}
     }
 }

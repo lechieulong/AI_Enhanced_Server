@@ -17,9 +17,10 @@ namespace Entity
         //Number of student
         public int Count { get; set; }
         public int CourseId { get; set; }
+        [ForeignKey("CourseId")]
+        public Course Course { get; set; }
         public DateTime StartDate { get; set; }
-        [NotMapped]
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
 

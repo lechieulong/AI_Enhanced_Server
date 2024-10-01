@@ -50,7 +50,11 @@ namespace Repository
         }
         public async Task<ClassDto> CreateAsync(ClassDto newClassDto)
         {
-            // Map ClassDto to Class
+            if (newClassDto == null)
+            {
+                throw new ArgumentNullException(nameof(newClassDto), "Class DTO cannot be null.");
+            }
+
             var classEntity = new Class
             {
                 ClassName = newClassDto.ClassName,
@@ -59,13 +63,21 @@ namespace Repository
                 CourseId = newClassDto.CourseId
             };
 
-            await _dbContext.Classes.AddAsync(classEntity);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                await _dbContext.Classes.AddAsync(classEntity);
+                await _dbContext.SaveChangesAsync();
 
-            // Map Class back to ClassDto
-            newClassDto.Id = classEntity.Id;
-            return newClassDto;
+                newClassDto.Id = classEntity.Id;
+                return newClassDto;
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log exception here
+                throw new Exception("An error occurred while creating the class.", ex);
+            }
         }
+
         public async Task<ClassDto> UpdateAsync(ClassDto updatedClassDto)
         {
             var existingClass = await _dbContext.Classes.FindAsync(updatedClassDto.Id);
@@ -104,6 +116,22 @@ namespace Repository
             _dbContext.Classes.Remove(classToDelete);
             await _dbContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<ClassDto>> GetByCourseIdAsync(int courseId)
+        {
+            // Retrieve classes for the specified CourseId and map to ClassDto
+            return await _dbContext.Classes
+                .Where(c => c.CourseId == courseId)
+                .Select(c => new ClassDto
+                {
+                    Id = c.Id,
+                    ClassName = c.ClassName,
+                    ClassDescription = c.ClassDescription,
+                    Count = c.Count,
+                    CourseId = c.CourseId
+                })
+                .ToListAsync();
         }
 
     }

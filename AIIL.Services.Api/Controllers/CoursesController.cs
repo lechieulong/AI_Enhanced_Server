@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
+using Model;
 
 namespace Auth.Controllers
 {
@@ -9,11 +10,13 @@ namespace Auth.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
+        private readonly IClassRepository _classRepository;
         private readonly ICourseRepository _repository;
 
-        public CoursesController(ICourseRepository repository)
+        public CoursesController(ICourseRepository repository, IClassRepository classRepository)
         {
             _repository = repository;
+            _classRepository = classRepository;
         }
 
         [HttpGet]
@@ -76,6 +79,30 @@ namespace Auth.Controllers
         {
             await _repository.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("{courseId:int}/classes")]
+        public async Task<ActionResult<ResponseDto>> GetByCourseId(int courseId)
+        {
+            var response = new ResponseDto();
+            try
+            {
+                var classList = await _classRepository.GetByCourseIdAsync(courseId);
+                if (classList == null || !classList.Any())
+                {
+                    response.IsSuccess = false;
+                    response.Message = "No classes found for the specified course ID.";
+                    return NotFound(response);
+                }
+                response.Result = classList;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }

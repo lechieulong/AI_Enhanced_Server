@@ -72,6 +72,8 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
+
 // Register CORS services
 builder.Services.AddCors(options =>
 {
