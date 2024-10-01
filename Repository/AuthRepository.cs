@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using IService;
 using Microsoft.EntityFrameworkCore;
 using Google.Apis.Auth;
+using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace Repository
 {
@@ -23,16 +25,17 @@ namespace Repository
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IEmailSenderService _emailSenderService; // Thêm dịch vụ
-
+        private readonly IConfiguration _configuration;
         public AuthRepository(AppDbContext appDbContext, IJwtTokenGenerator jwtTokenGenerator,
                           UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager,
-                          IEmailSenderService emailSenderService)
+                          IEmailSenderService emailSenderService, IConfiguration configuration)
         {
             _db = appDbContext;
             _jwtTokenGenerator = jwtTokenGenerator;
             _userManager = userManager;
             _roleManager = roleManager;
             _emailSenderService = emailSenderService;  // Khởi tạo dịch vụ gửi email
+            _configuration = configuration;
         }
 
         public async Task<bool> AssignRole(string email, string roleName)
@@ -68,7 +71,8 @@ namespace Repository
                 ID = user.Id,
                 Email = user.Email,
                 Name = user.Name,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                ImageURL = user.ImageURL
             };
 
             LoginReponseDto loginReponseDto = new LoginReponseDto()
@@ -156,7 +160,8 @@ namespace Repository
                 UserName = GetUsernameFromEmail(email),
                 Email = email,
                 NormalizedEmail = email.ToLower(),
-                Name = payload.Name
+                Name = payload.Name,
+                ImageURL = payload.Picture
             };
 
             var result = await _userManager.CreateAsync(user, generatedPassword);
@@ -239,7 +244,8 @@ namespace Repository
                     ID = user.Id,
                     Email = user.Email,
                     Name = user.Name,
-                    PhoneNumber = user.PhoneNumber
+                    PhoneNumber = user.PhoneNumber,
+                    ImageURL = user.ImageURL
                 };
 
                 return new LoginReponseDto()
@@ -252,6 +258,70 @@ namespace Repository
             {
                 // Handle token validation failure
                 return null;
+            }
+        }
+        public async Task<string> ChangePassword(string email, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return "User not found.";
+            }
+
+            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, currentPassword);
+            if (!isCurrentPasswordValid)
+            {
+                return "Current password is incorrect.";
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (result.Succeeded)
+            {
+                return "Password changed successfully.";
+            }
+            return result.Errors.FirstOrDefault()?.Description ?? "Password change failed.";
+        }
+        public async Task<string> RequestPasswordReset(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return "Email does not exist.";
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebUtility.UrlEncode(token);
+            var baseUrl = _configuration["AllowedOrigins:FrontendUrl"];
+            var resetLink = $"{baseUrl}/reset-password?token={encodedToken}&email={email}";
+
+            await _emailSenderService.SendResetPasswordRequestEmail(user.Email, user.Name, resetLink);
+
+            return "";
+        }
+        public async Task<string> ResetPassword(string email, string token, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return "User not found.";
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            // Check if the token is invalid
+            if (result.Errors.Any(e => e.Code == "InvalidToken"))
+            {
+                return "Please request a new password reset.";
+            }
+
+            if (result.Succeeded)
+            {
+                await _emailSenderService.SendResetPasswordConfirmationEmail(user.Email, user.Name);
+                return "Password reset successfully.";
+            }
+            else
+            {
+                return result.Errors.FirstOrDefault()?.Description ?? "Password reset failed.";
             }
         }
     }
