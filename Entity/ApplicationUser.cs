@@ -10,7 +10,7 @@ namespace Entity
     public class ApplicationUser : IdentityUser
     {
         public string Name { get; set; }
-        public string? IamgeURL { get; set; }
+        public string? ImageURL { get; set; }
         public DateTime? DOB { get; set; }
     }
 }

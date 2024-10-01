@@ -24,12 +24,6 @@ namespace Service
             await _emailSender.SendEmailAsync(recipientEmail, otpEmail.Subject, otpEmail.Body);
         }
 
-        public async Task SendPasswordResetEmailAsync(string recipientEmail, string recipientName, string resetLink)
-        {
-            var resetEmail = _emailTemplateService.GetPasswordResetEmailTemplate(recipientName, resetLink);
-            await _emailSender.SendEmailAsync(recipientEmail, resetEmail.Subject, resetEmail.Body);
-        }
-
         public async Task SendEmailRemindMemberAsync(string recipientEmail, string reminder)
         {
             var remindEmail = _emailTemplateService.RemindMember(recipientEmail, reminder);
@@ -45,6 +39,17 @@ namespace Service
         public async Task SendRegistrationGGSuccessEmail(string recipientEmail, string recipientName, string username, string password)
         {
             var emailTemplate = _emailTemplateService.AccountRegistrationGGEmail(recipientName, username, password);
+            await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
+        }
+
+        public async Task SendResetPasswordRequestEmail(string recipientEmail, string recipientName, string resetLink)
+        {
+            var emailTemplate = _emailTemplateService.ResetPasswordEmail(recipientName, resetLink);
+            await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
+        }
+        public async Task SendResetPasswordConfirmationEmail(string recipientEmail, string recipientName)
+        {
+            var emailTemplate = _emailTemplateService.PasswordResetConfirmationEmail(recipientName);
             await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
         }
     }

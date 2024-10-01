@@ -18,6 +18,8 @@ namespace Mapper
                 //Register mapper here nhe:))
                 config.CreateMap<Class, ClassDto>();
                 config.CreateMap<ClassDto, Class>();
+                config.CreateMap<ApplicationUser, UserDto>();
+                config.CreateMap<UserDto, ApplicationUser>();
             });
             return mappingConfig;
         }

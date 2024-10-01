@@ -93,5 +93,43 @@ namespace AIIL.Services.Api.Controllers
             _response.Result = loginResponse;
             return Ok(_response);
         }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            var result = await _authRepository.ChangePassword(request.Email, request.CurrentPassword, request.NewPassword);
+            if (result == "Password changed successfully.")
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            var errorMessage = await _authRepository.RequestPasswordReset(request.Email);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                _response.IsSuccess = false;
+                _response.Message = errorMessage;
+                return BadRequest(_response);
+            }
+
+            _response.Message = "Password reset email sent.";
+            return Ok(_response);
+        }
+
+        // New endpoint for resetting the password
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            var result = await _authRepository.ResetPassword(request.Email, request.Token, request.NewPassword);
+            if (result == "Password reset successfully.")
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }
