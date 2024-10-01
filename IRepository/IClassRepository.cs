@@ -11,6 +11,7 @@ namespace IRepository
     {
         Task<ClassDto> CreateAsync(ClassDto newClass);
         Task<ClassDto> GetByIdAsync(int id);
+        Task<IEnumerable<ClassDto>> GetByCourseIdAsync(int courseId);
         Task<IEnumerable<ClassDto>> GetAllAsync();
         Task<ClassDto> UpdateAsync(ClassDto updatedClass);
         Task<bool> DeleteAsync(int id);

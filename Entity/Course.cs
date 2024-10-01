@@ -17,5 +17,7 @@ namespace Entity
 
         [JsonIgnore] // Bỏ qua khi tạo Course
         public ICollection<CourseTimeline>? CourseTimelines { get; set; }
+        public ICollection<Class>? Classes { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
