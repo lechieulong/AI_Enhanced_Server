@@ -59,8 +59,10 @@ namespace Repository
             {
                 ClassName = newClassDto.ClassName,
                 ClassDescription = newClassDto.ClassDescription,
-                Count = newClassDto.Count,
-                CourseId = newClassDto.CourseId
+                Count = newClassDto.Count, // Default to 0 as it's a new class
+                CourseId = newClassDto.CourseId,
+                StartDate = newClassDto.StartDate,
+                ImageUrl = newClassDto.ImageUrl // Set the ImageUrl from the DTO
             };
 
             try
@@ -68,12 +70,14 @@ namespace Repository
                 await _dbContext.Classes.AddAsync(classEntity);
                 await _dbContext.SaveChangesAsync();
 
+                // Update the DTO with the generated class ID from the database
                 newClassDto.Id = classEntity.Id;
+
                 return newClassDto;
             }
             catch (DbUpdateException ex)
             {
-                // Log exception here
+                // Log the exception for debugging purposes
                 throw new Exception("An error occurred while creating the class.", ex);
             }
         }
