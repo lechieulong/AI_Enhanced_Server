@@ -20,6 +20,8 @@ namespace Mapper
                 config.CreateMap<ClassDto, Class>();
                 config.CreateMap<ApplicationUser, UserDto>();
                 config.CreateMap<UserDto, ApplicationUser>();
+                config.CreateMap<EventDto, Event>();
+                config.CreateMap<Event, EventDto>();
             });
             return mappingConfig;
         }
