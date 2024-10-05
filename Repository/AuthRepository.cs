@@ -69,6 +69,7 @@ namespace Repository
             UserDto userDto = new()
             {
                 ID = user.Id,
+                UserName = user.UserName,
                 Email = user.Email,
                 Name = user.Name,
                 PhoneNumber = user.PhoneNumber,
