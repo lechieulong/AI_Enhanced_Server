@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AIIL.Services.Api.Extensions;
+using AutoMapper;
 using Entity;
 using Entity.Data;
 using IRepository;
@@ -73,6 +74,7 @@ builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>(
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
 
 // Register CORS services
 builder.Services.AddCors(options =>
@@ -88,7 +90,44 @@ builder.Services.AddCors(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "AI-Enhanced IELTS Prep API",
+        Version = "v1",
+        Description = "API for AI-Enhanced IELTS Prep application"
+    });
+
+    // Cấu hình Bearer Token cho Swagger
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter your token"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+builder.AddAppAuthentication();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -96,7 +135,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI-Enhanced IELTS Prep API v1");
+    });
 }
 
 app.UseHttpsRedirection();
