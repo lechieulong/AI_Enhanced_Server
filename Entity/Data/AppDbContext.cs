@@ -18,11 +18,11 @@ namespace Entity.Data
         public DbSet<TestExam> TestExam { get; set; }
         public DbSet<SkillTestExam> SkillTestExam { get; set; }
         public DbSet<PartSkill> PartSkill { get; set; }
-        public DbSet<QuestionTypePart> QuestionTypePart { get; set; }
+        public DbSet<Section> Section { get; set; }
         public DbSet<Question> Question { get; set; }
         public DbSet<Answer> Answer { get; set; }
-        public DbSet<AnswerOptions> AnswerOptions { get; set; }
-        public DbSet<AnswerMatching> AnswerMatching { get; set; }
+        public DbSet<ClassRelationShip> ClassRelationShip { get; set; }
+
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseTimeline> CourseTimelines { get; set; }
         public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }

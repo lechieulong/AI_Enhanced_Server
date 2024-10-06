@@ -9,11 +9,17 @@ namespace Entity.Test
     public class Question
     {
         public Guid Id { get; set; }
-        public Guid TypePartId { get; set; }
         public string QuestionName { get; set; }
-        public int MaxMarks { get; set; }
-        public QuestionTypePart QuestionTypePart { get; set; }
-        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+        public int QuestionType { get; set; }
+        //For import file
+        public int Skill {  get; set; }
+        public int Section { get; set; }
+        public int PartNumber { get; set; }
+        //end import file
+
+        public Guid UserId { get; set; }
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } 
+        public ICollection<Answer> Answers { get; set; }
     }
 
 }

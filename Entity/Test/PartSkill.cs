@@ -6,7 +6,9 @@
         public Guid SkillId { get; set; }
         public int PartNumber { get; set; }
         public string ContentText { get; set; }
+        public string Audio { get; set; }
+        public string Image { get; set; }
         public SkillTestExam Skill { get; set; }
-        public ICollection<QuestionTypePart> QuestionTypeParts { get; set; } = new List<QuestionTypePart>();
+        public ICollection<Section> QuestionTypeParts { get; set; } = new List<Section>();
     }
 }
