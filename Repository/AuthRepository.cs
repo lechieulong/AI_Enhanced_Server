@@ -87,6 +87,13 @@ namespace Repository
 
         public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
         {
+            //Add check email exist
+            var existingUser = await _userManager.FindByEmailAsync(registrationRequestDto.Email);
+            if (existingUser != null)
+            {
+                return "Email is already taken.";
+            }
+
             ApplicationUser user = new()
             {
                 UserName = GetUsernameFromEmail(registrationRequestDto.Email),
@@ -97,8 +104,6 @@ namespace Repository
             };
             try
             {
-                //Add check email exist
-
                 var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
                 if (result.Succeeded)
                 {

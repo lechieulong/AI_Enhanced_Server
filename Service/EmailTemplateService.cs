@@ -67,18 +67,22 @@ namespace Service
             {
                 Subject = "Welcome to Our Platform!",
                 Body = $@"
-                <h1>Registration Successful!</h1>
-                <p>Dear {recipientName},</p>
-                <p>Thank you for registering an account with us.</p>
-                <p>Your username is: <strong>{username}</strong></p>
-                <p>We are excited to have you on board and hope you enjoy your experience with our platform!</p>
-                <p>If you have any questions, feel free to reach out to our support team.</p>
-                <br/>
-                <p>Best Regards,</p>
-                <p>The Platform Team</p>
-            "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>
+                    <h1 style='color: #333;'>Registration Successful!</h1>
+                    <p>Dear {recipientName},</p>
+                    <p>Thank you for registering an account with us.</p>
+                    <p>Your username is: <strong style='color: #007BFF;>{username}</strong></p>
+                    <p style='color: #FF5722;><em>Please use this Username to login to the system.</em></p>
+                    <p>We are excited to have you on board and hope you enjoy your experience with our platform!</p>
+                    <p>If you have any questions, feel free to reach out to our support team.</p>
+                    <br/>
+                    <p>Best Regards,</p>
+                    <p>The Platform Team</p>
+                </div>
+                "
             };
         }
+
 
         public EmailTemplate AccountRegistrationGGEmail(string recipientName, string username, string password)
         {
@@ -86,7 +90,7 @@ namespace Service
             {
                 Subject = "Welcome to Our Platform!",
                 Body = $@"
-                <div style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>
                     <h1 style='color: #4CAF50;'>Registration Successful!</h1>
                     <p>Dear <strong>{recipientName}</strong>,</p>
                     <p>Thank you for registering an account with us.</p>
