@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class QuestionTypePartResponseModel
+    public class SectionModel
     {
+        public Guid Id { get; set; }
         public string QuestionGuide { get; set; }
         public QuestionTypeENum QuestionType { get; set; }
-        public List<QuestionResponseModel> Questions { get; set; } = new List<QuestionResponseModel>();
+        public string Image { get; set; }
+        public List<QuestionModel> Questions { get; set; } = new List<QuestionModel>();
     }
 }

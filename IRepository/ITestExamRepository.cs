@@ -10,9 +10,6 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
-        Task<TestResponseModel> AddTestAsync(TestRequestModel model);
-        Task<TestResponseModel> GetTestByIdAsync(Guid id);
-        Task UpdateTestAsync(Guid id, TestRequestModel model);
-        Task DeleteTestAsync(Guid id);
+        Task<TestModel> AddTestAsync(TestModel model);
     }
 }

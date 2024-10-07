@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class AnswerMatchingRequest
+    public class AnswerModel
     {
-        public string Heading { get; set; }
-        public string Matching { get; set; }
+        public Guid Id { get; set; }
+        public string AnswerText { get; set; }
+        public int IsCorrect { get; set; }
     }
 }
