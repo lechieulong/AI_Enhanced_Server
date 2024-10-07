@@ -947,13 +947,6 @@ namespace Entity.Migrations
                     b.Navigation("BookedTeacherSessions");
                 });
 
-            modelBuilder.Entity("Entity.Test.Answer", b =>
-                {
-                    b.Navigation("AnswerMatchings");
-
-                    b.Navigation("AnswerOptions");
-                });
-
             modelBuilder.Entity("Entity.Test.PartSkill", b =>
                 {
                     b.Navigation("QuestionTypeParts");
