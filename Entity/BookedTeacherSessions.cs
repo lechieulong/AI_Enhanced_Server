@@ -10,16 +10,12 @@ namespace Entity
     public class BookedTeacherSession
     {
         public Guid Id { get; set; }
-        public DateTime BookedDate { get; set; }
-        public DateOnly AvailableDate { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
-        public string Link { get; set; }
-        public string ScheduleId { get; set; }
+        public Guid ScheduleId { get; set; }
         [ForeignKey("ScheduleId")]
+        public TeacherAvailableSchedule TeacherAvailableSchedule { get; set; }
         public string LearnerId { get; set; }
         [ForeignKey("LearnerId")]
         public ApplicationUser Learner { get; set; }
-        public TeacherAvailableSchedule TeacherAvailableSchedule { get; set; }
+        public DateTime BookedDate { get; set; }
     }
 }

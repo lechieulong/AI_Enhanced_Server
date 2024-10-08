@@ -103,38 +103,22 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly>("AvailableDate")
-                        .HasColumnType("date");
-
                     b.Property<DateTime>("BookedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
 
                     b.Property<string>("LearnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ScheduleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<Guid>("TeacherAvailableScheduleId")
+                    b.Property<Guid>("ScheduleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LearnerId");
 
-                    b.HasIndex("TeacherAvailableScheduleId");
+                    b.HasIndex("ScheduleId")
+                        .IsUnique();
 
                     b.ToTable("BookedTeacherSessions");
                 });
@@ -302,11 +286,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.EmailLog", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -336,11 +318,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Event", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -383,10 +363,6 @@ namespace Entity.Migrations
                     b.Property<bool>("IsBooked")
                         .HasColumnType("bit");
 
-                    b.Property<string>("LearnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -402,8 +378,6 @@ namespace Entity.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LearnerId");
 
                     b.HasIndex("TeacherId");
 
@@ -734,8 +708,8 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.HasOne("Entity.TeacherAvailableSchedule", "TeacherAvailableSchedule")
-                        .WithMany("BookedTeacherSessions")
-                        .HasForeignKey("TeacherAvailableScheduleId")
+                        .WithOne("BookedTeacherSession")
+                        .HasForeignKey("Entity.BookedTeacherSession", "ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -790,12 +764,6 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>
                 {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("LearnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Entity.ApplicationUser", "Teacher")
                         .WithMany("TeacherAvailableSchedules")
                         .HasForeignKey("TeacherId")
@@ -803,8 +771,6 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.Navigation("Teacher");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Entity.Test.Answer", b =>
@@ -944,7 +910,7 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>
                 {
-                    b.Navigation("BookedTeacherSessions");
+                    b.Navigation("BookedTeacherSession");
                 });
 
             modelBuilder.Entity("Entity.Test.PartSkill", b =>
