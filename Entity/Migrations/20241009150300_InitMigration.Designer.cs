@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:Entity/Migrations/20241009143336_ChangeToGuidNew.Designer.cs
-    [Migration("20241009143336_ChangeToGuidNew")]
-    partial class ChangeToGuidNew
-========
-    [Migration("20241006162722_InitialMigration")]
-    partial class InitialMigration
->>>>>>>> 4d922cc5cffb4237e13dd430814b5bda6a6e09d3:Entity/Migrations/20241006162722_InitialMigration.Designer.cs
+    [Migration("20241009150300_InitMigration")]
+    partial class InitMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

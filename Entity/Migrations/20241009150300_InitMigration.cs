@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Entity.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangeToGuidNew : Migration
+    public partial class InitMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,6 +54,19 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClassRelationShip",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClassId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassRelationShip", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmailLogs",
                 columns: table => new
                 {
@@ -71,12 +84,28 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Question",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuestionType = table.Column<int>(type: "int", nullable: false),
+                    Skill = table.Column<int>(type: "int", nullable: false),
+                    Section = table.Column<int>(type: "int", nullable: false),
+                    PartNumber = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Question", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TestExam",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TestName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Duration = table.Column<int>(type: "int", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -243,6 +272,26 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Answer",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsCorrect = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Answer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Answer_Question_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Question",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SkillTestExam",
                 columns: table => new
                 {
@@ -339,7 +388,9 @@ namespace Entity.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SkillId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PartNumber = table.Column<int>(type: "int", nullable: false),
-                    ContentText = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ContentText = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Audio = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -400,103 +451,47 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionTypePart",
+                name: "Section",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuestionGuide = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    QuestionType = table.Column<int>(type: "int", nullable: false),
-                    PartSkillId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SectionGuide = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SectionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuestionTypePart", x => x.Id);
+                    table.PrimaryKey("PK_Section", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuestionTypePart_PartSkill_PartSkillId",
-                        column: x => x.PartSkillId,
+                        name: "FK_Section_PartSkill_PartId",
+                        column: x => x.PartId,
                         principalTable: "PartSkill",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Question",
+                name: "SectionQuestion",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TypePartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuestionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MaxMarks = table.Column<int>(type: "int", nullable: false),
-                    QuestionTypePartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Question", x => x.Id);
+                    table.PrimaryKey("PK_SectionQuestion", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Question_QuestionTypePart_QuestionTypePartId",
-                        column: x => x.QuestionTypePartId,
-                        principalTable: "QuestionTypePart",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Answer",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AnswerFilling = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AnswerTrueFalse = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Answer", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Answer_Question_QuestionId",
+                        name: "FK_SectionQuestion_Question_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Question",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AnswerMatching",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AnswerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Heading = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Matching = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AnswerMatching", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnswerMatching_Answer_AnswerId",
-                        column: x => x.AnswerId,
-                        principalTable: "Answer",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AnswerOptions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AnswerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsCorrect = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AnswerOptions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AnswerOptions_Answer_AnswerId",
-                        column: x => x.AnswerId,
-                        principalTable: "Answer",
+                        name: "FK_SectionQuestion_Section_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Section",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -505,16 +500,6 @@ namespace Entity.Migrations
                 name: "IX_Answer_QuestionId",
                 table: "Answer",
                 column: "QuestionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AnswerMatching_AnswerId",
-                table: "AnswerMatching",
-                column: "AnswerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AnswerOptions_AnswerId",
-                table: "AnswerOptions",
-                column: "AnswerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -586,14 +571,19 @@ namespace Entity.Migrations
                 column: "SkillId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_QuestionTypePartId",
-                table: "Question",
-                column: "QuestionTypePartId");
+                name: "IX_Section_PartId",
+                table: "Section",
+                column: "PartId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuestionTypePart_PartSkillId",
-                table: "QuestionTypePart",
-                column: "PartSkillId");
+                name: "IX_SectionQuestion_QuestionId",
+                table: "SectionQuestion",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SectionQuestion_SectionId",
+                table: "SectionQuestion",
+                column: "SectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SkillTestExam_TestId",
@@ -625,10 +615,7 @@ namespace Entity.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AnswerMatching");
-
-            migrationBuilder.DropTable(
-                name: "AnswerOptions");
+                name: "Answer");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -646,6 +633,9 @@ namespace Entity.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ClassRelationShip");
+
+            migrationBuilder.DropTable(
                 name: "CourseTimelineDetails");
 
             migrationBuilder.DropTable(
@@ -655,13 +645,13 @@ namespace Entity.Migrations
                 name: "Events");
 
             migrationBuilder.DropTable(
+                name: "SectionQuestion");
+
+            migrationBuilder.DropTable(
                 name: "UserClasses");
 
             migrationBuilder.DropTable(
                 name: "UserCourses");
-
-            migrationBuilder.DropTable(
-                name: "Answer");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -670,25 +660,25 @@ namespace Entity.Migrations
                 name: "CourseTimelines");
 
             migrationBuilder.DropTable(
-                name: "Classes");
-
-            migrationBuilder.DropTable(
                 name: "Question");
 
             migrationBuilder.DropTable(
-                name: "Courses");
+                name: "Section");
 
             migrationBuilder.DropTable(
-                name: "QuestionTypePart");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Classes");
 
             migrationBuilder.DropTable(
                 name: "PartSkill");
 
             migrationBuilder.DropTable(
+                name: "Courses");
+
+            migrationBuilder.DropTable(
                 name: "SkillTestExam");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "TestExam");
