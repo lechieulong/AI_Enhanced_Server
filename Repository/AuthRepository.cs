@@ -52,18 +52,51 @@ namespace Repository
             }
             return false;
         }
-
+        
         public async Task<LoginReponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == loginRequestDto.Username.ToLower());
+            var user = await _userManager.FindByNameAsync(loginRequestDto.Username);
+
+            if (user == null)
+            {
+                return new LoginReponseDto() { User = null, Token = "", Message = "Invalid username or password." };
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                return new LoginReponseDto() { User = null, Token = "", Message = "User account is locked out." };
+            }
+
             bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
 
-            if (user == null || isValid == false)
+            if (!isValid)
             {
-                return new LoginReponseDto() { User = null, Token = "" };
+                await _userManager.AccessFailedAsync(user);
+
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return new LoginReponseDto() { User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later." };
+                }
+
+                var failedAttempts = await _userManager.GetAccessFailedCountAsync(user);
+                if (failedAttempts >= 3)
+                {
+                    return new LoginReponseDto()
+                    {
+                        User = null,
+                        Token = "",
+                        Message = $"Invalid username or password. You have {failedAttempts} failed login attempts."
+                    };
+                }
+
+                return new LoginReponseDto() { User = null, Token = "", Message = "Invalid username or password." };
             }
-            //if user found, generate JWT
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+
             var roles = await _userManager.GetRolesAsync(user);
+
+            // Generate JWT token
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
             UserDto userDto = new()
@@ -79,7 +112,8 @@ namespace Repository
             LoginReponseDto loginReponseDto = new LoginReponseDto()
             {
                 User = userDto,
-                Token = token
+                Token = token,
+                Message = "Login successful."
             };
 
             return loginReponseDto;
@@ -107,7 +141,6 @@ namespace Repository
                 var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
                 if (result.Succeeded)
                 {
-                    //Assign rolle "USER" auto
                     await AssignRole(user.Email, SD.User);
 
                     var userToReturn = _db.ApplicationUsers.First(u => u.Email == registrationRequestDto.Email);
@@ -239,6 +272,17 @@ namespace Repository
                 {
                     await RegisterWithGoogle(email, token);
                     user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+                }
+
+                // Check if the user is locked out due to multiple failed login attempts
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return new LoginReponseDto
+                    {
+                        User = null,
+                        Token = "",
+                        Message = "Your account is locked due to multiple failed login attempts. Please try again later."
+                    };
                 }
 
                 // Generate JWT token for authenticated user

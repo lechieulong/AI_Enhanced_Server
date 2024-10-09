@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Model.LoginGoogle;
+using Model.Role;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -38,15 +39,16 @@ namespace AIIL.Services.Api.Controllers
             if (loginResponse.User == null)
             {
                 _response.IsSuccess = false;
-                _response.Message = "Login Failed!";
+                _response.Message = loginResponse.Message;
                 return BadRequest(_response);
             }
             _response.Result = loginResponse;
+            _response.Message = loginResponse.Message;
             return Ok(_response);
         }
 
         [HttpPost("AssignRole")]
-        public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDto model)
+        public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequestDto model)
         {
             var assignRoleSuccessful = await _authRepository.AssignRole(model.Email, model.Role.ToUpper());
             if (!assignRoleSuccessful)

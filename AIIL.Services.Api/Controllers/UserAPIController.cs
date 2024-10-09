@@ -24,23 +24,6 @@ namespace AIIL.Services.Api.Controllers
             _response = new ResponseDto();
         }
 
-        //[HttpGet]
-        //[Route("{userName}")]
-        //public ResponseDto Get(string userName)
-        //{
-        //    try
-        //    {
-        //        ApplicationUser obj = _db.ApplicationUsers.First(u => u.UserName == userName);
-        //        _response.Result = _mapper.Map<UserDto>(obj);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _response.IsSuccess = false;
-        //        _response.Message = ex.Message;
-        //    }
-        //    return _response;
-        //}
-
         [HttpGet("profile/{username}")]
         public async Task<IActionResult> GetUserProfile(string username)
         {
@@ -84,5 +67,33 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
+        [HttpGet("top-teachers")]
+        public async Task<IActionResult> GetTopTeachers()
+        {
+
+            var topTeachers = await _userRepository.GetTopTeachersAsync();
+
+            if (topTeachers == null || !topTeachers.Any())
+            {
+                _response.IsSuccess = false;
+                _response.Message = "No teachers found.";
+                return NotFound(_response);
+            }
+
+            _response.IsSuccess = true;
+            _response.Result = topTeachers.Select(u => new UserDto
+            {
+                ID = u.Id,
+                UserName = u.UserName,
+                Name = u.Name,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                ImageURL = u.ImageURL
+            }).ToList(); // Return a list of UserDto
+
+            return Ok(_response);
+        }
+
     }
 }

@@ -1,8 +1,11 @@
-﻿using Entity.Data;
+﻿using Entity;
+using Entity.Data;
 using Google;
 using IRepository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
+using Model.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +17,31 @@ namespace Repository
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _db;
-        public UserRepository(AppDbContext context)
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public UserRepository(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
             _db = context;
+            _userManager = userManager;
         }
+
+        public async Task<IEnumerable<ApplicationUser>> GetTopTeachersAsync()
+        {
+            var allUsers = await _db.ApplicationUsers.ToListAsync();
+
+            var teacherUsers = new List<ApplicationUser>();
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains(SD.Teacher))
+                {
+                    teacherUsers.Add(user);
+                }
+            }
+
+            return teacherUsers.Take(10);
+        }
+
         public async Task<UserDto> GetUserProfileByUsernameAsync(string username)
         {
             var user = await _db.ApplicationUsers
