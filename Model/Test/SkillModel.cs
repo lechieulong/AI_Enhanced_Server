@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class SkillRequest
+    public class SkillModel
     {
+        public Guid Id { get; set; }
         public SkillTypeEnum SKillType { get; set; }
         public int Duration { get; set; }
-        public List<PartRequestModel> PartSkills { get; set; } = new List<PartRequestModel>();
+        public List<PartModel> Parts { get; set; } = new List<PartModel>();
+
     }
 }

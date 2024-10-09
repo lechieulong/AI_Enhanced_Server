@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class PartResponseModel
+    public class PartModel
     {
+        public Guid Id { get; set; }
         public int PartNumber { get; set; }
         public string ContentText { get; set; }
-        public List<QuestionTypePartResponseModel> QuestionTypeParts { get; set; } = new List<QuestionTypePartResponseModel>();
+        public string Image { get; set; }
+        public string Audio { get; set; }
+        public List<SectionModel> Section { get; set; } = new List<SectionModel>();
     }
 }

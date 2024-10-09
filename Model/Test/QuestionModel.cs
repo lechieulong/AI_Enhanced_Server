@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class QuestionRequestModel
+    public class QuestionModel
     {
+        public Guid Id { get; set; }
         public string QuestionName { get; set; }
-        public int MaxMarks { get; set; }
-        public List<AnswerRequest> Answers { get; set; } = new List<AnswerRequest>();
-
+        public QuestionTypeENum QuestionType { get; set; }
     }
 }
