@@ -8,10 +8,10 @@ namespace Entity
 {
     public class CourseTimelineDetail
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Khóa ngoại liên kết với CourseTimeline
-        public int TimelineId { get; set; }
+        public Guid TimelineId { get; set; }
         public CourseTimeline CourseTimeline { get; set; }
 
         public string Title { get; set; }

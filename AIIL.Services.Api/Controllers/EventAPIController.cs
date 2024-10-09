@@ -43,7 +43,7 @@ namespace AIIL.Services.Api.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<ResponseDto> Get(int id)
+        public async Task<ResponseDto> Get(Guid id)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace AIIL.Services.Api.Controllers
         [HttpDelete]
         [Route("{id:int}")]
         //[Authorize(Roles = "ADMIN")]
-        public async Task<ResponseDto> Delete(int id)
+        public async Task<ResponseDto> Delete(Guid id)
         {
             try
             {

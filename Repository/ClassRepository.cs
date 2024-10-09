@@ -1,5 +1,6 @@
 ﻿using IRepository;
 using Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,20 +18,21 @@ namespace Repository
         {
             _dbContext = dbContext;
         }
+
         public async Task<IEnumerable<ClassDto>> GetAllAsync()
         {
-            // Map List<Class> to List<ClassDto>
             return await _dbContext.Classes
                 .Select(c => new ClassDto
                 {
                     Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
-                    Count = c.Count,
+                    Count = c.Count, // Ensure Count is handled as int
                     CourseId = c.CourseId
                 }).ToListAsync();
         }
-        public async Task<ClassDto> GetByIdAsync(int id)
+
+        public async Task<ClassDto> GetByIdAsync(Guid id)
         {
             var classEntity = await _dbContext.Classes.FindAsync(id);
             if (classEntity == null)
@@ -38,7 +40,6 @@ namespace Repository
                 return null;
             }
 
-            // Map Class to ClassDto
             return new ClassDto
             {
                 Id = classEntity.Id,
@@ -48,6 +49,7 @@ namespace Repository
                 CourseId = classEntity.CourseId
             };
         }
+
         public async Task<ClassDto> CreateAsync(ClassDto newClassDto)
         {
             if (newClassDto == null)
@@ -59,10 +61,10 @@ namespace Repository
             {
                 ClassName = newClassDto.ClassName,
                 ClassDescription = newClassDto.ClassDescription,
-                Count = newClassDto.Count, // Default to 0 as it's a new class
+                Count = newClassDto.Count, // This should be managed accordingly
                 CourseId = newClassDto.CourseId,
                 StartDate = newClassDto.StartDate,
-                ImageUrl = newClassDto.ImageUrl // Set the ImageUrl from the DTO
+                ImageUrl = newClassDto.ImageUrl
             };
 
             try
@@ -70,14 +72,12 @@ namespace Repository
                 await _dbContext.Classes.AddAsync(classEntity);
                 await _dbContext.SaveChangesAsync();
 
-                // Update the DTO with the generated class ID from the database
                 newClassDto.Id = classEntity.Id;
 
                 return newClassDto;
             }
             catch (DbUpdateException ex)
             {
-                // Log the exception for debugging purposes
                 throw new Exception("An error occurred while creating the class.", ex);
             }
         }
@@ -90,16 +90,14 @@ namespace Repository
                 return null;
             }
 
-            // Update properties
             existingClass.ClassName = updatedClassDto.ClassName;
             existingClass.ClassDescription = updatedClassDto.ClassDescription;
-            existingClass.Count = updatedClassDto.Count;
+            existingClass.Count = updatedClassDto.Count; // Update as necessary
             existingClass.CourseId = updatedClassDto.CourseId;
 
             _dbContext.Classes.Update(existingClass);
             await _dbContext.SaveChangesAsync();
 
-            // Map Class back to ClassDto
             return new ClassDto
             {
                 Id = existingClass.Id,
@@ -109,7 +107,8 @@ namespace Repository
                 CourseId = existingClass.CourseId
             };
         }
-        public async Task<bool> DeleteAsync(int id)
+
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var classToDelete = await _dbContext.Classes.FindAsync(id);
             if (classToDelete == null)
@@ -122,9 +121,8 @@ namespace Repository
             return true;
         }
 
-        public async Task<IEnumerable<ClassDto>> GetByCourseIdAsync(int courseId)
+        public async Task<IEnumerable<ClassDto>> GetByCourseIdAsync(Guid courseId)
         {
-            // Retrieve classes for the specified CourseId and map to ClassDto
             return await _dbContext.Classes
                 .Where(c => c.CourseId == courseId)
                 .Select(c => new ClassDto
@@ -137,6 +135,5 @@ namespace Repository
                 })
                 .ToListAsync();
         }
-
     }
 }

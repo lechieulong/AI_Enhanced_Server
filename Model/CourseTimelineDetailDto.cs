@@ -8,10 +8,10 @@ namespace Model
 {
     public class CourseTimelineDetailDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Khóa ngoại liên kết với CourseTimeline
-        public int TimelineId { get; set; }
+        public Guid TimelineId { get; set; }
         public CourseTimelineDto CourseTimeline { get; set; }
 
         public string Title { get; set; }

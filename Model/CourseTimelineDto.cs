@@ -6,10 +6,10 @@ namespace Model
 {
     public class CourseTimelineDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Khóa ngoại liên kết với bảng Course
-        public int CourseId { get; set; }
+        public Guid CourseId { get; set; }
 
         // Bỏ qua thuộc tính Course khi tạo CourseTimeline
         [JsonIgnore]

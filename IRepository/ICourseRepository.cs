@@ -1,20 +1,17 @@
 ﻿using Entity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IRepository
 {
     public interface ICourseRepository
     {
-        Task<Course> GetByIdAsync(int id);
+        Task<Course> GetByIdAsync(Guid id); // Thay đổi từ int sang Guid
         Task<IEnumerable<Course>> GetAllAsync();
         Task AddAsync(Course course);
         Task UpdateAsync(Course course);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Guid id); // Thay đổi từ int sang Guid
+        Task<IEnumerable<Course>> GetAllByUserIdAsync(string userId);
     }
-
 }

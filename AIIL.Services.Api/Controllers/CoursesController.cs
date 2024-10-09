@@ -26,8 +26,8 @@ namespace Auth.Controllers
             return Ok(courses);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
             var course = await _repository.GetByIdAsync(id);
             if (course == null)
@@ -51,9 +51,10 @@ namespace Auth.Controllers
                 course.Hours <= 0 ||
                 course.Days <= 0 ||
                 string.IsNullOrWhiteSpace(course.Category) ||
-                course.Price <= 0)
+                course.Price <= 0 ||
+                string.IsNullOrWhiteSpace(course.UserId)) // Kiểm tra UserId không bị thiếu
             {
-                return BadRequest("Invalid course data.");
+                return BadRequest("Invalid course data. Please ensure all required fields are filled correctly.");
             }
 
             // Không cần thiết phải xử lý CourseTimelines ở đây
@@ -61,28 +62,39 @@ namespace Auth.Controllers
             return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
         }
 
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Course course)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, Course course)
         {
             if (id != course.Id)
             {
-                return BadRequest();
+                return BadRequest("Course ID mismatch.");
+            }
+
+            // Kiểm tra các trường bắt buộc
+            if (string.IsNullOrWhiteSpace(course.CourseName) ||
+                string.IsNullOrWhiteSpace(course.Content) ||
+                course.Hours <= 0 ||
+                course.Days <= 0 ||
+                string.IsNullOrWhiteSpace(course.Category) ||
+                course.Price <= 0 ||
+                string.IsNullOrWhiteSpace(course.UserId)) // Kiểm tra UserId không bị thiếu
+            {
+                return BadRequest("Invalid course data. Please ensure all required fields are filled correctly.");
             }
 
             await _repository.UpdateAsync(course);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _repository.DeleteAsync(id);
             return NoContent();
         }
 
-        [HttpGet("{courseId:int}/classes")]
-        public async Task<ActionResult<ResponseDto>> GetByCourseId(int courseId)
+        [HttpGet("{courseId:guid}/classes")]
+        public async Task<ActionResult<ResponseDto>> GetByCourseId(Guid courseId)
         {
             var response = new ResponseDto();
             try
@@ -103,6 +115,23 @@ namespace Auth.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
+        }
+
+        [HttpGet("user/{userId}")] // Không cần thay đổi
+        public async Task<IActionResult> GetAllByUserId(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return BadRequest("User ID is required.");
+            }
+
+            var courses = await _repository.GetAllByUserIdAsync(userId);
+            if (courses == null || !courses.Any())
+            {
+                return NotFound("No courses found for the specified user ID.");
+            }
+
+            return Ok(courses);
         }
     }
 }

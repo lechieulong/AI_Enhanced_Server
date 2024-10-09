@@ -2,11 +2,11 @@
 
 public interface ICourseTimelineRepository
 {
-    Task<CourseTimeline> GetByIdAsync(int id);
+    Task<CourseTimeline> GetByIdAsync(Guid id);
     Task<IEnumerable<CourseTimeline>> GetAllAsync();
     Task AddAsync(CourseTimeline courseTimeline);
     Task UpdateAsync(CourseTimeline courseTimeline);
-    Task DeleteAsync(int id);
-    Task<bool> CheckExistCourseIdAsync(int courseId);
-    Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(int courseId);
+    Task DeleteAsync(Guid id);
+    Task<bool> CheckExistCourseIdAsync(Guid courseId);
+    Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(Guid courseId);
 }

@@ -25,7 +25,7 @@ namespace Auth.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var courseTimeline = await _repository.GetByIdAsync(id);
             if (courseTimeline == null)
@@ -34,6 +34,7 @@ namespace Auth.Controllers
             }
             return Ok(courseTimeline);
         }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CourseTimeline courseTimeline)
         {
@@ -42,8 +43,8 @@ namespace Auth.Controllers
                 return BadRequest("Timeline data is required.");
             }
 
-            // Kiểm tra các trường bắt buộc
-            if (courseTimeline.CourseId <= 0 ||
+            // Validate required fields
+            if (courseTimeline.CourseId == Guid.Empty || // Assuming CourseId is a Guid
                 string.IsNullOrWhiteSpace(courseTimeline.Title) ||
                 string.IsNullOrWhiteSpace(courseTimeline.Description) ||
                 string.IsNullOrWhiteSpace(courseTimeline.Author) ||
@@ -52,25 +53,31 @@ namespace Auth.Controllers
                 return BadRequest("Invalid timeline data.");
             }
 
-            // Kiểm tra xem CourseId có tồn tại không
+            // Check if CourseId exists
             bool courseExists = await _repository.CheckExistCourseIdAsync(courseTimeline.CourseId);
             if (!courseExists)
             {
                 return BadRequest("Invalid CourseId.");
             }
 
-            // Thêm CourseTimeline vào cơ sở dữ liệu
+            // Add CourseTimeline to the database
             await _repository.AddAsync(courseTimeline);
             return CreatedAtAction(nameof(GetById), new { id = courseTimeline.Id }, courseTimeline);
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, CourseTimeline courseTimeline)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CourseTimeline courseTimeline)
         {
             if (id != courseTimeline.Id)
             {
-                return BadRequest();
+                return BadRequest("ID mismatch.");
+            }
+
+            // Check if the course timeline exists before updating
+            var existingTimeline = await _repository.GetByIdAsync(id);
+            if (existingTimeline == null)
+            {
+                return NotFound();
             }
 
             await _repository.UpdateAsync(courseTimeline);
@@ -78,14 +85,20 @@ namespace Auth.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
+            var courseTimelineExists = await _repository.GetByIdAsync(id);
+            if (courseTimelineExists == null)
+            {
+                return NotFound();
+            }
+
             await _repository.DeleteAsync(id);
             return NoContent();
         }
 
         [HttpGet("Course/{courseId}")]
-        public async Task<IActionResult> GetByCourseId(int courseId)
+        public async Task<IActionResult> GetByCourseId(Guid courseId)
         {
             var courseTimelines = await _repository.GetByCourseIdAsync(courseId);
             if (courseTimelines == null || !courseTimelines.Any())

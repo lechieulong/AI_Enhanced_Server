@@ -22,7 +22,7 @@ namespace Repository
             _context = context;
         }
 
-        public async Task<CourseTimeline> GetByIdAsync(int id)
+        public async Task<CourseTimeline> GetByIdAsync(Guid id)
         {
             return await _context.CourseTimelines.FindAsync(id);
         }
@@ -44,7 +44,7 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var timeline = await _context.CourseTimelines.FindAsync(id);
             if (timeline != null)
@@ -54,12 +54,12 @@ namespace Repository
             }
         }
 
-        public async Task<bool> CheckExistCourseIdAsync(int courseId)
+        public async Task<bool> CheckExistCourseIdAsync(Guid courseId)
         {
             return await _context.Courses.AnyAsync(c => c.Id == courseId);
         }
 
-        public async Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(int courseId)
+        public async Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(Guid courseId)
         {
             return await _context.CourseTimelines.Where(ct => ct.CourseId == courseId).ToListAsync();
         }

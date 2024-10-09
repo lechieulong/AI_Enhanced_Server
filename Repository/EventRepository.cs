@@ -25,7 +25,7 @@ namespace Repository
             return await _db.Events.ToListAsync();
         }
 
-        public async Task<Event> GetEventsByIdAsync(int id)
+        public async Task<Event> GetEventsByIdAsync(Guid id)
         {
             return await _db.Events.FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -50,7 +50,7 @@ namespace Repository
             return Event;
         }
 
-        public async Task<bool> DeleteEventAsync(int id)
+        public async Task<bool> DeleteEventAsync(Guid id)
         {
             var Event = await _db.Events.FirstOrDefaultAsync(p => p.Id == id);
             if (Event != null)

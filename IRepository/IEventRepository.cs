@@ -11,10 +11,10 @@ namespace IRepository
     public interface IEventRepository
     {
         Task<IEnumerable<Event>> GetEventsAsync();
-        Task<Event> GetEventsByIdAsync(int id);
+        Task<Event> GetEventsByIdAsync(Guid id);
         Task<IEnumerable<Event>> GetEventsByUserIdAsync(string userId);
         Task<Event> CreateEventAsync(Event Event);
         Task<Event> UpdateEventAsync(Event Event);
-        Task<bool> DeleteEventAsync(int id);
+        Task<bool> DeleteEventAsync(Guid id);
     }
 }

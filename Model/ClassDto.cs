@@ -9,13 +9,15 @@ namespace Model
 {
     public class ClassDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string ClassName { get; set; }
         public string ClassDescription { get; set; }
         //Number of student
         public int Count { get; set; }
-        public int CourseId { get; set; }
+        public Guid CourseId { get; set; }
         public DateTime StartDate { get; set; }
         public string ImageUrl { get; set; }
+
+
     }
 }

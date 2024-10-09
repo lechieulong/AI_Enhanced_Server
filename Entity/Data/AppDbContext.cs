@@ -13,6 +13,7 @@ namespace Entity.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<TestExam> TestExam { get; set; }
@@ -29,10 +30,26 @@ namespace Entity.Data
 
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<UserClass> UserClasses { get; set; }
+        public DbSet<UserCourse> UserCourses { get; set; } // Thêm DbSet cho UserCourse
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserCourses)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserClass>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserClasses)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
+
     }
 }
