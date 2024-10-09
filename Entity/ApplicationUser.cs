@@ -17,5 +17,7 @@ namespace Entity
 
         public ICollection<UserClass>? UserClasses { get; set; }
         public ICollection<UserCourse>? UserCourses { get; set; }
+        public ICollection<TeacherAvailableSchedule>? TeacherAvailableSchedules { get; set; }
+        public ICollection<BookedTeacherSession>? BookedTeacherSessions { get; set; }
     }
 }

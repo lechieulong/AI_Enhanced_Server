@@ -22,6 +22,8 @@ namespace Mapper
                 config.CreateMap<UserDto, ApplicationUser>();
                 config.CreateMap<EventDto, Event>();
                 config.CreateMap<Event, EventDto>();
+                config.CreateMap<TeacherAvailableSchedule, TeacherAvailableScheduleDto>();
+                config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
             });
             return mappingConfig;
         }

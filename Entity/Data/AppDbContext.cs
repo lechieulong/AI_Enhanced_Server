@@ -27,15 +27,28 @@ namespace Entity.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseTimeline> CourseTimelines { get; set; }
         public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }
-
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<TeacherAvailableSchedule> TeacherAvailableSchedules { get; set; }
+        public DbSet<BookedTeacherSession> BookedTeacherSessions { get; set; }
         public DbSet<UserClass> UserClasses { get; set; }
         public DbSet<UserCourse> UserCourses { get; set; } // Thêm DbSet cho UserCourse
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>()
+            .HasMany(u => u.TeacherAvailableSchedules)
+            .WithOne(s => s.Teacher) // Mỗi lịch chỉ có một giáo viên
+            .HasForeignKey(s => s.TeacherId)
+            .OnDelete(DeleteBehavior.Restrict); // Không xóa lịch khi xóa giáo viên
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.BookedTeacherSessions)
+                .WithOne(b => b.Learner) // Mỗi phiên học chỉ có một học viên
+                .HasForeignKey(b => b.LearnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserCourse>()
                 .HasOne(uc => uc.User)
