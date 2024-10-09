@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Entity.Migrations
 {
     /// <inheritdoc />
-    public partial class InitMigration : Migration
+    public partial class InitialCreateTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -272,6 +272,29 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TeacherAvailableSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsBooked = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeacherAvailableSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TeacherAvailableSchedules_AspNetUsers_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Answer",
                 columns: table => new
                 {
@@ -377,6 +400,32 @@ namespace Entity.Migrations
                         name: "FK_UserCourses_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BookedTeacherSessions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LearnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BookedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookedTeacherSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BookedTeacherSessions_AspNetUsers_LearnerId",
+                        column: x => x.LearnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BookedTeacherSessions_TeacherAvailableSchedules_ScheduleId",
+                        column: x => x.ScheduleId,
+                        principalTable: "TeacherAvailableSchedules",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -541,6 +590,17 @@ namespace Entity.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BookedTeacherSessions_LearnerId",
+                table: "BookedTeacherSessions",
+                column: "LearnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookedTeacherSessions_ScheduleId",
+                table: "BookedTeacherSessions",
+                column: "ScheduleId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Classes_CourseId",
                 table: "Classes",
                 column: "CourseId");
@@ -591,6 +651,11 @@ namespace Entity.Migrations
                 column: "TestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TeacherAvailableSchedules_TeacherId",
+                table: "TeacherAvailableSchedules",
+                column: "TeacherId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserClasses_ClassId",
                 table: "UserClasses",
                 column: "ClassId");
@@ -633,6 +698,9 @@ namespace Entity.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BookedTeacherSessions");
+
+            migrationBuilder.DropTable(
                 name: "ClassRelationShip");
 
             migrationBuilder.DropTable(
@@ -655,6 +723,9 @@ namespace Entity.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "TeacherAvailableSchedules");
 
             migrationBuilder.DropTable(
                 name: "CourseTimelines");

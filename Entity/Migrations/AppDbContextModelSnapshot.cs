@@ -977,11 +977,13 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
-                    b.Navigation("Courses");
-
                     b.Navigation("BookedTeacherSessions");
 
+                    b.Navigation("Courses");
+
                     b.Navigation("Events");
+
+                    b.Navigation("TeacherAvailableSchedules");
 
                     b.Navigation("UserClasses");
 
@@ -991,8 +993,6 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.Class", b =>
                 {
                     b.Navigation("UserClasses");
-
-                    b.Navigation("TeacherAvailableSchedules");
                 });
 
             modelBuilder.Entity("Entity.Course", b =>
