@@ -10,10 +10,10 @@ namespace IRepository
     public interface IClassRepository
     {
         Task<ClassDto> CreateAsync(ClassDto newClass);
-        Task<ClassDto> GetByIdAsync(int id);
-        Task<IEnumerable<ClassDto>> GetByCourseIdAsync(int courseId);
+        Task<ClassDto> GetByIdAsync(Guid id);
+        Task<IEnumerable<ClassDto>> GetByCourseIdAsync(Guid courseId);
         Task<IEnumerable<ClassDto>> GetAllAsync();
         Task<ClassDto> UpdateAsync(ClassDto updatedClass);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteAsync(Guid id);
     }
 }

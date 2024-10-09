@@ -13,6 +13,7 @@ namespace Entity.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<TestExam> TestExam { get; set; }
@@ -30,6 +31,8 @@ namespace Entity.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<TeacherAvailableSchedule> TeacherAvailableSchedules { get; set; }
         public DbSet<BookedTeacherSession> BookedTeacherSessions { get; set; }
+        public DbSet<UserClass> UserClasses { get; set; }
+        public DbSet<UserCourse> UserCourses { get; set; } // Thêm DbSet cho UserCourse
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +49,20 @@ namespace Entity.Data
                 .WithOne(b => b.Learner) // Mỗi phiên học chỉ có một học viên
                 .HasForeignKey(b => b.LearnerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserCourses)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserClass>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserClasses)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
+
     }
 }

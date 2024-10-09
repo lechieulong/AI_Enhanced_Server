@@ -1,13 +1,10 @@
 ﻿using Entity;
 using IRepository;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Entity.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository
@@ -23,7 +20,7 @@ namespace Repository
             _courses = _context.Courses;
         }
 
-        public async Task<Course> GetByIdAsync(int id)
+        public async Task<Course> GetByIdAsync(Guid id) // Thay đổi từ int sang Guid
         {
             return await _courses.FindAsync(id);
         }
@@ -45,7 +42,7 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id) // Thay đổi từ int sang Guid
         {
             var course = await _courses.FindAsync(id);
             if (course != null)
@@ -55,5 +52,11 @@ namespace Repository
             }
         }
 
+        public async Task<IEnumerable<Course>> GetAllByUserIdAsync(string userId)
+        {
+            return await _context.Courses
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+        }
     }
 }

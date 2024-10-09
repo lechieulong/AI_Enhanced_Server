@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241006162722_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20241009150300_InitMigration")]
+    partial class InitMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,11 +102,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Class", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ClassDescription")
                         .IsRequired()
@@ -119,8 +117,8 @@ namespace Entity.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -154,11 +152,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Course", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -190,25 +186,28 @@ namespace Entity.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("Entity.CourseTimeline", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -230,17 +229,15 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.CourseTimelineDetail", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("CourseTimelineId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CourseTimelineId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimelineId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("TimelineId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -263,11 +260,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.EmailLog", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -297,11 +292,9 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Event", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -514,6 +507,50 @@ namespace Entity.Migrations
                     b.ToTable("TestExam");
                 });
 
+            modelBuilder.Entity("Entity.UserClass", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserClasses");
+                });
+
+            modelBuilder.Entity("Entity.UserCourse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserCourses");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -658,6 +695,15 @@ namespace Entity.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Entity.Course", b =>
+                {
+                    b.HasOne("Entity.ApplicationUser", "User")
+                        .WithMany("Courses")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Entity.CourseTimeline", b =>
                 {
                     b.HasOne("Entity.Course", "Course")
@@ -754,6 +800,44 @@ namespace Entity.Migrations
                     b.Navigation("Test");
                 });
 
+            modelBuilder.Entity("Entity.UserClass", b =>
+                {
+                    b.HasOne("Entity.Class", "Class")
+                        .WithMany("UserClasses")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.ApplicationUser", "User")
+                        .WithMany("UserClasses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entity.UserCourse", b =>
+                {
+                    b.HasOne("Entity.Course", "Course")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.ApplicationUser", "User")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -807,7 +891,18 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
+                    b.Navigation("Courses");
+
                     b.Navigation("Events");
+
+                    b.Navigation("UserClasses");
+
+                    b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.Navigation("UserClasses");
                 });
 
             modelBuilder.Entity("Entity.Course", b =>
@@ -815,6 +910,8 @@ namespace Entity.Migrations
                     b.Navigation("Classes");
 
                     b.Navigation("CourseTimelines");
+
+                    b.Navigation("UserCourses");
                 });
 
             modelBuilder.Entity("Entity.CourseTimeline", b =>

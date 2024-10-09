@@ -10,12 +10,12 @@ namespace IRepository
 {
     public interface ICourseTimelineDetailRepository
     {
-        Task<CourseTimelineDetail> GetByIdAsync(int id);
+        Task<CourseTimelineDetail> GetByIdAsync(Guid id);
         Task<IEnumerable<CourseTimelineDetail>> GetAllAsync();
         Task AddAsync(CourseTimelineDetail courseTimelineDetail);
         Task UpdateAsync(CourseTimelineDetail courseTimelineDetail);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Guid id);
 
-        Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(int courseTimelineId); //Lấy tất cả CourseTimeline từ CourseId
+        Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId); //Lấy tất cả CourseTimeline từ CourseId
     }
 }

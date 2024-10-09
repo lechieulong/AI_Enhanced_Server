@@ -24,7 +24,7 @@ namespace Repository
             _coursesTimelineDetail = _context.CourseTimelineDetails;
         }
 
-        public async Task<CourseTimelineDetail> GetByIdAsync(int id)
+        public async Task<CourseTimelineDetail> GetByIdAsync(Guid id)
         {
             return await _coursesTimelineDetail.FindAsync(id);
         }
@@ -46,7 +46,7 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var courseTimelineDetail = await _coursesTimelineDetail.FindAsync(id);
             if (courseTimelineDetail != null)
@@ -56,7 +56,7 @@ namespace Repository
             }
         }
         // Phương thức để lấy CourseTimelineDetail theo CourseTimelineId
-        public async Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(int courseTimelineId)
+        public async Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId)
         {
             return await _context.CourseTimelineDetails
                                  .Where(ct => ct.TimelineId == courseTimelineId)

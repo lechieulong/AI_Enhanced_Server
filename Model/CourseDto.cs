@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Model
 {
     public class CourseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+        public string UserId { get; set; }
+
         public string CourseName { get; set; }
         public string Content { get; set; }
         public int Hours { get; set; }
@@ -17,5 +20,8 @@ namespace Model
 
         [JsonIgnore] // Bỏ qua khi tạo Course
         public ICollection<CourseTimelineDto>? CourseTimelines { get; set; }
+
+        [JsonIgnore] // Bỏ qua khi tạo Course
+        public ICollection<UserDto>? Users { get; set; }
     }
 }

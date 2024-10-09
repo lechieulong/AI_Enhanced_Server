@@ -24,7 +24,7 @@ namespace Auth.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var courseTimelineDetail = await _repository.GetByIdAsync(id);
             if (courseTimelineDetail == null)
@@ -42,7 +42,7 @@ namespace Auth.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, CourseTimelineDetail courseTimelineDetail)
+        public async Task<IActionResult> Update(Guid id, CourseTimelineDetail courseTimelineDetail)
         {
             if (id != courseTimelineDetail.Id)
             {
@@ -54,14 +54,14 @@ namespace Auth.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _repository.DeleteAsync(id);
             return NoContent();
         }
 
         [HttpGet("CourseTimeline/{courseTimelineId}")]
-        public async Task<IActionResult> GetByCourseTimelineId(int courseTimelineId)
+        public async Task<IActionResult> GetByCourseTimelineId(Guid courseTimelineId)
         {
             var courseTimelineDetails = await _repository.GetByCourseTimelineIdAsync(courseTimelineId);
 

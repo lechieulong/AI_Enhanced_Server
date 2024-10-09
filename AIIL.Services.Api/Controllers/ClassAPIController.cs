@@ -44,8 +44,8 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}")]
-        public ResponseDto Get(int id)
+        [Route("{id:Guid}")]
+        public ResponseDto Get(Guid id)
         {
             try
             {
@@ -100,9 +100,9 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpDelete]
-        [Route("{id:int}")]
+        [Route("{id:Guid}")]
         //[Authorize(Roles = "ADMIN")]
-        public ResponseDto Delete(int id)
+        public ResponseDto Delete(Guid id)
         {
             try
             {
@@ -119,8 +119,8 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
 
-        [HttpGet("course/{courseId:int}/classes")]
-        public async Task<ActionResult<ResponseDto>> GetByCourseId(int courseId)
+        [HttpGet("course/{courseId:Guid}/classes")]
+        public async Task<ActionResult<ResponseDto>> GetByCourseId(Guid courseId)
         {
             var response = new ResponseDto();
             try
