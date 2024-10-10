@@ -11,7 +11,7 @@ namespace Entity
     {
         public Guid Id { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public int Minutes { get; set; }
         public decimal Price { get; set; }
         public string Link {  get; set; }
         public string TeacherId { get; set; }
@@ -19,5 +19,7 @@ namespace Entity
         public ApplicationUser Teacher { get; set; }
         public bool IsBooked { get; set; }
         public BookedTeacherSession? BookedTeacherSession { get; set; }
+        [NotMapped]
+        public DateTime EndTime => StartTime.AddMinutes(Minutes);
     }
 }

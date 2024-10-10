@@ -12,10 +12,11 @@ namespace IRepository
     {
         Task<TeacherAvailableSchedule> GetByIdAsync(Guid id);
         Task<IEnumerable<TeacherAvailableSchedule>> GetAllAsync();
-        Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherIdAsync(string userName);
+        Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherNameAsync(string userName);
         Task<TeacherAvailableSchedule> CreateAsync(TeacherAvailableSchedule newSchedule);
         Task<TeacherAvailableSchedule> UpdateAsync(TeacherAvailableSchedule updatedSchedule);
         Task<bool> DeleteAsync(Guid id);
+        Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime);
     }
 
 }

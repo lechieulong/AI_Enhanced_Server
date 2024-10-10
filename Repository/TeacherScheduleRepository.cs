@@ -21,8 +21,34 @@ namespace Repository
 
         public async Task<TeacherAvailableSchedule> CreateAsync(TeacherAvailableSchedule newSchedule)
         {
+            if (newSchedule.StartTime < DateTime.Now)
+            {
+                throw new ArgumentException("Start time cannot be in the past.");
+            }
+            if (newSchedule.Minutes <= 0)
+            {
+                throw new ArgumentException("Duration should be greater than zero.");
+            }
+            if (newSchedule.Price <= 0)
+            {
+                throw new ArgumentException("Price must be a positive value.");
+            }
+            // Create the schedule
             await _db.TeacherAvailableSchedules.AddAsync(newSchedule);
             await _db.SaveChangesAsync();
+            //// Automatically create an Event based on the new TeacherAvailableSchedule
+            //var newEvent = new Event
+            //{
+            //    Title = $"Available Coaching Session with {newSchedule.TeacherId}",
+            //    Description = $"Coaching session for {newSchedule.Minutes} minutes",
+            //    Start = newSchedule.StartTime,
+            //    End = newSchedule.StartTime.AddMinutes(newSchedule.Minutes),
+            //    Link = newSchedule.Link,
+            //    UserId = newSchedule.TeacherId, // Assuming the Teacher is the "User" who creates this event
+            //    User = newSchedule.Teacher // Optionally set the Teacher entity if needed
+            //};
+            //await _db.Events.AddAsync(newEvent);
+            //await _db.SaveChangesAsync();
             return newSchedule;
         }
 
@@ -48,7 +74,7 @@ namespace Repository
             return await _db.TeacherAvailableSchedules.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherIdAsync(string userName)
+        public async Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherNameAsync(string userName)
         {
             return await _db.TeacherAvailableSchedules
                             .Where(p => p.Teacher.UserName == userName)
@@ -61,5 +87,14 @@ namespace Repository
             await _db.SaveChangesAsync();
             return updatedSchedule;
         }
+
+        public async Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime)
+        {
+            return await _db.TeacherAvailableSchedules
+                .Where(schedule => schedule.TeacherId == teacherId &&
+                                  ((schedule.StartTime.AddMinutes(schedule.Minutes) > startTime) && (schedule.StartTime < endTime)))
+                .ToListAsync();
+        }
+
     }
 }
