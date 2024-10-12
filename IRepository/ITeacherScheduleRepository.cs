@@ -13,6 +13,7 @@ namespace IRepository
         Task<TeacherAvailableSchedule> GetByIdAsync(Guid id);
         Task<IEnumerable<TeacherAvailableSchedule>> GetAllAsync();
         Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherNameAsync(string userName);
+        Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherName7DaysAsync(string userName);
         Task<TeacherAvailableSchedule> CreateAsync(TeacherAvailableSchedule newSchedule);
         Task<TeacherAvailableSchedule> UpdateAsync(TeacherAvailableSchedule updatedSchedule);
         Task<bool> DeleteAsync(Guid id);

@@ -81,6 +81,20 @@ namespace Repository
                             .ToListAsync();
         }
 
+        public async Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherName7DaysAsync(string userName)
+        {
+            var today = DateTime.Now;
+            var sevenDaysFromNow = today.AddDays(6);
+
+            return await _db.TeacherAvailableSchedules
+                            .Where(p => p.Teacher.UserName == userName &&
+                                        p.StartTime >= today &&
+                                        p.StartTime <= sevenDaysFromNow &&
+                                        p.Status == 0 || p.Status == 1)
+                            .OrderBy(p => p.StartTime)
+                            .ToListAsync();
+        }
+
         public async Task<TeacherAvailableSchedule> UpdateAsync(TeacherAvailableSchedule updatedSchedule)
         {
             _db.TeacherAvailableSchedules.Update(updatedSchedule);

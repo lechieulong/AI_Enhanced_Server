@@ -171,5 +171,37 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
 
+        [HttpGet]
+        [Route("{userName}/7days")]
+        public async Task<ResponseDto> GetScheduleByTeacherName7Days(string userName)
+        {
+            try
+            {
+                UserDto user = await _userRepository.GetUserProfileByUsernameAsync(userName);
+                if (user == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "User not found.";
+                    return _response;
+                }
+                IEnumerable<TeacherAvailableSchedule> scheduleList = await _teacherScheduleRepository.GetByTeacherName7DaysAsync(userName);
+                if (scheduleList != null)
+                {
+                    _response.Result = _mapper.Map<IEnumerable<TeacherAvailableScheduleDto>>(scheduleList);
+                }
+                else
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "Schedule not found for this teacher.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+            return _response;
+        }
+
     }
 }

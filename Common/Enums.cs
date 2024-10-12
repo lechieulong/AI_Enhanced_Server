@@ -16,4 +16,12 @@
         Radio, // 3
         TrueFalse, // 3
     }
+
+    public enum ScheduleStatus
+    {
+        Available = 0,
+        Pending = 1,
+        Booked = 2
+    }
+
 }

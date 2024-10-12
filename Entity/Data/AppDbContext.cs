@@ -62,6 +62,10 @@ namespace Entity.Data
                 .HasForeignKey(uc => uc.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(e => e.Events)
+                .WithMany(u => u.Users)
+                .UsingEntity(j => j.ToTable("UserEvents"));
         }
 
     }

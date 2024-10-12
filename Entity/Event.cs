@@ -15,8 +15,6 @@ namespace Entity
         public DateTime Start {  get; set; }
         public DateTime End { get; set; }
         public string Link { get; set; }
-        public string UserId { get; set; }
-        [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; }
+        public ICollection<ApplicationUser> Users { get; set; }
     }
 }

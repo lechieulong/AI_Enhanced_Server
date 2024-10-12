@@ -17,7 +17,8 @@ namespace Entity
         public string TeacherId { get; set; }
         [ForeignKey("TeacherId")]
         public ApplicationUser Teacher { get; set; }
-        public bool IsBooked { get; set; }
+        // 0 is availabe, 1 is pending, 2 is booked
+        public int Status { get; set; }
         public BookedTeacherSession? BookedTeacherSession { get; set; }
         [NotMapped]
         public DateTime EndTime => StartTime.AddMinutes(Minutes);

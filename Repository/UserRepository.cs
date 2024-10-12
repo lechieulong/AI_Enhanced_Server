@@ -42,6 +42,32 @@ namespace Repository
             return teacherUsers.Take(10);
         }
 
+        public async Task<IEnumerable<TeacherSearchDto>> SearchTeachersAsync(string searchText)
+        {
+            var allUsers = await _db.ApplicationUsers.ToListAsync();
+
+            var teacherUsers = new List<TeacherSearchDto>();
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains(SD.Teacher) &&
+                    (user.UserName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                     user.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                     user.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+                {
+                    teacherUsers.Add(new TeacherSearchDto
+                    {
+                        Name = user.Name,
+                        UserName = user.UserName,
+                        ImageURL = user.ImageURL
+                    });
+                }
+            }
+
+            return teacherUsers.Take(5);
+        }
+
         public async Task<UserDto> GetUserProfileByUsernameAsync(string username)
         {
             var user = await _db.ApplicationUsers
