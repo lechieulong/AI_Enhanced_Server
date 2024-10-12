@@ -61,7 +61,9 @@ namespace Entity.Data
                 .WithMany(u => u.UserClasses)
                 .HasForeignKey(uc => uc.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            modelBuilder.Entity<TeacherAvailableSchedule>()
+    .Property(t => t.Price)
+    .HasColumnType("decimal(18,4)");
         }
 
     }

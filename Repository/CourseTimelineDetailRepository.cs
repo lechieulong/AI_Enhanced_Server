@@ -59,7 +59,7 @@ namespace Repository
         public async Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId)
         {
             return await _context.CourseTimelineDetails
-                                 .Where(ct => ct.TimelineId == courseTimelineId)
+                                 .Where(ct => ct.CourseTimelineId == courseTimelineId)
                                  .ToListAsync();
         }
 
