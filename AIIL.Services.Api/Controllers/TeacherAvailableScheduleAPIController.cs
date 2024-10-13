@@ -58,7 +58,8 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
         [HttpPost]
-        [Authorize]
+        //[Authorize]
+        [Authorize(Roles = "TEACHER")]
         public async Task<IActionResult> Post([FromBody] TeacherAvailableScheduleDto scheduleDto)
         {
             try

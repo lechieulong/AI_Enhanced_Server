@@ -90,7 +90,7 @@ namespace Repository
                             .Where(p => p.Teacher.UserName == userName &&
                                         p.StartTime >= today &&
                                         p.StartTime <= sevenDaysFromNow &&
-                                        p.Status == 0 || p.Status == 1)
+                                        (p.Status == 0 || p.Status == 1))
                             .OrderBy(p => p.StartTime)
                             .ToListAsync();
         }

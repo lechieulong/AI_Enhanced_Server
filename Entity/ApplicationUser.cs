@@ -12,6 +12,7 @@ namespace Entity
         public string Name { get; set; }
         public string? ImageURL { get; set; }
         public DateTime? DOB { get; set; }
+        public UserEducation UserEducation { get; set; }
         public ICollection<Event>? Events { get; set; }
         public ICollection<Course>? Courses { get; set; }
 
