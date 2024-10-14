@@ -26,6 +26,7 @@ namespace Repository
                 EndTime = model.EndTime,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
+                CreateBy = model.CreateBy,
             };
             _context.TestExam.Add(newTest);
 
@@ -47,6 +48,11 @@ namespace Repository
             return model;
         }
 
-
+        public async Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId)
+        {
+            return await _context.TestExam
+                .Where(test => test.CreateBy == userId) 
+                .ToListAsync();
+        }
     }
 }

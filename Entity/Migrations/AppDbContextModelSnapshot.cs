@@ -554,6 +554,9 @@ namespace Entity.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("CreateBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 

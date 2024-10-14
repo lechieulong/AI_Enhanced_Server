@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Entity;
+using Entity.Test;
 using Model;
+using Model.Test;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +26,8 @@ namespace Mapper
                 config.CreateMap<Event, EventDto>();
                 config.CreateMap<TeacherAvailableSchedule, TeacherAvailableScheduleDto>();
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
+                config.CreateMap<TestExam, TestModel>();
+
                 config.CreateMap<UserEducation, UserEducationDto>();
                 config.CreateMap<UserEducationDto, UserEducation>();
             });

@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Entity.Test;
+using Model;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task<TestModel> AddTestAsync(TestModel model);
+        Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
     }
 }
