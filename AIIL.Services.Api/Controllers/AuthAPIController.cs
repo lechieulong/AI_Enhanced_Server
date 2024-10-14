@@ -89,7 +89,7 @@ namespace AIIL.Services.Api.Controllers
             if (loginResponse.User == null)
             {
                 _response.IsSuccess = false;
-                _response.Message = "Google Login Failed!";
+                _response.Message = loginResponse.Message;
                 return BadRequest(_response);
             }
             _response.Result = loginResponse;
