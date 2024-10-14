@@ -80,6 +80,12 @@ builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetail
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
+builder.Services.AddScoped<IBlogStorageService>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config.GetConnectionString("AzureBlobStorage");
+    return new BlobStorageService(connectionString);
+});
 
 // Register CORS services
 builder.Services.AddCors(options =>

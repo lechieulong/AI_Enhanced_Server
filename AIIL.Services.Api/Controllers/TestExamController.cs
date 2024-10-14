@@ -1,7 +1,9 @@
-﻿using IRepository;
+﻿using AutoMapper;
+using IRepository;
 using IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Test;
 using System;
@@ -14,10 +16,15 @@ namespace AIIL.Services.Api.Controllers
     public class TestExamController : ControllerBase
     {
         private readonly ITestExamService _testExamService;
+        private readonly ITestExamRepository _testRepository;
+        private readonly IMapper _mapper;
 
-        public TestExamController(ITestExamService testExamService)
+
+        public TestExamController(ITestExamService testExamService, ITestExamRepository testRepository, IMapper mapper)
         {
             _testExamService = testExamService;
+            _testRepository = testRepository;
+            _mapper = mapper;
         }
 
         [HttpPost("")]
@@ -25,6 +32,13 @@ namespace AIIL.Services.Api.Controllers
         {
             var result = await _testExamService.CreateTestAsync(model);
             return Ok(result);
+        }
+
+        [HttpGet("")]
+        public async Task<IEnumerable<TestModel>> GetAllTestsAsync([FromRoute] Guid userId)
+        {
+            var tests = await _testRepository.GetAllTestsAsync(userId); 
+            return _mapper.Map<IEnumerable<TestModel>>(tests);
         }
     }
 }

@@ -15,5 +15,7 @@ namespace Model.Test
         public DateTime EndTime { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public Guid CreateBy { get; set; }
+
     }
 }
