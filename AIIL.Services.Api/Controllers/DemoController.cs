@@ -24,7 +24,7 @@ namespace AIIL.Services.Api.Controllers
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
-            var userId = "e6a19d66-ef07-4468-a951-4464e0b4f3c1";
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("User ID is required.");
