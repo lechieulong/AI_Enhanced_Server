@@ -15,6 +15,7 @@ namespace Entity.Data
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<UserEducation> UserEducations { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<TestExam> TestExam { get; set; }
         public DbSet<SkillTestExam> SkillTestExam { get; set; }
@@ -62,6 +63,10 @@ namespace Entity.Data
                 .HasForeignKey(uc => uc.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(e => e.Events)
+                .WithMany(u => u.Users)
+                .UsingEntity(j => j.ToTable("UserEvents"));
         }
 
     }

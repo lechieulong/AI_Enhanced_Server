@@ -11,10 +11,13 @@ namespace Model
     {
         public Guid Id { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public bool IsBooked { get; set; }
+        public int Minutes { get; set; }
+        // 0 is availabe, 1 is pending, 2 is booked
+        public int Status { get; set; }
         public decimal Price { get; set; }
         public string Link { get; set; }
         public string TeacherId { get; set; }
+        [NotMapped]
+        public DateTime EndTime => StartTime.AddMinutes(Minutes);
     }
 }

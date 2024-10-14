@@ -1,4 +1,5 @@
 ﻿using AIIL.Services.Api.Extensions;
+using AIIL.Services.Api.Middlewares;
 using AutoMapper;
 using Entity;
 using Entity.Data;
@@ -13,6 +14,9 @@ using Repository;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Add to support Middleware get
+//builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(option =>
@@ -146,6 +150,10 @@ app.UseHttpsRedirection();
 app.UseCors("AllowMyOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
+
+//Add middleware when neccesary
+//app.UseMiddleware<LockoutCheckMiddleware>();
+
 app.MapControllers();
 
 ApplyMigration();

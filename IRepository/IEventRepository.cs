@@ -16,5 +16,6 @@ namespace IRepository
         Task<Event> CreateEventAsync(Event Event);
         Task<Event> UpdateEventAsync(Event Event);
         Task<bool> DeleteEventAsync(Guid id);
+        Task<bool> AssignUser(string userId, Guid eventId);
     }
 }
