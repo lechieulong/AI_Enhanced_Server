@@ -28,6 +28,8 @@ namespace Mapper
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<TestExam, TestModel>();
 
+                config.CreateMap<UserEducation, UserEducationDto>();
+                config.CreateMap<UserEducationDto, UserEducation>();
             });
             return mappingConfig;
         }

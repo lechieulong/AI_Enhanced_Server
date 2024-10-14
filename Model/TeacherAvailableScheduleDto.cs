@@ -14,7 +14,7 @@ namespace Model
         public int Minutes { get; set; }
         // 0 is availabe, 1 is pending, 2 is booked
         public int Status { get; set; }
-        public decimal Price { get; set; }
+        public Int64 Price { get; set; }
         public string Link { get; set; }
         public string TeacherId { get; set; }
         [NotMapped]
