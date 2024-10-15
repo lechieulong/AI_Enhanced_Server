@@ -64,7 +64,26 @@ namespace Repository
 
             if (await _userManager.IsLockedOutAsync(user))
             {
-                return new LoginReponseDto() { User = null, Token = "", Message = "User account is locked out." };
+                var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+                // Nếu thời gian kết thúc khóa không phải null, thêm vào thời gian khóa vào thông báo
+                if (lockoutEndDate.HasValue)
+                {
+                    var remainingLockoutTime = lockoutEndDate.Value.UtcDateTime - DateTime.UtcNow;
+                    var remainingMinutes = (int)remainingLockoutTime.TotalMinutes;
+
+                    return new LoginReponseDto()
+                    {
+                        User = null, Token = "", Message = $"Your account is locked due to too many failed login attempts. Please try again in {remainingMinutes} minutes."
+                    };
+                }
+                else
+                {
+                    // Nếu không có thời gian khóa cụ thể
+                    return new LoginReponseDto()
+                    {
+                        User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                    };
+                }
             }
 
             bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
@@ -75,7 +94,10 @@ namespace Repository
 
                 if (await _userManager.IsLockedOutAsync(user))
                 {
-                    return new LoginReponseDto() { User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later." };
+                    return new LoginReponseDto()
+                    {
+                        User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                    };
                 }
 
                 var failedAttempts = await _userManager.GetAccessFailedCountAsync(user);
@@ -83,9 +105,7 @@ namespace Repository
                 {
                     return new LoginReponseDto()
                     {
-                        User = null,
-                        Token = "",
-                        Message = $"Invalid username or password. You have {failedAttempts} failed login attempts."
+                        User = null, Token = "", Message = $"Invalid username or password. You have {failedAttempts} failed login attempts."
                     };
                 }
 
@@ -274,15 +294,32 @@ namespace Repository
                     user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
                 }
 
-                // Check if the user is locked out due to multiple failed login attempts
                 if (await _userManager.IsLockedOutAsync(user))
                 {
-                    return new LoginReponseDto
+                    var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+                    // Nếu thời gian kết thúc khóa không phải null, thêm vào thời gian khóa vào thông báo
+                    if (lockoutEndDate.HasValue)
                     {
-                        User = null,
-                        Token = "",
-                        Message = "Your account is locked due to multiple failed login attempts. Please try again later."
-                    };
+                        var remainingLockoutTime = lockoutEndDate.Value.UtcDateTime - DateTime.UtcNow;
+                        var remainingMinutes = (int)remainingLockoutTime.TotalMinutes;
+
+                        return new LoginReponseDto()
+                        {
+                            User = null,
+                            Token = "",
+                            Message = $"Your account is locked due to too many failed login attempts. Please try again in {remainingMinutes} minutes."
+                        };
+                    }
+                    else
+                    {
+                        // Nếu không có thời gian khóa cụ thể
+                        return new LoginReponseDto()
+                        {
+                            User = null,
+                            Token = "",
+                            Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                        };
+                    }
                 }
 
                 // Generate JWT token for authenticated user

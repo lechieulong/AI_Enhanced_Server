@@ -39,6 +39,8 @@ namespace Mapper
        
             
 
+                config.CreateMap<UserEducation, UserEducationDto>();
+                config.CreateMap<UserEducationDto, UserEducation>();
             });
             return mappingConfig;
         }

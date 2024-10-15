@@ -12,7 +12,7 @@ namespace Entity
         public Guid Id { get; set; }
         public DateTime StartTime { get; set; }
         public int Minutes { get; set; }
-        public decimal Price { get; set; }
+        public Int64 Price { get; set; }
         public string Link {  get; set; }
         public string TeacherId { get; set; }
         [ForeignKey("TeacherId")]

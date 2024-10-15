@@ -113,11 +113,11 @@ namespace AIIL.Services.Api.Controllers
 
         [HttpPost]
         //[Authorize(Roles = "ADMIN")]
-        public async Task<ResponseDto> Post([FromBody] EventDto EventDto)
+        public async Task<ResponseDto> Post([FromBody] EventDto eventDto)
         {
             try
             {
-                Event Event = _mapper.Map<Event>(EventDto);
+                Event Event = _mapper.Map<Event>(eventDto);
                 Event = await _eventRepository.CreateEventAsync(Event);
                 _response.Result = _mapper.Map<EventDto>(Event);
             }
