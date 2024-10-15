@@ -70,6 +70,7 @@ builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
+builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();

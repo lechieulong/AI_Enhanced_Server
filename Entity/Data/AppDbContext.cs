@@ -16,6 +16,7 @@ namespace Entity.Data
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<UserEducation> UserEducations { get; set; }
+        public DbSet<Specialization> Specializations { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<TestExam> TestExam { get; set; }
         public DbSet<SkillTestExam> SkillTestExam { get; set; }
@@ -38,6 +39,13 @@ namespace Entity.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            // Thêm dữ liệu mặc định vào bảng Specializations
+            modelBuilder.Entity<Specialization>().HasData(
+                new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
+                new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
+                new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
+                new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
+            );
 
             modelBuilder.Entity<ApplicationUser>()
             .HasMany(u => u.TeacherAvailableSchedules)
@@ -67,6 +75,11 @@ namespace Entity.Data
                 .HasMany(e => e.Events)
                 .WithMany(u => u.Users)
                 .UsingEntity(j => j.ToTable("UserEvents"));
+
+            modelBuilder.Entity<UserEducation>()
+                .HasMany(ue => ue.Specializations)
+                .WithMany(s => s.UserEducations)
+                .UsingEntity(j => j.ToTable("UserEducationSpecializations"));
         }
 
     }

@@ -20,7 +20,24 @@ namespace Repository
 
         public async Task<UserEducation> CreateAsync(UserEducation userEducation)
         {
-            _context.Set<UserEducation>().Add(userEducation);
+            var existingEducation = await _context.UserEducations
+                .FirstOrDefaultAsync(e => e.TeacherId == userEducation.TeacherId);
+
+            if (existingEducation != null)
+            {
+                throw new InvalidOperationException("You have registered before, please approve.");
+            }
+
+            _context.UserEducations.Add(userEducation);
+
+            if (userEducation.Specializations != null && userEducation.Specializations.Any())
+            {
+                foreach (var specialization in userEducation.Specializations)
+                {
+                    _context.Entry(specialization).State = EntityState.Unchanged;
+                }
+            }
+
             await _context.SaveChangesAsync();
             return userEducation;
         }

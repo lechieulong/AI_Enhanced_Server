@@ -14,7 +14,8 @@ namespace Model
         public string DegreeURL { get; set; }
         public string Career { get; set; }
         public int YearExperience { get; set; }
-        public string? Specialization { get; set; }
         public bool IsApprove { get; set; } = false;
+        public bool IsReject { get; set; } = false;
+        public List<Guid> SpecializationIds { get; set; }
     }
 }
