@@ -18,7 +18,8 @@ namespace Entity
         public string DegreeURL { get; set; }
         public string Career {  get; set; }
         public int YearExperience { get; set; }
-        public string? Specialization { get; set; } // E.g., IELTS Speaking, Writing, etc.
         public bool IsApprove { get; set; } = false;
+        public bool IsReject { get; set; } = false;
+        public ICollection<Specialization>? Specializations { get; set; }
     }
 }

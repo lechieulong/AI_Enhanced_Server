@@ -41,6 +41,8 @@ namespace Mapper
 
                 config.CreateMap<UserEducation, UserEducationDto>();
                 config.CreateMap<UserEducationDto, UserEducation>();
+                config.CreateMap<SpecializationDto, Specialization>();
+                config.CreateMap<Specialization, SpecializationDto>();
             });
             return mappingConfig;
         }
