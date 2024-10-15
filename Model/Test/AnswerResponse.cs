@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Model.Test
 {
-    public class AnswerModel
+    public class AnswerResponse
     {
+        public Guid Id { get; set; }
         public string AnswerText { get; set; }
-            public int IsCorrect { get; set; }
-        }
+        public int IsCorrect { get; set; }
+    }
 }
