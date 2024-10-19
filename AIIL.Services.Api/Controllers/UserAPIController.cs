@@ -18,10 +18,12 @@ namespace AIIL.Services.Api.Controllers
         private readonly AppDbContext _db;
         IMapper _mapper;
 
-        public UserAPIController(IUserRepository userRepository)
+        public UserAPIController(IUserRepository userRepository, IMapper mapper, AppDbContext db)
         {
             _userRepository = userRepository;
             _response = new ResponseDto();
+            _mapper = mapper;
+            _db = db;
         }
 
         [HttpGet("profile/{username}")]
@@ -94,6 +96,26 @@ namespace AIIL.Services.Api.Controllers
 
             return Ok(_response);
         }
+
+        [HttpGet]
+        [Route("search/{searchText}")]
+        public async Task<IActionResult> SearchTeachers(string searchText)
+        {
+            if (string.IsNullOrEmpty(searchText))
+            {
+                return BadRequest("Search text is required.");
+            }
+
+            var teachers = await _userRepository.SearchTeachersAsync(searchText);
+
+            if (teachers == null || !teachers.Any())
+            {
+                return NotFound("No teachers found.");
+            }
+
+            return Ok(teachers);
+        }
+
 
     }
 }

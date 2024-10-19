@@ -1,4 +1,5 @@
 ﻿using AIIL.Services.Api.Extensions;
+using AIIL.Services.Api.Middlewares;
 using AutoMapper;
 using Entity;
 using Entity.Data;
@@ -14,6 +15,9 @@ using Repository;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Add to support Middleware get
+//builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(option =>
@@ -66,6 +70,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
+builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
@@ -78,6 +84,12 @@ builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
+builder.Services.AddScoped<IBlogStorageService>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config.GetConnectionString("AzureBlobStorage");
+    return new BlobStorageService(connectionString);
+});
 
 // Register CORS services
 builder.Services.AddCors(options =>
@@ -148,6 +160,10 @@ app.UseHttpsRedirection();
 app.UseCors("AllowMyOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
+
+//Add middleware when neccesary
+//app.UseMiddleware<LockoutCheckMiddleware>();
+
 app.MapControllers();
 
 ApplyMigration();

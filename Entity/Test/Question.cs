@@ -12,11 +12,9 @@ namespace Entity.Test
         public string QuestionName { get; set; }
         public int QuestionType { get; set; }
         //For import file
-        public int Skill {  get; set; }
-        public int Section { get; set; }
-        public int PartNumber { get; set; }
+        public int? Skill {  get; set; }
+        public int? PartNumber { get; set; }
         //end import file
-
         public Guid UserId { get; set; }
         public ICollection<SectionQuestion> SectionQuestions { get; set; } 
         public ICollection<Answer> Answers { get; set; }

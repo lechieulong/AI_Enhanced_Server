@@ -1,6 +1,7 @@
 ﻿using Entity;
 using Entity.Data;
 using IRepository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using System;
@@ -31,8 +32,9 @@ namespace Repository
         }
         public async Task<IEnumerable<Event>> GetEventsByUserIdAsync(string userId)
         {
-            return await _db.Events
-                            .Where(p => p.UserId == userId)
+            return await _db.Users
+                            .Where(p => p.Id == userId)
+                            .SelectMany(u => u.Events)
                             .ToListAsync();
         }
 
@@ -61,5 +63,28 @@ namespace Repository
             }
             return false;
         }
+
+        public async Task<bool> AssignUser(string userId, Guid eventId)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            var eventEntity = await _db.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+            if (user.Events.Any(e => e.Id == eventId))
+            {
+                return false;
+            }
+            user.Events.Add(eventEntity);
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+
     }
 }
