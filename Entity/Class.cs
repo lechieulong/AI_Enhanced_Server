@@ -25,8 +25,5 @@ public class Class
     public string? ImageUrl { get; set; }
 
     // Quan hệ nhiều-nhiều với User thông qua UserClass
-    public ICollection<UserClass>? UserClasses { get; set; }
-
-    // Thêm thuộc tính navigation cho TeacherAvailableSchedule
-    //public ICollection<TeacherAvailableSchedule>? TeacherAvailableSchedules { get; set; } // <-- Thêm dòng này
+    public ICollection<Enrollment>? Enrollments { get; set; }
 }

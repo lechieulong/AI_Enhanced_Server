@@ -31,8 +31,7 @@ namespace Entity.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<TeacherAvailableSchedule> TeacherAvailableSchedules { get; set; }
         public DbSet<BookedTeacherSession> BookedTeacherSessions { get; set; }
-        public DbSet<UserClass> UserClasses { get; set; }
-        public DbSet<UserCourse> UserCourses { get; set; } // Thêm DbSet cho UserCourse
+        public DbSet<Enrollment> Enrollments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,20 +49,37 @@ namespace Entity.Data
                 .HasForeignKey(b => b.LearnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<UserCourse>()
-                .HasOne(uc => uc.User)
-                .WithMany(u => u.UserCourses)
-                .HasForeignKey(uc => uc.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<UserClass>()
-                .HasOne(uc => uc.User)
-                .WithMany(u => u.UserClasses)
-                .HasForeignKey(uc => uc.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TeacherAvailableSchedule>()
-    .Property(t => t.Price)
-    .HasColumnType("decimal(18,4)");
+                .Property(t => t.Price)
+                .HasColumnType("decimal(18,4)");
+
+            // Cấu hình quan hệ Course - Class
+            modelBuilder.Entity<Class>()
+                .HasOne(c => c.Course)
+                .WithMany(c => c.Classes)
+                .HasForeignKey(c => c.CourseId)
+                .OnDelete(DeleteBehavior.NoAction); // Tắt cascade khi xóa
+
+            // Cấu hình quan hệ Class - Enrollment
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Class)
+                .WithMany(c => c.Enrollments)
+                .HasForeignKey(e => e.ClassId)
+                .OnDelete(DeleteBehavior.NoAction); // Tắt cascade khi xóa
+
+            // Cấu hình quan hệ Course - Enrollment
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Course)
+                .WithMany(c => c.Enrollments)
+                .HasForeignKey(e => e.CourseId)
+                .OnDelete(DeleteBehavior.NoAction); // Tắt cascade khi xóa
+
+            // Cấu hình quan hệ User - Enrollment
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.User)
+                .WithMany(u => u.Enrollments)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction); // Tắt cascade khi xóa
         }
 
     }

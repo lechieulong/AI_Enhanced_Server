@@ -34,7 +34,7 @@ namespace Repository
             return await _coursesTimelineDetail.ToListAsync();
         }
 
-        public async Task AddAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task CreateAsync(CourseTimelineDetail courseTimelineDetail)
         {
             await _coursesTimelineDetail.AddAsync(courseTimelineDetail);
             await _context.SaveChangesAsync();

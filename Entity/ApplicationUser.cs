@@ -14,9 +14,7 @@ namespace Entity
         public DateTime? DOB { get; set; }
         public ICollection<Event>? Events { get; set; }
         public ICollection<Course>? Courses { get; set; }
-
-        public ICollection<UserClass>? UserClasses { get; set; }
-        public ICollection<UserCourse>? UserCourses { get; set; }
+        public ICollection<Enrollment>? Enrollments { get; set; }
         public ICollection<TeacherAvailableSchedule>? TeacherAvailableSchedules { get; set; }
         public ICollection<BookedTeacherSession>? BookedTeacherSessions { get; set; }
     }

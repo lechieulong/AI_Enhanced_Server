@@ -59,5 +59,10 @@ namespace Repository
 
             return user;
         }
+        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        {
+            // Tìm kiếm người dùng theo UserId
+            return await _db.ApplicationUsers.FindAsync(userId);
+        }
     }
 }
