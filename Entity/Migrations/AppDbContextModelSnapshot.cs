@@ -346,7 +346,7 @@ namespace Entity.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserId");
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -428,7 +428,7 @@ namespace Entity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserId");
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -1001,7 +1001,7 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
+                }));
 
             modelBuilder.Entity("Entity.Test.Answer", b =>
                 {
