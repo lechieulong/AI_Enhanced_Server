@@ -1,0 +1,18 @@
+﻿using Entity.Live;
+using Microsoft.EntityFrameworkCore;
+using Model.Live;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IRepository.Live
+{
+    public interface IStreamSessionRepository
+    {
+        Task<IEnumerable<StreamSession>> getStreamSessionsIsLive();
+        Task<StreamSession> AddStreamSessionAsync(StreamSession mode);
+        Task<StreamSession> UpdateStreamSessionAsync(StreamSession mode);
+    }
+}

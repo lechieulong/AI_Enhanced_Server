@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Entity.Live;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,9 @@ namespace Entity
         public ICollection<UserCourse>? UserCourses { get; set; }
         public ICollection<TeacherAvailableSchedule>? TeacherAvailableSchedules { get; set; }
         public ICollection<BookedTeacherSession>? BookedTeacherSessions { get; set; }
+        public ICollection<Transaction>? Transactions { get; set; }
+        public ICollection<LiveStream>? LiveStreams { get; set; }
+        public ICollection<User_Ticket>? User_Tickets { get; set; }
+        public AccountBalance? AccountBalances { get; set; }
     }
 }

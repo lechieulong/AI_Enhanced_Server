@@ -4,6 +4,7 @@ using AutoMapper;
 using Entity;
 using Entity.Data;
 using IRepository;
+using IRepository.Live;
 using IService;
 using Mapper;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Email;
 using Repository;
+using Repository.Live;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,6 +90,9 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
     var connectionString = config.GetConnectionString("AzureBlobStorage");
     return new BlobStorageService(connectionString);
 });
+
+builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 // Register CORS services
 builder.Services.AddCors(options =>
