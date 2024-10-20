@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entity
 {
@@ -11,8 +7,8 @@ namespace Entity
         public Guid Id { get; set; }
 
         // Khóa ngoại liên kết với CourseTimeline
-        public Guid TimelineId { get; set; }
-        public CourseTimeline CourseTimeline { get; set; }
+        public Guid CourseTimelineId { get; set; } // Sửa tên biến để phản ánh rõ ràng mối quan hệ
+        public CourseTimeline CourseTimeline { get; set; } // Khóa ngoại liên kết với CourseTimeline
 
         public string Title { get; set; }
 

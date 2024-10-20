@@ -8,12 +8,12 @@ namespace Entity
     {
         public Guid Id { get; set; }
 
-        // Khóa ngoại liên kết với bảng Course
+        // Foreign key linking to the Course table
         public Guid CourseId { get; set; }
 
-        // Bỏ qua thuộc tính Course khi tạo CourseTimeline
+        // Ignore Course property when creating CourseTimeline
         [JsonIgnore]
-        public Course? Course { get; set; } // Có thể giữ lại nhưng không yêu cầu trong việc tạo
+        public Course? Course { get; set; } // Optional, not required during creation
 
         public DateTime EventDate { get; set; }
         public string Title { get; set; }

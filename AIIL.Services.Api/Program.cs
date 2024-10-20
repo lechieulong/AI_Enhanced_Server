@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Email;
+using Repositories;
 using Repository;
 using Service;
 
@@ -78,6 +79,7 @@ builder.Services.AddScoped<ITestExamService, TestExamService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
