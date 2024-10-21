@@ -1,34 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace Entity
 {
-    public class Enrollment
+    public class UserClass
     {
         [Key]
         public Guid Id { get; set; }
 
-        [Required]
-        public Guid CourseId { get; set; }
-
-        [ForeignKey("CourseId")]
-        [JsonIgnore]
-        public Course? Course { get; set; }
-
-        // Thay đổi ClassId thành Nullable Guid
-        public Guid? ClassId { get; set; } // Cho phép null
+        public Guid ClassId { get; set; }
 
         [ForeignKey("ClassId")]
-        [JsonIgnore]
         public Class? Class { get; set; }
 
-        [Required]
         public string UserId { get; set; }
 
         [ForeignKey("UserId")]
-        [JsonIgnore]
         public ApplicationUser? User { get; set; }
     }
 }

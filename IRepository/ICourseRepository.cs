@@ -7,11 +7,11 @@ namespace IRepository
 {
     public interface ICourseRepository
     {
-        Task<Course> GetByIdAsync(Guid id);
+        Task<Course> GetByIdAsync(Guid id); // Thay đổi từ int sang Guid
         Task<IEnumerable<Course>> GetAllAsync();
-        Task CreateAsync(Course course);
+        Task AddAsync(Course course);
         Task UpdateAsync(Course course);
-        Task DeleteAsync(Guid id);
-        Task<IEnumerable<Course>> GetAllCourseByUserIdAsync(string userId);
+        Task DeleteAsync(Guid id); // Thay đổi từ int sang Guid
+        Task<IEnumerable<Course>> GetAllByUserIdAsync(string userId);
     }
 }

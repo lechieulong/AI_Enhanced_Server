@@ -38,6 +38,6 @@ namespace Entity
 
         // Thêm thuộc tính để lưu danh sách UserCourse
         [JsonIgnore]
-        public ICollection<Enrollment>? Enrollments { get; set; }
+        public ICollection<UserCourse>? UserCourses { get; set; } // Thêm thuộc tính này
     }
 }

@@ -13,7 +13,7 @@ namespace Entity
         public DateTime StartTime { get; set; }
         public int Minutes { get; set; }
         public Int64 Price { get; set; }
-        public string Link { get; set; }
+        public string Link {  get; set; }
         public string TeacherId { get; set; }
         [ForeignKey("TeacherId")]
         public ApplicationUser Teacher { get; set; }

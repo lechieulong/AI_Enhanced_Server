@@ -35,14 +35,14 @@ namespace Auth.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task<IActionResult> Create(CourseTimelineDetail courseTimelineDetail)
         {
-            await _repository.CreateAsync(courseTimelineDetail);
+            await _repository.AddAsync(courseTimelineDetail);
             return CreatedAtAction(nameof(GetById), new { id = courseTimelineDetail.Id }, courseTimelineDetail);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, CourseTimelineDetail courseTimelineDetail)
+        public async Task<IActionResult> Update(Guid id, CourseTimelineDetail courseTimelineDetail)
         {
             if (id != courseTimelineDetail.Id)
             {
@@ -54,7 +54,7 @@ namespace Auth.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _repository.DeleteAsync(id);
             return NoContent();

@@ -4,14 +4,15 @@ using AutoMapper;
 using Entity;
 using Entity.Data;
 using IRepository;
+using IRepository.Live;
 using IService;
 using Mapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Email;
-using Repositories;
 using Repository;
+using Repository.Live;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,7 +80,6 @@ builder.Services.AddScoped<ITestExamService, TestExamService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
-builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
@@ -90,6 +90,9 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
     var connectionString = config.GetConnectionString("AzureBlobStorage");
     return new BlobStorageService(connectionString);
 });
+
+builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 // Register CORS services
 builder.Services.AddCors(options =>

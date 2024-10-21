@@ -34,7 +34,7 @@ namespace Repository
             return await _coursesTimelineDetail.ToListAsync();
         }
 
-        public async Task CreateAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task AddAsync(CourseTimelineDetail courseTimelineDetail)
         {
             await _coursesTimelineDetail.AddAsync(courseTimelineDetail);
             await _context.SaveChangesAsync();
@@ -59,7 +59,7 @@ namespace Repository
         public async Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId)
         {
             return await _context.CourseTimelineDetails
-                                 .Where(ct => ct.CourseTimelineId == courseTimelineId)
+                                 .Where(ct => ct.TimelineId == courseTimelineId)
                                  .ToListAsync();
         }
 

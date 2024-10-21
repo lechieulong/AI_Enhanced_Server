@@ -1,7 +1,6 @@
 ﻿using IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
-using Model; // Đừng quên thêm namespace cho DTO
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,14 +11,10 @@ namespace Auth.Controllers
     public class CourseTimelineController : ControllerBase
     {
         private readonly ICourseTimelineRepository _repository;
-        private readonly ICourseRepository _courseRepository; // Thêm repository để lấy thông tin khóa học
-        private readonly IUserRepository _userRepository; // Thêm repository để lấy thông tin người dùng
 
-        public CourseTimelineController(ICourseTimelineRepository repository, ICourseRepository courseRepository, IUserRepository userRepository)
+        public CourseTimelineController(ICourseTimelineRepository repository)
         {
             _repository = repository;
-            _courseRepository = courseRepository;
-            _userRepository = userRepository; // Khởi tạo user repository
         }
 
         [HttpGet]
@@ -41,64 +36,39 @@ namespace Auth.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] List<CourseTimelineDto> courseTimelineDtos)
+        public async Task<IActionResult> Create([FromBody] CourseTimeline courseTimeline)
         {
-            if (courseTimelineDtos == null || !courseTimelineDtos.Any())
+            if (courseTimeline == null)
             {
-                return BadRequest("At least one timeline is required.");
+                return BadRequest("Timeline data is required.");
             }
 
-            var addedTimelines = new List<CourseTimeline>();
-
-            foreach (var timelineDto in courseTimelineDtos)
+            // Validate required fields
+            if (courseTimeline.CourseId == Guid.Empty || // Assuming CourseId is a Guid
+                string.IsNullOrWhiteSpace(courseTimeline.Title) ||
+                string.IsNullOrWhiteSpace(courseTimeline.Description) ||
+                string.IsNullOrWhiteSpace(courseTimeline.Author) ||
+                courseTimeline.EventDate == default)
             {
-                // Validate required fields
-                if (timelineDto.CourseId == Guid.Empty || // Assuming CourseId is a Guid
-                    string.IsNullOrWhiteSpace(timelineDto.Title) ||
-                    string.IsNullOrWhiteSpace(timelineDto.Description) ||
-                    timelineDto.EventDate == default)
-                {
-                    return BadRequest("Invalid timeline data.");
-                }
-
-                // Check if CourseId exists
-                var course = await _courseRepository.GetByIdAsync(timelineDto.CourseId);
-                if (course == null)
-                {
-                    return BadRequest($"Invalid CourseId: {timelineDto.CourseId}.");
-                }
-
-                // Lấy thông tin người dùng từ UserId của khóa học
-                var user = await _userRepository.GetUserByIdAsync(course.UserId);
-                timelineDto.Author = user?.Name ?? "Unknown"; // Gán tên người dùng vào Author
-
-                // Map DTO to Entity
-                var courseTimeline = new CourseTimeline
-                {
-                    CourseId = timelineDto.CourseId,
-                    EventDate = timelineDto.EventDate,
-                    Title = timelineDto.Title,
-                    Description = timelineDto.Description,
-                    Author = timelineDto.Author
-                };
-
-                // Add CourseTimeline to the list of added timelines
-                addedTimelines.Add(courseTimeline);
+                return BadRequest("Invalid timeline data.");
             }
 
-            // Add all valid CourseTimelines to the database
-            foreach (var timeline in addedTimelines)
+            // Check if CourseId exists
+            bool courseExists = await _repository.CheckExistCourseIdAsync(courseTimeline.CourseId);
+            if (!courseExists)
             {
-                await _repository.CreateAsync(timeline);
+                return BadRequest("Invalid CourseId.");
             }
 
-            return CreatedAtAction(nameof(GetAll), addedTimelines);
+            // Add CourseTimeline to the database
+            await _repository.AddAsync(courseTimeline);
+            return CreatedAtAction(nameof(GetById), new { id = courseTimeline.Id }, courseTimeline);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CourseTimelineDto timelineDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CourseTimeline courseTimeline)
         {
-            if (id != timelineDto.CourseId)
+            if (id != courseTimeline.Id)
             {
                 return BadRequest("ID mismatch.");
             }
@@ -110,13 +80,7 @@ namespace Auth.Controllers
                 return NotFound();
             }
 
-            // Map DTO to Entity for update
-            existingTimeline.EventDate = timelineDto.EventDate;
-            existingTimeline.Title = timelineDto.Title;
-            existingTimeline.Description = timelineDto.Description;
-            existingTimeline.Author = timelineDto.Author;
-
-            await _repository.UpdateAsync(existingTimeline);
+            await _repository.UpdateAsync(courseTimeline);
             return NoContent();
         }
 

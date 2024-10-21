@@ -8,6 +8,7 @@ namespace Model
 {
     public class CourseTimelineDetailDto
     {
+        public Guid Id { get; set; }
 
         // Khóa ngoại liên kết với CourseTimeline
         public Guid TimelineId { get; set; }

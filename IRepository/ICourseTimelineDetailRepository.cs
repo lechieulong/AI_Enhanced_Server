@@ -12,7 +12,7 @@ namespace IRepository
     {
         Task<CourseTimelineDetail> GetByIdAsync(Guid id);
         Task<IEnumerable<CourseTimelineDetail>> GetAllAsync();
-        Task CreateAsync(CourseTimelineDetail courseTimelineDetail);
+        Task AddAsync(CourseTimelineDetail courseTimelineDetail);
         Task UpdateAsync(CourseTimelineDetail courseTimelineDetail);
         Task DeleteAsync(Guid id);
 
