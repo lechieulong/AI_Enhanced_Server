@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Entity;
+using Entity.Live;
 using Entity.Test;
 using Model;
+using Model.Live;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -43,6 +45,10 @@ namespace Mapper
                 config.CreateMap<UserEducationDto, UserEducation>();
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();
+                config.CreateMap<StreamSession, StreamSessionModel>();
+                config.CreateMap<StreamSessionModel, StreamSessionModel>();
+                config.CreateMap<Ticket, TicketModel>();
+                config.CreateMap<TicketModel, Ticket>();
             });
             return mappingConfig;
         }

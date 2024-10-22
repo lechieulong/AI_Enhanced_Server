@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241019085803_live")]
+    partial class live
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,48 +24,6 @@ namespace Entity.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ClassDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Classes");
-                });
 
             modelBuilder.Entity("ApplicationUserEvent", b =>
                 {
@@ -204,6 +165,39 @@ namespace Entity.Migrations
                     b.ToTable("BookedTeacherSessions");
                 });
 
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClassDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Classes");
+                });
+
             modelBuilder.Entity("Entity.ClassRelationShip", b =>
                 {
                     b.Property<Guid>("Id")
@@ -307,6 +301,9 @@ namespace Entity.Migrations
                     b.Property<Guid>("CourseTimelineId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("TimelineId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -358,19 +355,19 @@ namespace Entity.Migrations
                     b.ToTable("EmailLogs");
                 });
 
-            modelBuilder.Entity("Entity.Enrollment", b =>
+            modelBuilder.Entity("Entity.Event", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ClassId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId");
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -505,14 +502,8 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("UserId");
                     b.ToTable("Specializations");
 
-                    b.ToTable("Enrollments");
                     b.HasData(
                         new
                         {
@@ -536,7 +527,7 @@ namespace Entity.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Entity.Event", b =>
+            modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -546,19 +537,15 @@ namespace Entity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("datetime2");
                     b.Property<int>("Minutes")
                         .HasColumnType("int");
 
                     b.Property<long>("Price")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId");
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -568,9 +555,9 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TeacherId");
 
-                    b.ToTable("Events");
+                    b.ToTable("TeacherAvailableSchedules");
                 });
 
             modelBuilder.Entity("Entity.Test.Answer", b =>
@@ -995,55 +982,6 @@ namespace Entity.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TeacherAvailableSchedule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsBooked")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TeacherId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("TeacherAvailableSchedules");
-                });
-
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.HasOne("Entity.Course", "Course")
-                        .WithMany("Classes")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("SpecializationUserEducation", b =>
                 {
                     b.Property<Guid>("SpecializationsId")
@@ -1093,7 +1031,7 @@ namespace Entity.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TeacherAvailableSchedule", "TeacherAvailableSchedule")
+                    b.HasOne("Entity.TeacherAvailableSchedule", "TeacherAvailableSchedule")
                         .WithOne("BookedTeacherSession")
                         .HasForeignKey("Entity.BookedTeacherSession", "ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1102,6 +1040,17 @@ namespace Entity.Migrations
                     b.Navigation("Learner");
 
                     b.Navigation("TeacherAvailableSchedule");
+                });
+
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.HasOne("Entity.Course", "Course")
+                        .WithMany("Classes")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Entity.Course", b =>
@@ -1133,32 +1082,6 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.Navigation("CourseTimeline");
-                });
-
-            modelBuilder.Entity("Entity.Enrollment", b =>
-                {
-                    b.HasOne("Class", "Class")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Entity.Course", "Course")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Course");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Entity.Live.LiveStream", b =>
@@ -1213,13 +1136,13 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>
                 {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany("Events")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Entity.ApplicationUser", "Teacher")
+                        .WithMany("TeacherAvailableSchedules")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Entity.Test.Answer", b =>
@@ -1396,30 +1319,6 @@ namespace Entity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TeacherAvailableSchedule", b =>
-                {
-                    b.HasOne("Class", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Entity.ApplicationUser", "Teacher")
-                        .WithMany("TeacherAvailableSchedules")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.Navigation("Enrollments");
-                });
-
             modelBuilder.Entity("SpecializationUserEducation", b =>
                 {
                     b.HasOne("Entity.Specialization", null)
@@ -1469,7 +1368,7 @@ namespace Entity.Migrations
 
                     b.Navigation("CourseTimelines");
 
-                    b.Navigation("Enrollments");
+                    b.Navigation("UserCourses");
                 });
 
             modelBuilder.Entity("Entity.CourseTimeline", b =>
@@ -1519,11 +1418,6 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.Test.TestExam", b =>
                 {
                     b.Navigation("SkillTests");
-                });
-
-            modelBuilder.Entity("TeacherAvailableSchedule", b =>
-                {
-                    b.Navigation("BookedTeacherSession");
                 });
 #pragma warning restore 612, 618
         }

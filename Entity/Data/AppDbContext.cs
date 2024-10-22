@@ -1,6 +1,8 @@
-﻿using Entity.Test;
+﻿using Entity.Live;
+using Entity.Test;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Entity.Data
 {
@@ -35,6 +37,12 @@ namespace Entity.Data
         public DbSet<BookedTeacherSession> BookedTeacherSessions { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
 
+        public DbSet<Transaction>  Transactions{ get; set; }
+        public DbSet<AccountBalance> AccountBalances { get; set; }
+        public DbSet<LiveStream> LiveStreams { get; set; }
+        public DbSet<StreamSession> StreamSessions { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<User_Ticket> User_Tickets { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
