@@ -1,14 +1,9 @@
 ﻿using Entity;
 using IRepository;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Entity;
 using Entity.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository
@@ -32,14 +27,24 @@ namespace Repository
             return await _context.CourseTimelines.ToListAsync();
         }
 
-        public async Task AddAsync(CourseTimeline courseTimeline)
+        public async Task CreateAsync(CourseTimeline courseTimeline)
         {
+            if (courseTimeline == null)
+            {
+                throw new ArgumentNullException(nameof(courseTimeline), "CourseTimeline cannot be null.");
+            }
+
             await _context.CourseTimelines.AddAsync(courseTimeline);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(CourseTimeline courseTimeline)
         {
+            if (courseTimeline == null)
+            {
+                throw new ArgumentNullException(nameof(courseTimeline), "CourseTimeline cannot be null.");
+            }
+
             _context.CourseTimelines.Update(courseTimeline);
             await _context.SaveChangesAsync();
         }
@@ -52,6 +57,10 @@ namespace Repository
                 _context.CourseTimelines.Remove(timeline);
                 await _context.SaveChangesAsync();
             }
+            else
+            {
+                throw new KeyNotFoundException("CourseTimeline not found.");
+            }
         }
 
         public async Task<bool> CheckExistCourseIdAsync(Guid courseId)
@@ -61,7 +70,9 @@ namespace Repository
 
         public async Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(Guid courseId)
         {
-            return await _context.CourseTimelines.Where(ct => ct.CourseId == courseId).ToListAsync();
+            return await _context.CourseTimelines
+                .Where(ct => ct.CourseId == courseId)
+                .ToListAsync();
         }
     }
 }

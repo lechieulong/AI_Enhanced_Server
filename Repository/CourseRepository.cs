@@ -1,7 +1,7 @@
 ﻿using Entity;
+using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
-using Entity.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,51 +12,47 @@ namespace Repository
     public class CourseRepository : ICourseRepository
     {
         private readonly AppDbContext _context;
-        private readonly DbSet<Course> _courses;
 
         public CourseRepository(AppDbContext context)
         {
             _context = context;
-            _courses = _context.Courses;
         }
 
-        public async Task<Course> GetByIdAsync(Guid id) // Thay đổi từ int sang Guid
+        public async Task<Course> GetByIdAsync(Guid id)
         {
-            return await _courses.FindAsync(id);
+            return await _context.Courses.FindAsync(id);
         }
 
         public async Task<IEnumerable<Course>> GetAllAsync()
         {
-            return await _courses.ToListAsync();
+            return await _context.Courses.ToListAsync();
         }
 
-        public async Task AddAsync(Course course)
+        public async Task CreateAsync(Course course)
         {
-            await _courses.AddAsync(course);
+            await _context.Courses.AddAsync(course);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Course course)
         {
-            _courses.Update(course);
+            _context.Courses.Update(course);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id) // Thay đổi từ int sang Guid
+        public async Task DeleteAsync(Guid id)
         {
-            var course = await _courses.FindAsync(id);
+            var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                _courses.Remove(course);
+                _context.Courses.Remove(course);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task<IEnumerable<Course>> GetAllByUserIdAsync(string userId)
+        public async Task<IEnumerable<Course>> GetAllCourseByUserIdAsync(string userId)
         {
-            return await _context.Courses
-                .Where(c => c.UserId == userId)
-                .ToListAsync();
+            return await _context.Courses.Where(c => c.UserId == userId).ToListAsync();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using IRepository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
 using Model;
@@ -10,8 +9,8 @@ namespace Auth.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly IClassRepository _classRepository;
         private readonly ICourseRepository _repository;
+        private readonly IClassRepository _classRepository;
 
         public CoursesController(ICourseRepository repository, IClassRepository classRepository)
         {
@@ -26,60 +25,34 @@ namespace Auth.Controllers
             return Ok(courses);
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var course = await _repository.GetByIdAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-            return Ok(course);
-        }
+        //[HttpGet("{id:guid}")]
+        //public async Task<IActionResult> GetById(Guid id)
+        //{
+        //    var course = await _repository.GetByIdAsync(id);
+        //    return course == null ? NotFound() : Ok(course);
+        //}
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Course course)
         {
-            if (course == null)
+            if (course == null || string.IsNullOrWhiteSpace(course.CourseName) ||
+                string.IsNullOrWhiteSpace(course.Content) || course.Hours <= 0 ||
+                course.Days <= 0 || string.IsNullOrWhiteSpace(course.Category) ||
+                course.Price <= 0 || string.IsNullOrWhiteSpace(course.UserId))
             {
-                return BadRequest("Course data is required.");
+                return BadRequest("Invalid course data.");
             }
 
-            // Kiểm tra các trường bắt buộc
-            if (string.IsNullOrWhiteSpace(course.CourseName) ||
-                string.IsNullOrWhiteSpace(course.Content) ||
-                course.Hours <= 0 ||
-                course.Days <= 0 ||
-                string.IsNullOrWhiteSpace(course.Category) ||
-                course.Price <= 0 ||
-                string.IsNullOrWhiteSpace(course.UserId)) // Kiểm tra UserId không bị thiếu
-            {
-                return BadRequest("Invalid course data. Please ensure all required fields are filled correctly.");
-            }
-
-            // Không cần thiết phải xử lý CourseTimelines ở đây
-            await _repository.AddAsync(course);
-            return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
+            await _repository.CreateAsync(course);
+            return Ok(course);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, Course course)
+        public async Task<IActionResult> Update(Guid id, [FromBody] Course course)
         {
             if (id != course.Id)
             {
                 return BadRequest("Course ID mismatch.");
-            }
-
-            // Kiểm tra các trường bắt buộc
-            if (string.IsNullOrWhiteSpace(course.CourseName) ||
-                string.IsNullOrWhiteSpace(course.Content) ||
-                course.Hours <= 0 ||
-                course.Days <= 0 ||
-                string.IsNullOrWhiteSpace(course.Category) ||
-                course.Price <= 0 ||
-                string.IsNullOrWhiteSpace(course.UserId)) // Kiểm tra UserId không bị thiếu
-            {
-                return BadRequest("Invalid course data. Please ensure all required fields are filled correctly.");
             }
 
             await _repository.UpdateAsync(course);
@@ -94,44 +67,17 @@ namespace Auth.Controllers
         }
 
         [HttpGet("{courseId:guid}/classes")]
-        public async Task<ActionResult<ResponseDto>> GetByCourseId(Guid courseId)
+        public async Task<IActionResult> GetClassesByCourseId(Guid courseId)
         {
-            var response = new ResponseDto();
-            try
-            {
-                var classList = await _classRepository.GetByCourseIdAsync(courseId);
-                if (classList == null || !classList.Any())
-                {
-                    response.IsSuccess = false;
-                    response.Message = "No classes found for the specified course ID.";
-                    return NotFound(response);
-                }
-                response.Result = classList;
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = ex.Message;
-                return BadRequest(response);
-            }
-            return Ok(response);
+            var classes = await _classRepository.GetByCourseIdAsync(courseId);
+            return classes == null || !classes.Any() ? NotFound("No classes found.") : Ok(classes);
         }
 
-        [HttpGet("user/{userId}")] // Không cần thay đổi
-        public async Task<IActionResult> GetAllByUserId(string userId)
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetAllCourseByUserId(string userId)
         {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return BadRequest("User ID is required.");
-            }
-
-            var courses = await _repository.GetAllByUserIdAsync(userId);
-            if (courses == null || !courses.Any())
-            {
-                return NotFound("No courses found for the specified user ID.");
-            }
-
-            return Ok(courses);
+            var courses = await _repository.GetAllCourseByUserIdAsync(userId);
+            return courses == null || !courses.Any() ? NotFound("No courses found.") : Ok(courses);
         }
     }
 }
