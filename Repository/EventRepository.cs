@@ -38,11 +38,20 @@ namespace Repository
                             .ToListAsync();
         }
 
-        public async Task<Event> CreateEventAsync(Event Event)
+        public async Task<Event> CreateEventAsync(Event eventEntity, List<string> userIds)
         {
-            await _db.Events.AddAsync(Event);
+            await _db.Events.AddAsync(eventEntity);
             await _db.SaveChangesAsync();
-            return Event;
+
+            if (userIds != null && userIds.Count > 0)
+            {
+                var users = await _db.Users.Where(u => userIds.Contains(u.Id)).ToListAsync();
+
+                eventEntity.Users = users;
+                await _db.SaveChangesAsync();
+            }
+
+            return eventEntity;
         }
 
         public async Task<Event> UpdateEventAsync(Event Event)

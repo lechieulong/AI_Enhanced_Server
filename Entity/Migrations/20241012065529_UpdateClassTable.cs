@@ -18,26 +18,6 @@ namespace Entity.Migrations
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "decimal(18,2)");
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "ClassId",
-                table: "TeacherAvailableSchedules",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TeacherAvailableSchedules_ClassId",
-                table: "TeacherAvailableSchedules",
-                column: "ClassId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_TeacherAvailableSchedules_Classes_ClassId",
-                table: "TeacherAvailableSchedules",
-                column: "ClassId",
-                principalTable: "Classes",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
