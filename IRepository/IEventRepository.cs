@@ -13,7 +13,7 @@ namespace IRepository
         Task<IEnumerable<Event>> GetEventsAsync();
         Task<Event> GetEventsByIdAsync(Guid id);
         Task<IEnumerable<Event>> GetEventsByUserIdAsync(string userId);
-        Task<Event> CreateEventAsync(Event Event);
+        Task<Event> CreateEventAsync(Event Event, List<string> userIds);
         Task<Event> UpdateEventAsync(Event Event);
         Task<bool> DeleteEventAsync(Guid id);
         Task<bool> AssignUser(string userId, Guid eventId);

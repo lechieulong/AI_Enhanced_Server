@@ -13,5 +13,7 @@ namespace Model
         public string Description { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
+        public string Link { get; set; }
+        public List<string> UserIds { get; set; }
     }
 }

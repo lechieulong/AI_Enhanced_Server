@@ -85,7 +85,7 @@ namespace AIIL.Services.Api.Controllers
         [HttpGet]
         [Route("events")]
         [Authorize]
-        public async Task<ResponseDto> GetEventsForCurrentUser()
+        public async Task<IActionResult> GetEventsForCurrentUser()
         {
             try
             {
@@ -95,11 +95,15 @@ namespace AIIL.Services.Api.Controllers
                 {
                     IEnumerable<Event> events = await _eventRepository.GetEventsByUserIdAsync(userId);
                     _response.Result = _mapper.Map<IEnumerable<EventDto>>(events);
+                    _response.IsSuccess = true;
+                    _response.Message = "Get event successful";
+                    return Ok(_response);
                 }
                 else
                 {
                     _response.IsSuccess = false;
                     _response.Message = "User not found.";
+                    return NotFound(_response);
                 }
             }
             catch (Exception ex)
@@ -107,27 +111,30 @@ namespace AIIL.Services.Api.Controllers
                 _response.IsSuccess = false;
                 _response.Message = ex.Message;
             }
-            return _response;
+            return BadRequest(_response);
         }
 
 
-        [HttpPost]
+        [HttpPost("create-event")]
         //[Authorize(Roles = "ADMIN")]
-        public async Task<ResponseDto> Post([FromBody] EventDto eventDto)
+        public async Task<IActionResult> Post([FromBody] EventDto eventDto)
         {
             try
             {
                 Event Event = _mapper.Map<Event>(eventDto);
-                Event = await _eventRepository.CreateEventAsync(Event);
+                Event = await _eventRepository.CreateEventAsync(Event, eventDto.UserIds);
                 _response.Result = _mapper.Map<EventDto>(Event);
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.Message = ex.Message;
+                return BadRequest(_response);
             }
-            return _response;
+
+            return Ok(_response);
         }
+
 
         [HttpPut]
         //[Authorize(Roles = "ADMIN")]

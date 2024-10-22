@@ -40,12 +40,12 @@ namespace Entity.Data
         {
             base.OnModelCreating(modelBuilder);
             // Thêm dữ liệu mặc định vào bảng Specializations
-            modelBuilder.Entity<Specialization>().HasData(
-                new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
-            );
+            //modelBuilder.Entity<Specialization>().HasData(
+            //    new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
+            //    new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
+            //    new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
+            //    new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
+            //);
 
             modelBuilder.Entity<ApplicationUser>()
             .HasMany(u => u.TeacherAvailableSchedules)

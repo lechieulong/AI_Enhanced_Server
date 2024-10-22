@@ -27,8 +27,8 @@ namespace AIIL.Services.Api.Controllers
             _response = new ResponseDto();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] UserEducationDto userEducationDto)
+        [HttpPost("beteacher")]
+        public async Task<IActionResult> RegisterTeacher([FromBody] UserEducationDto userEducationDto)
         {
             try
             {

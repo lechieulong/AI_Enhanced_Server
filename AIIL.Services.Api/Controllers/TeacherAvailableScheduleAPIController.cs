@@ -58,7 +58,6 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
         [HttpPost]
-        //[Authorize]
         [Authorize(Roles = "TEACHER")]
         public async Task<IActionResult> Post([FromBody] TeacherAvailableScheduleDto scheduleDto)
         {
@@ -84,7 +83,6 @@ namespace AIIL.Services.Api.Controllers
                     _response.Message = $"You already have a schedule starting at {firstConflict.StartTime} for {firstConflict.Minutes} minutes.";
                     return Conflict(_response);
                 }
-
 
                 TeacherAvailableSchedule schedule = _mapper.Map<TeacherAvailableSchedule>(scheduleDto);
                 schedule.TeacherId = teacherId;
