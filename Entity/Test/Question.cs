@@ -14,7 +14,6 @@ namespace Entity.Test
         //For import file
         public int? Skill {  get; set; }
         public int? PartNumber { get; set; }
-        //end import file
         public Guid UserId { get; set; }
         public ICollection<SectionQuestion> SectionQuestions { get; set; } 
         public ICollection<Answer> Answers { get; set; }

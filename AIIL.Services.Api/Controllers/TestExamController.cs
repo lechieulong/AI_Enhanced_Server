@@ -25,6 +25,25 @@ namespace AIIL.Services.Api.Controllers
             _mapper = mapper;
         }
 
+        [HttpPost("skills/{testId}")]
+        public async Task<IActionResult> CreateSkills([FromRoute] Guid testId, [FromBody] SkillDtos skillsDto)
+        {
+            if (skillsDto == null || skillsDto.Skills == null)
+            {
+                return BadRequest("The skills data cannot be null.");
+            }
+
+            try
+            {
+                await _testExamService.CreateSkillsAsync(testId, skillsDto.Skills);
+                return Ok("Skills created successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {
@@ -130,7 +149,7 @@ namespace AIIL.Services.Api.Controllers
             }
         }
         [HttpPost("questionsBank")]
-        public async Task<IActionResult> CreateQuestionsAsync([FromBody] List<QuestionModel> questionModels)
+        public async Task<IActionResult> CreateQuestionsAsync([FromBody] List<QuestionDto> questionModels)
         {
             if (questionModels == null || !questionModels.Any())
             {

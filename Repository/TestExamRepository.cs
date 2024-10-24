@@ -18,6 +18,12 @@ namespace Repository
             _context = context;
         }
 
+        public async Task AddSkillAsync(Skill skill)
+        {
+            _context.Skills.Add(skill);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<TestModel> AddTestAsync(TestModel model)
         {
             var newTest = new TestExam
@@ -30,7 +36,7 @@ namespace Repository
                 UpdateAt = DateTime.UtcNow,
                 CreateBy = model.CreateBy,
             };
-            _context.TestExam.Add(newTest);
+            _context.TestExams.Add(newTest);
 
             foreach (var classId in model.ClassIds)
             {
@@ -52,8 +58,7 @@ namespace Repository
 
         public async Task<List<Question>> GetAllQuestionsAsync(Guid userId)
         {
-            // Fetch questions filtered by UserId
-            return await _context.Question
+            return await _context.Questions
                                  .Where(q => q.UserId == userId)
                                  .Include(q => q.Answers) 
                                  .ToListAsync();
@@ -88,12 +93,12 @@ namespace Repository
                             IsCorrect = answer.IsCorrect
                         };
 
-                        _context.Answer.Add(newAnswer); // Add to the Answers table
+                        _context.Answers.Add(newAnswer); // Add to the Answers table
                         newQuestion.Answers.Add(newAnswer); // Add to the question's Answers collection
                     }
                 }
 
-                _context.Question.Add(newQuestion); // Add the question to the context
+                _context.Questions.Add(newQuestion); // Add the question to the context
             }
 
             await _context.SaveChangesAsync(); // Save all changes in one go
@@ -129,13 +134,13 @@ namespace Repository
                             IsCorrect = answer.IsCorrect
                         };
 
-                        _context.Answer.Add(newAnswer); // Add to the Answers table
+                        _context.Answers.Add(newAnswer); // Add to the Answers table
                                                          // Optionally, you can also add to the question's Answers collection
                         newQuestion.Answers.Add(newAnswer);
                     }
                 }
 
-                _context.Question.Add(newQuestion); // Assuming you have a DbSet<Question> Questions in your context
+                _context.Questions.Add(newQuestion); // Assuming you have a DbSet<Question> Questions in your context
             }
 
             await _context.SaveChangesAsync();
@@ -144,14 +149,14 @@ namespace Repository
 
         public async Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId)
         {
-            return await _context.TestExam
+            return await _context.TestExams
                 .Where(test => test.CreateBy == userId) 
                 .ToListAsync();
         }
 
         public async Task<Question> GetQuestionByIdAsync(Guid id)
         {
-            return await _context.Question
+            return await _context.Questions
                 .Include(q => q.Answers) // Include answers for the question
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
@@ -159,7 +164,7 @@ namespace Repository
         public async Task UpdateQuestionAsync(QuestionResponse updatedQuestion)
         {
             // Retrieve the existing question from the database, including its answers
-            var existingQuestion = await _context.Question
+            var existingQuestion = await _context.Questions
                 .Include(q => q.Answers) // Include the answers related to the question
                 .FirstOrDefaultAsync(q => q.Id == updatedQuestion.Id);
 
@@ -200,7 +205,7 @@ namespace Repository
                 // Remove answers that were not included in the updated question
                 foreach (var answerToRemove in existingAnswers)
                 {
-                    _context.Answer.Remove(answerToRemove);
+                    _context.Answers.Remove(answerToRemove);
                 }
 
                 // Save changes to the database
@@ -214,11 +219,11 @@ namespace Repository
         public async Task DeleteQuestionAsync(Guid id)
         {
             // Find the question to delete
-            var questionToDelete = await _context.Question.FindAsync(id);
+            var questionToDelete = await _context.Questions.FindAsync(id);
             if (questionToDelete != null)
             {
                 // Remove the question from the context
-                _context.Question.Remove(questionToDelete);
+                _context.Questions.Remove(questionToDelete);
                 await _context.SaveChangesAsync(); // Save changes to the database
             }
         }
