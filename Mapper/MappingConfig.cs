@@ -30,21 +30,20 @@ namespace Mapper
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<TestExam, TestModel>();
                 config.CreateMap<QuestionModel, Question>()
- .ForMember(dest => dest.Answers, opt => opt.Ignore()); // Ignore Answers during mapping, handled later
+                    .ForMember(dest => dest.Answers, opt => opt.Ignore()); // Ignore Answers during mapping, handled later
 
                 config.CreateMap<Question, QuestionResponse>()
                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers)); // Ensure answers are mapped
 
                 config.CreateMap<Answer, AnswerResponse>(); // Ensure Answer is mapped to AnswerResponse
 
-
-       
-            
-
                 config.CreateMap<UserEducation, UserEducationDto>();
                 config.CreateMap<UserEducationDto, UserEducation>();
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();
+                config.CreateMap<TeacherRequest, TeacherRequestDto>();
+                config.CreateMap<TeacherRequestDto, TeacherRequest>();
+
                 config.CreateMap<StreamSession, StreamSessionModel>();
                 config.CreateMap<StreamSessionModel, StreamSessionModel>();
                 config.CreateMap<Ticket, TicketModel>();

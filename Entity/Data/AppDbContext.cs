@@ -18,6 +18,7 @@ namespace Entity.Data
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<UserEducation> UserEducations { get; set; }
+        public DbSet<TeacherRequest> TeacherRequests { get; set; }
         public DbSet<Specialization> Specializations { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<TestExam> TestExam { get; set; }

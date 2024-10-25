@@ -14,5 +14,6 @@ namespace IRepository
         Task<IEnumerable<TeacherSearchDto>> SearchTeachersAsync(string searchText);
         Task<UserDto> GetUserProfileByUsernameAsync(string username);
         Task<ApplicationUser> GetUserByIdAsync(string userId);
+        Task<(IEnumerable<UserDto> users, int totalCount)> GetUsersAsync(int page, int pageSize);
     }
 }
