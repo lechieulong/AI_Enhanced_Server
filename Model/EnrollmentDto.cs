@@ -11,6 +11,8 @@ namespace Model
         public Guid CourseId { get; set; }
         public string UserId { get; set; }
 
+        public Guid ClassId { get; set; }
+
         //public string ClassId { get; set; }
     }
 

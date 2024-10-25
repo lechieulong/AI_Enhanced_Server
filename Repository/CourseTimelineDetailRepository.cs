@@ -1,67 +1,105 @@
-﻿using Entity;
+﻿using Entity.Data;
+using Entity;
 using IRepository;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
-using Entity.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Repository
 {
     public class CourseTimelineDetailRepository : ICourseTimelineDetailRepository
     {
         private readonly AppDbContext _context;
-        private readonly DbSet<CourseTimelineDetail> _coursesTimelineDetail;
+        private readonly DbSet<CourseTimelineDetail> _courseTimelineDetails; // Thay đổi về DbSet
 
         public CourseTimelineDetailRepository(AppDbContext context)
         {
             _context = context;
-            _coursesTimelineDetail = _context.CourseTimelineDetails;
+            _courseTimelineDetails = _context.CourseTimelineDetails; // Thay đổi về DbSet
         }
 
-        public async Task<CourseTimelineDetail> GetByIdAsync(Guid id)
+        public async Task<CourseTimelineDetailDto> GetByIdAsync(Guid id)
         {
-            return await _coursesTimelineDetail.FindAsync(id);
+            var courseTimelineDetail = await _courseTimelineDetails.FindAsync(id);
+            return courseTimelineDetail != null ? MapToDto(courseTimelineDetail) : null; // Chuyển đổi sang DTO
         }
 
-        public async Task<IEnumerable<CourseTimelineDetail>> GetAllAsync()
+        public async Task<IEnumerable<CourseTimelineDetailDto>> GetAllAsync()
         {
-            return await _coursesTimelineDetail.ToListAsync();
+            var courseTimelineDetails = await _courseTimelineDetails.ToListAsync();
+            return courseTimelineDetails.Select(MapToDto); // Chuyển đổi danh sách sang DTO
         }
 
-        public async Task CreateAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task CreateAsync(CourseTimelineDetailDto courseTimelineDetailDto)
         {
-            await _coursesTimelineDetail.AddAsync(courseTimelineDetail);
+            var courseTimelineDetail = new CourseTimelineDetail
+            {
+                Id = Guid.NewGuid(), // Tạo ID mới
+                CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
+                Title = courseTimelineDetailDto.Title,
+                VideoUrl = courseTimelineDetailDto.VideoUrl,
+                Topic = courseTimelineDetailDto.Topic,
+            };
+
+            await _courseTimelineDetails.AddAsync(courseTimelineDetail);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task UpdateAsync(CourseTimelineDetailDto courseTimelineDetailDto)
         {
-            _coursesTimelineDetail.Update(courseTimelineDetail);
-            await _context.SaveChangesAsync();
+            var courseTimelineDetail = await _courseTimelineDetails.FindAsync(courseTimelineDetailDto.Id);
+            if (courseTimelineDetail != null)
+            {
+                courseTimelineDetail.CourseTimelineId = courseTimelineDetailDto.CourseTimelineId;
+                courseTimelineDetail.Title = courseTimelineDetailDto.Title;
+                courseTimelineDetail.VideoUrl = courseTimelineDetailDto.VideoUrl;
+                courseTimelineDetail.Topic = courseTimelineDetailDto.Topic;
+
+                _courseTimelineDetails.Update(courseTimelineDetail);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var courseTimelineDetail = await _coursesTimelineDetail.FindAsync(id);
+            var courseTimelineDetail = await _courseTimelineDetails.FindAsync(id);
             if (courseTimelineDetail != null)
             {
-                _coursesTimelineDetail.Remove(courseTimelineDetail);
+                _courseTimelineDetails.Remove(courseTimelineDetail);
                 await _context.SaveChangesAsync();
             }
         }
-        // Phương thức để lấy CourseTimelineDetail theo CourseTimelineId
-        public async Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId)
+
+        // Phương thức lấy CourseTimelineDetail theo một CourseTimelineId duy nhất
+        public async Task<IEnumerable<CourseTimelineDetailDto>> GetByCourseTimelineIdAsync(Guid courseTimelineId)
         {
-            return await _context.CourseTimelineDetails
+            var courseTimelineDetails = await _courseTimelineDetails
                                  .Where(ct => ct.CourseTimelineId == courseTimelineId)
                                  .ToListAsync();
+
+            return courseTimelineDetails.Select(MapToDto); // Chuyển đổi sang DTO
         }
 
+        // Phương thức lấy CourseTimelineDetail theo danh sách CourseTimelineIds
+        public async Task<IEnumerable<CourseTimelineDetailDto>> GetByCourseTimelineIdsAsync(IEnumerable<Guid> courseTimelineIds)
+        {
+            var courseTimelineDetails = await _courseTimelineDetails
+                                 .Where(ct => courseTimelineIds.Contains(ct.CourseTimelineId))
+                                 .ToListAsync();
+
+            return courseTimelineDetails.Select(MapToDto); // Chuyển đổi sang DTO
+        }
+
+        // Hàm chuyển đổi từ CourseTimelineDetail sang CourseTimelineDetailDto
+        private CourseTimelineDetailDto MapToDto(CourseTimelineDetail courseTimelineDetail)
+        {
+            return new CourseTimelineDetailDto
+            {
+                Id = courseTimelineDetail.Id,
+                CourseTimelineId = courseTimelineDetail.CourseTimelineId,
+                Title = courseTimelineDetail.Title,
+                VideoUrl = courseTimelineDetail.VideoUrl,
+                Topic = courseTimelineDetail.Topic,
+            };
+        }
     }
 }

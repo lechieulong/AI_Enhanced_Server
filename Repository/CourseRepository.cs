@@ -54,5 +54,17 @@ namespace Repository
         {
             return await _context.Courses.Where(c => c.UserId == userId).ToListAsync();
         }
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsEnabled
+        public async Task<IEnumerable<Course>> GetAllEnabledCoursesAsync()
+        {
+            return await _context.Courses.Where(c => c.IsEnabled).ToListAsync();
+        }
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsDisabled
+        public async Task<IEnumerable<Course>> GetAllDisabledCoursesAsync()
+        {
+            return await _context.Courses.Where(c => !c.IsEnabled).ToListAsync();
+        }
     }
 }

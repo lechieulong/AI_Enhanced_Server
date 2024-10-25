@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Model
@@ -7,7 +7,6 @@ namespace Model
     public class CourseDto
     {
         public string UserId { get; set; }
-
         public string CourseName { get; set; }
         public string Content { get; set; }
         public int Hours { get; set; }
@@ -16,6 +15,8 @@ namespace Model
         public double Price { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        public bool IsEnabled { get; set; } = true; // Thêm thuộc tính IsEnabled
 
         [JsonIgnore] // Bỏ qua khi tạo Course
         public ICollection<CourseTimelineDto>? CourseTimelines { get; set; }
