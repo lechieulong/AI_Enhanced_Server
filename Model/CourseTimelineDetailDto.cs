@@ -9,9 +9,10 @@ namespace Model
     public class CourseTimelineDetailDto
     {
 
+        public Guid Id { get; set; }
+
         // Khóa ngoại liên kết với CourseTimeline
-        public Guid TimelineId { get; set; }
-        public CourseTimelineDto CourseTimeline { get; set; }
+        public Guid CourseTimelineId { get; set; } // Sửa tên biến để phản ánh rõ ràng mối quan hệ
 
         public string Title { get; set; }
 

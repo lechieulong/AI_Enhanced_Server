@@ -18,5 +18,7 @@ namespace IRepository
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
         Task DeleteQuestionAsync(Guid id); // Added
+
+        Task AddSkillAsync(Skill skill);
     }
 }

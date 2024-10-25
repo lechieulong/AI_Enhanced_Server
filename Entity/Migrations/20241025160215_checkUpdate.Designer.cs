@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241025160215_checkUpdate")]
+    partial class checkUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -571,37 +574,6 @@ namespace Entity.Migrations
                     b.ToTable("TeacherAvailableSchedules");
                 });
 
-            modelBuilder.Entity("Entity.TeacherRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("TeacherRequests", (string)null);
-                });
-
             modelBuilder.Entity("Entity.Test.Answer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -829,6 +801,12 @@ namespace Entity.Migrations
 
                     b.Property<double>("Grade")
                         .HasColumnType("float");
+
+                    b.Property<bool>("IsApprove")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsReject")
+                        .HasColumnType("bit");
 
                     b.Property<int>("YearExperience")
                         .HasColumnType("int");
@@ -1160,17 +1138,6 @@ namespace Entity.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Entity.TeacherRequest", b =>
-                {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithOne("TeacherRequest")
-                        .HasForeignKey("Entity.TeacherRequest", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entity.Test.Answer", b =>
                 {
                     b.HasOne("Entity.Test.Question", "Question")
@@ -1349,8 +1316,6 @@ namespace Entity.Migrations
                     b.Navigation("LiveStreams");
 
                     b.Navigation("TeacherAvailableSchedules");
-
-                    b.Navigation("TeacherRequest");
 
                     b.Navigation("Transactions");
 

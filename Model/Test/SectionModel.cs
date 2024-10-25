@@ -13,6 +13,6 @@ namespace Model.Test
         public string QuestionGuide { get; set; }
         public QuestionTypeENum QuestionType { get; set; }
         public string Image { get; set; }
-        public List<QuestionModel> Questions { get; set; } = new List<QuestionModel>();
+        public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
     }
 }

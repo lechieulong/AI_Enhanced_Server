@@ -25,13 +25,6 @@ namespace Auth.Controllers
             return Ok(courses);
         }
 
-        //[HttpGet("{id:guid}")]
-        //public async Task<IActionResult> GetById(Guid id)
-        //{
-        //    var course = await _repository.GetByIdAsync(id);
-        //    return course == null ? NotFound() : Ok(course);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Course course)
         {
@@ -42,6 +35,9 @@ namespace Auth.Controllers
             {
                 return BadRequest("Invalid course data.");
             }
+
+            // Mặc định IsEnabled là true nếu không được chỉ định
+            course.IsEnabled = true;
 
             await _repository.CreateAsync(course);
             return Ok(course);
@@ -78,6 +74,22 @@ namespace Auth.Controllers
         {
             var courses = await _repository.GetAllCourseByUserIdAsync(userId);
             return courses == null || !courses.Any() ? NotFound("No courses found.") : Ok(courses);
+        }
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsEnabled
+        [HttpGet("enabled")]
+        public async Task<IActionResult> GetEnabledCourses()
+        {
+            var courses = await _repository.GetAllEnabledCoursesAsync();
+            return courses == null || !courses.Any() ? NotFound("No enabled courses found.") : Ok(courses);
+        }
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsDisabled
+        [HttpGet("disabled")]
+        public async Task<IActionResult> GetDisabledCourses()
+        {
+            var courses = await _repository.GetAllDisabledCoursesAsync();
+            return courses == null || !courses.Any() ? NotFound("No disabled courses found.") : Ok(courses);
         }
     }
 }

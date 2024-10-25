@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241025134010_UpdateCourseEnabled")]
+    partial class UpdateCourseEnabled
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -571,37 +574,6 @@ namespace Entity.Migrations
                     b.ToTable("TeacherAvailableSchedules");
                 });
 
-            modelBuilder.Entity("Entity.TeacherRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("TeacherRequests", (string)null);
-                });
-
             modelBuilder.Entity("Entity.Test.Answer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -622,19 +594,24 @@ namespace Entity.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.ToTable("Answer");
                 });
 
-            modelBuilder.Entity("Entity.Test.Part", b =>
+            modelBuilder.Entity("Entity.Test.PartSkill", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Audio")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContentText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -648,7 +625,7 @@ namespace Entity.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("Parts");
+                    b.ToTable("PartSkill");
                 });
 
             modelBuilder.Entity("Entity.Test.Question", b =>
@@ -675,7 +652,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Question");
                 });
 
             modelBuilder.Entity("Entity.Test.Section", b =>
@@ -695,14 +672,15 @@ namespace Entity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SectionType")
-                        .HasColumnType("int");
+                    b.Property<string>("SectionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PartId");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Section");
                 });
 
             modelBuilder.Entity("Entity.Test.SectionQuestion", b =>
@@ -726,7 +704,7 @@ namespace Entity.Migrations
                     b.ToTable("SectionQuestion");
                 });
 
-            modelBuilder.Entity("Entity.Test.Skill", b =>
+            modelBuilder.Entity("Entity.Test.SkillTestExam", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -735,17 +713,17 @@ namespace Entity.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
+                    b.Property<int>("SkillType")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("TestId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TestId");
 
-                    b.ToTable("Skills");
+                    b.ToTable("SkillTestExam");
                 });
 
             modelBuilder.Entity("Entity.Test.TestExam", b =>
@@ -763,9 +741,6 @@ namespace Entity.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SectionCourseId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -778,7 +753,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TestExams");
+                    b.ToTable("TestExam");
                 });
 
             modelBuilder.Entity("Entity.Transaction", b =>
@@ -829,6 +804,12 @@ namespace Entity.Migrations
 
                     b.Property<double>("Grade")
                         .HasColumnType("float");
+
+                    b.Property<bool>("IsApprove")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsReject")
+                        .HasColumnType("bit");
 
                     b.Property<int>("YearExperience")
                         .HasColumnType("int");
@@ -1160,17 +1141,6 @@ namespace Entity.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Entity.TeacherRequest", b =>
-                {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithOne("TeacherRequest")
-                        .HasForeignKey("Entity.TeacherRequest", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entity.Test.Answer", b =>
                 {
                     b.HasOne("Entity.Test.Question", "Question")
@@ -1182,10 +1152,10 @@ namespace Entity.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("Entity.Test.Part", b =>
+            modelBuilder.Entity("Entity.Test.PartSkill", b =>
                 {
-                    b.HasOne("Entity.Test.Skill", "Skill")
-                        .WithMany("Parts")
+                    b.HasOne("Entity.Test.SkillTestExam", "Skill")
+                        .WithMany("PartSkills")
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1195,8 +1165,8 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Test.Section", b =>
                 {
-                    b.HasOne("Entity.Test.Part", "Part")
-                        .WithMany("Sections")
+                    b.HasOne("Entity.Test.PartSkill", "Part")
+                        .WithMany("QuestionTypeParts")
                         .HasForeignKey("PartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1223,7 +1193,7 @@ namespace Entity.Migrations
                     b.Navigation("Section");
                 });
 
-            modelBuilder.Entity("Entity.Test.Skill", b =>
+            modelBuilder.Entity("Entity.Test.SkillTestExam", b =>
                 {
                     b.HasOne("Entity.Test.TestExam", "Test")
                         .WithMany("SkillTests")
@@ -1350,8 +1320,6 @@ namespace Entity.Migrations
 
                     b.Navigation("TeacherAvailableSchedules");
 
-                    b.Navigation("TeacherRequest");
-
                     b.Navigation("Transactions");
 
                     b.Navigation("UserEducation");
@@ -1381,9 +1349,9 @@ namespace Entity.Migrations
                     b.Navigation("BookedTeacherSession");
                 });
 
-            modelBuilder.Entity("Entity.Test.Part", b =>
+            modelBuilder.Entity("Entity.Test.PartSkill", b =>
                 {
-                    b.Navigation("Sections");
+                    b.Navigation("QuestionTypeParts");
                 });
 
             modelBuilder.Entity("Entity.Test.Question", b =>
@@ -1398,9 +1366,9 @@ namespace Entity.Migrations
                     b.Navigation("SectionQuestions");
                 });
 
-            modelBuilder.Entity("Entity.Test.Skill", b =>
+            modelBuilder.Entity("Entity.Test.SkillTestExam", b =>
                 {
-                    b.Navigation("Parts");
+                    b.Navigation("PartSkills");
                 });
 
             modelBuilder.Entity("Entity.Test.TestExam", b =>
