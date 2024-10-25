@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
+using Model; // Thêm không gian tên cho DTO
 
 namespace Auth.Controllers
 {
@@ -19,8 +20,18 @@ namespace Auth.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var courseTimelineDetail = await _repository.GetAllAsync();
-            return Ok(courseTimelineDetail);
+            var courseTimelineDetails = await _repository.GetAllAsync();
+            // Chuyển đổi sang DTO nếu cần
+            var courseTimelineDetailsDto = courseTimelineDetails.Select(ct => new CourseTimelineDetailDto
+            {
+                Id = ct.Id,
+                CourseTimelineId = ct.CourseTimelineId,
+                Title = ct.Title,
+                VideoUrl = ct.VideoUrl,
+                Topic = ct.Topic,
+            });
+
+            return Ok(courseTimelineDetailsDto);
         }
 
         [HttpGet("{id}")]
@@ -31,23 +42,52 @@ namespace Auth.Controllers
             {
                 return NotFound();
             }
-            return Ok(courseTimelineDetail);
+
+            // Chuyển đổi sang DTO
+            var courseTimelineDetailDto = new CourseTimelineDetailDto
+            {
+                Id = courseTimelineDetail.Id,
+                CourseTimelineId = courseTimelineDetail.CourseTimelineId,
+                Title = courseTimelineDetail.Title,
+                VideoUrl = courseTimelineDetail.VideoUrl,
+                Topic = courseTimelineDetail.Topic,
+            };
+
+            return Ok(courseTimelineDetailDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CourseTimelineDetail courseTimelineDetail)
+        public async Task<IActionResult> CreateAsync(CourseTimelineDetailDto courseTimelineDetailDto)
         {
+            var courseTimelineDetail = new CourseTimelineDetailDto
+            {
+                Id = Guid.NewGuid(),
+                CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
+                Title = courseTimelineDetailDto.Title,
+                VideoUrl = courseTimelineDetailDto.VideoUrl,
+                Topic = courseTimelineDetailDto.Topic,
+            };
+
             await _repository.CreateAsync(courseTimelineDetail);
-            return CreatedAtAction(nameof(GetById), new { id = courseTimelineDetail.Id }, courseTimelineDetail);
+            return CreatedAtAction(nameof(GetById), new { id = courseTimelineDetail.Id }, courseTimelineDetailDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, CourseTimelineDetail courseTimelineDetail)
+        public async Task<IActionResult> UpdateAsync(Guid id, CourseTimelineDetailDto courseTimelineDetailDto)
         {
-            if (id != courseTimelineDetail.Id)
+            if (id != courseTimelineDetailDto.Id)
             {
                 return BadRequest();
             }
+
+            var courseTimelineDetail = new CourseTimelineDetailDto
+            {
+                Id = courseTimelineDetailDto.Id,
+                CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
+                Title = courseTimelineDetailDto.Title,
+                VideoUrl = courseTimelineDetailDto.VideoUrl,
+                Topic = courseTimelineDetailDto.Topic,
+            };
 
             await _repository.UpdateAsync(courseTimelineDetail);
             return NoContent();
@@ -60,17 +100,28 @@ namespace Auth.Controllers
             return NoContent();
         }
 
-        [HttpGet("CourseTimeline/{courseTimelineId}")]
-        public async Task<IActionResult> GetByCourseTimelineId(Guid courseTimelineId)
+        [HttpGet("CourseTimelines/Details")]
+        public async Task<IActionResult> GetByCourseTimelineIds([FromQuery(Name = "courseTimelineIds")] IEnumerable<Guid> courseTimelineIds)
         {
-            var courseTimelineDetails = await _repository.GetByCourseTimelineIdAsync(courseTimelineId);
-
-            if (courseTimelineDetails == null || !courseTimelineDetails.Any())
+            // Kiểm tra nếu courseTimelineIds null hoặc rỗng
+            if (courseTimelineIds == null || !courseTimelineIds.Any())
             {
-                return NotFound(new { message = "Không tìm thấy chi tiết nào cho CourseTimelineId đã cho." });
+                return BadRequest(new { message = "Danh sách CourseTimelineId không được để trống." });
             }
 
-            return Ok(courseTimelineDetails);
+            // Lấy thông tin chi tiết theo danh sách CourseTimelineId
+            var courseTimelineDetailsList = await _repository.GetByCourseTimelineIdsAsync(courseTimelineIds.ToList());
+
+            // Kiểm tra nếu không tìm thấy thông tin chi tiết nào
+            if (courseTimelineDetailsList == null || !courseTimelineDetailsList.Any())
+            {
+                return NotFound(new { message = "Không tìm thấy chi tiết nào cho các CourseTimelineId đã cho." });
+            }
+
+            // Trả về danh sách chi tiết nếu tìm thấy
+            return Ok(courseTimelineDetailsList);
         }
+
+
     }
 }

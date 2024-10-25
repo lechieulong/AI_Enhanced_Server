@@ -1,21 +1,20 @@
 ﻿using Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using Model;
 
 namespace IRepository
 {
     public interface ICourseTimelineDetailRepository
     {
-        Task<CourseTimelineDetail> GetByIdAsync(Guid id);
-        Task<IEnumerable<CourseTimelineDetail>> GetAllAsync();
-        Task CreateAsync(CourseTimelineDetail courseTimelineDetail);
-        Task UpdateAsync(CourseTimelineDetail courseTimelineDetail);
+        Task<CourseTimelineDetailDto> GetByIdAsync(Guid id);
+        Task<IEnumerable<CourseTimelineDetailDto>> GetAllAsync();
+        Task CreateAsync(CourseTimelineDetailDto courseTimelineDetail);
+        Task UpdateAsync(CourseTimelineDetailDto courseTimelineDetail);
         Task DeleteAsync(Guid id);
 
-        Task<IEnumerable<CourseTimelineDetail>> GetByCourseTimelineIdAsync(Guid courseTimelineId); //Lấy tất cả CourseTimeline từ CourseId
+        // Phương thức lấy tất cả CourseTimelineDetail theo một CourseTimelineId duy nhất
+        Task<IEnumerable<CourseTimelineDetailDto>> GetByCourseTimelineIdAsync(Guid courseTimelineId);
+
+        // Thêm phương thức để lấy chi tiết theo danh sách CourseTimelineIds
+        Task<IEnumerable<CourseTimelineDetailDto>> GetByCourseTimelineIdsAsync(IEnumerable<Guid> courseTimelineIds);
     }
 }

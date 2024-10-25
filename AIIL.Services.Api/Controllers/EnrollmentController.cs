@@ -55,6 +55,7 @@ namespace API.Controllers
                     Id = Guid.NewGuid(), // Tạo GUID mới
                     CourseId = enrollmentRequest.CourseId,
                     UserId = enrollmentRequest.UserId,
+                    ClassId = enrollmentRequest.ClassId,
                     // Nếu có các trường khác mà bạn muốn khởi tạo, hãy thêm vào đây
                 };
 

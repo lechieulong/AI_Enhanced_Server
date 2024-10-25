@@ -13,5 +13,11 @@ namespace IRepository
         Task UpdateAsync(Course course);
         Task DeleteAsync(Guid id);
         Task<IEnumerable<Course>> GetAllCourseByUserIdAsync(string userId);
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsEnabled
+        Task<IEnumerable<Course>> GetAllEnabledCoursesAsync();
+
+        // Thêm phương thức để lấy tất cả khóa học với trạng thái IsDisabled
+        Task<IEnumerable<Course>> GetAllDisabledCoursesAsync();
     }
 }

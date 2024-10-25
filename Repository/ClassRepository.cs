@@ -27,8 +27,12 @@ namespace Repository
                     Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
-                    Count = c.Count, // Ensure Count is handled as int
-                    CourseId = c.CourseId
+                    CourseId = c.CourseId,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    StartTime = c.StartTime,
+                    EndTime = c.EndTime,
+                    ImageUrl = c.ImageUrl // Đảm bảo ImageUrl cũng được lấy
                 }).ToListAsync();
         }
 
@@ -45,8 +49,12 @@ namespace Repository
                 Id = classEntity.Id,
                 ClassName = classEntity.ClassName,
                 ClassDescription = classEntity.ClassDescription,
-                Count = classEntity.Count,
-                CourseId = classEntity.CourseId
+                CourseId = classEntity.CourseId,
+                StartDate = classEntity.StartDate,
+                EndDate = classEntity.EndDate,
+                StartTime = classEntity.StartTime,
+                EndTime = classEntity.EndTime,
+                ImageUrl = classEntity.ImageUrl // Đảm bảo ImageUrl cũng được lấy
             };
         }
 
@@ -61,9 +69,11 @@ namespace Repository
             {
                 ClassName = newClassDto.ClassName,
                 ClassDescription = newClassDto.ClassDescription,
-                Count = newClassDto.Count, // This should be managed accordingly
                 CourseId = newClassDto.CourseId,
                 StartDate = newClassDto.StartDate,
+                EndDate = newClassDto.EndDate,
+                StartTime = newClassDto.StartTime,
+                EndTime = newClassDto.EndTime,
                 ImageUrl = newClassDto.ImageUrl
             };
 
@@ -92,8 +102,12 @@ namespace Repository
 
             existingClass.ClassName = updatedClassDto.ClassName;
             existingClass.ClassDescription = updatedClassDto.ClassDescription;
-            existingClass.Count = updatedClassDto.Count; // Update as necessary
             existingClass.CourseId = updatedClassDto.CourseId;
+            existingClass.StartDate = updatedClassDto.StartDate; // Cập nhật StartDate
+            existingClass.EndDate = updatedClassDto.EndDate; // Cập nhật EndDate
+            existingClass.StartTime = updatedClassDto.StartTime; // Cập nhật StartTime
+            existingClass.EndTime = updatedClassDto.EndTime; // Cập nhật EndTime
+            existingClass.ImageUrl = updatedClassDto.ImageUrl; // Cập nhật ImageUrl
 
             _dbContext.Classes.Update(existingClass);
             await _dbContext.SaveChangesAsync();
@@ -103,8 +117,12 @@ namespace Repository
                 Id = existingClass.Id,
                 ClassName = existingClass.ClassName,
                 ClassDescription = existingClass.ClassDescription,
-                Count = existingClass.Count,
-                CourseId = existingClass.CourseId
+                CourseId = existingClass.CourseId,
+                StartDate = existingClass.StartDate,
+                EndDate = existingClass.EndDate,
+                StartTime = existingClass.StartTime,
+                EndTime = existingClass.EndTime,
+                ImageUrl = existingClass.ImageUrl // Đảm bảo ImageUrl cũng được lấy
             };
         }
 
@@ -130,8 +148,12 @@ namespace Repository
                     Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
-                    Count = c.Count,
-                    CourseId = c.CourseId
+                    CourseId = c.CourseId,
+                    StartDate = c.StartDate, // Lấy StartDate
+                    EndDate = c.EndDate, // Lấy EndDate
+                    StartTime = c.StartTime, // Lấy StartTime
+                    EndTime = c.EndTime, // Lấy EndTime
+                    ImageUrl = c.ImageUrl // Lấy ImageUrl
                 })
                 .ToListAsync();
         }
