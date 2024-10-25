@@ -20,12 +20,15 @@ namespace Entity.Data
         public DbSet<UserEducation> UserEducations { get; set; }
         public DbSet<Specialization> Specializations { get; set; }
         public DbSet<Class> Classes { get; set; }
-        public DbSet<TestExam> TestExam { get; set; }
-        public DbSet<SkillTestExam> SkillTestExam { get; set; }
-        public DbSet<PartSkill> PartSkill { get; set; }
-        public DbSet<Section> Section { get; set; }
-        public DbSet<Question> Question { get; set; }
-        public DbSet<Answer> Answer { get; set; }
+        // Test Exam 
+        public DbSet<TestExam> TestExams { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<SectionQuestion> SectionQuestion { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+        //End Test Exam 
         public DbSet<ClassRelationShip> ClassRelationShip { get; set; }
 
         public DbSet<Course> Courses { get; set; }

@@ -8,7 +8,8 @@
         public DateTime EndTime { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
+        public Guid SectionCourseId { get; set; }   
         public Guid CreateBy {  get; set; }
-        public ICollection<SkillTestExam> SkillTests { get; set; } = new List<SkillTestExam>();
+        public ICollection<Skill> SkillTests { get; set; } = new List<Skill>();
     }
 }

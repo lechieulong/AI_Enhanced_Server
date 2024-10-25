@@ -29,7 +29,7 @@ namespace Mapper
                 config.CreateMap<TeacherAvailableSchedule, TeacherAvailableScheduleDto>();
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<TestExam, TestModel>();
-                config.CreateMap<QuestionModel, Question>()
+                config.CreateMap<QuestionDto, Question>()
  .ForMember(dest => dest.Answers, opt => opt.Ignore()); // Ignore Answers during mapping, handled later
 
                 config.CreateMap<Question, QuestionResponse>()

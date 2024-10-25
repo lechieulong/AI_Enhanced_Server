@@ -8,13 +8,13 @@ using System.Security.Claims;
 
 namespace AIIL.Services.Api.Controllers
 {
-    [Route("api/demo")]
+    [Route("api/")]
     [ApiController]
-    public class DemoController : ControllerBase
+    public class CommonController : ControllerBase
     {
         private readonly IBlogStorageService _blobStorageService;
 
-        public DemoController(IBlogStorageService blobStorageService)
+        public CommonController(IBlogStorageService blobStorageService)
         {
             _blobStorageService = blobStorageService;
         }
