@@ -25,7 +25,7 @@ namespace Repository
 
             if (existingEducation != null)
             {
-                throw new InvalidOperationException("You have registered before, please approve.");
+                throw new InvalidOperationException("You have registered before, please wait for approve.");
             }
 
             _context.UserEducations.Add(userEducation);

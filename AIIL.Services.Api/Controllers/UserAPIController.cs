@@ -116,6 +116,21 @@ namespace AIIL.Services.Api.Controllers
             return Ok(teachers);
         }
 
+        [HttpGet("users")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetUsers(int page = 1, int pageSize = 10)
+        {
+            var (users, totalCount) = await _userRepository.GetUsersAsync(page, pageSize);
 
+            var response = new
+            {
+                Users = users,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(response);
+        }
     }
 }

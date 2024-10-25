@@ -37,14 +37,13 @@ namespace Mapper
 
                 config.CreateMap<Answer, AnswerResponse>(); // Ensure Answer is mapped to AnswerResponse
 
-
-       
-            
-
                 config.CreateMap<UserEducation, UserEducationDto>();
                 config.CreateMap<UserEducationDto, UserEducation>();
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();
+                config.CreateMap<TeacherRequest, TeacherRequestDto>();
+                config.CreateMap<TeacherRequestDto, TeacherRequest>();
+
                 config.CreateMap<StreamSession, StreamSessionModel>();
                 config.CreateMap<StreamSessionModel, StreamSessionModel>();
                 config.CreateMap<Ticket, TicketModel>();

@@ -24,4 +24,10 @@
         Booked = 2
     }
 
+    public enum RequestStatusEnum
+    {
+        Pending = 0,
+        Approve = 1,
+        Reject = 2
+    }
 }

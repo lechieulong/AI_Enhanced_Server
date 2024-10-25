@@ -15,5 +15,7 @@ namespace Model
         public string? PhoneNumber { get; set; }
         public DateTime? DOB { get; set; }
         public string? ImageURL { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
+        public bool LockoutEnabled { get; set; }
     }
 }

@@ -90,5 +90,28 @@ namespace Repository
             // Tìm kiếm người dùng theo UserId
             return await _db.ApplicationUsers.FindAsync(userId);
         }
+        public async Task<(IEnumerable<UserDto> users, int totalCount)> GetUsersAsync(int page, int pageSize)
+        {
+            var totalCount = await _db.ApplicationUsers.CountAsync();
+
+            var users = await _db.ApplicationUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new UserDto
+                {
+                    UserName = u.UserName,
+                    Name = u.Name,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber,
+                    DOB = u.DOB,
+                    ImageURL = u.ImageURL,
+                    LockoutEnd = u.LockoutEnd,
+                    LockoutEnabled = u.LockoutEnabled
+                })
+                .ToListAsync();
+
+            return (users, totalCount);
+        }
+
     }
 }
