@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241026130640_updateTests")]
+    partial class updateTests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -480,8 +483,9 @@ namespace Entity.Migrations
                     b.Property<Guid>("LiveStreamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -520,56 +524,6 @@ namespace Entity.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("User_Tickets");
-                });
-
-            modelBuilder.Entity("Entity.Payment.AccountBalance", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("AccountBalances");
-                });
-
-            modelBuilder.Entity("Entity.Payment.Balance_History", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AccountBalanceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountBalanceId");
-
-                    b.ToTable("Balance_Historys");
                 });
 
             modelBuilder.Entity("Entity.Specialization", b =>
@@ -1204,28 +1158,6 @@ namespace Entity.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entity.Payment.AccountBalance", b =>
-                {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithOne("AccountBalances")
-                        .HasForeignKey("Entity.Payment.AccountBalance", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Entity.Payment.Balance_History", b =>
-                {
-                    b.HasOne("Entity.Payment.AccountBalance", "AccountBalance")
-                        .WithMany("History")
-                        .HasForeignKey("AccountBalanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AccountBalance");
-                });
-
             modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "Teacher")
@@ -1447,11 +1379,6 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.Live.Ticket", b =>
                 {
                     b.Navigation("User_Tickets");
-                });
-
-            modelBuilder.Entity("Entity.Payment.AccountBalance", b =>
-                {
-                    b.Navigation("History");
                 });
 
             modelBuilder.Entity("Entity.TeacherAvailableSchedule", b =>

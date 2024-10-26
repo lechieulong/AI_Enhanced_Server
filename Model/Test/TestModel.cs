@@ -16,7 +16,7 @@ namespace Model.Test
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public Guid SectionCourseId { get; set; }
-        public Guid CreateBy { get; set; }
+        public Guid UserId { get; set; }
 
     }
 }

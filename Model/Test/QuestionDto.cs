@@ -10,10 +10,8 @@ namespace Model.Test
     public class QuestionDto
     {
         public string QuestionName { get; set; }
-        public QuestionTypeENum QuestionType { get; set; }
-        public int Skill { get; set; }
-        public int Part { get; set; }
-        public List<AnswerDto> Answers { get; set; }
+        public int QuestionType { get; set; }
+        public List<AnswerDto> Answers { get; set; } = new List<AnswerDto>();
 
     }
 }

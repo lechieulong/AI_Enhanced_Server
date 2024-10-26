@@ -10,8 +10,7 @@ namespace Entity.Test
     {
         public Guid Id { get; set; }
         public string QuestionName { get; set; }
-        public int QuestionType { get; set; }
-        //For import file
+        public int QuestionType { get; set; } = 0;
         public int? Skill {  get; set; }
         public int? PartNumber { get; set; }
         public Guid UserId { get; set; }

@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Model.Test;
 using System.Security.Claims;
 using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel; // For .xlsx files
+using NPOI.XSSF.UserModel;
+using Newtonsoft.Json; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -28,6 +29,15 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost("skills/{testId}")]
         public async Task<IActionResult> CreateSkills([FromRoute] Guid testId, [FromBody] SkillDtos skillsDto)
         {
+
+
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
+
             if (skillsDto == null || skillsDto.Skills == null)
             {
                 return BadRequest("The skills data cannot be null.");
@@ -35,7 +45,7 @@ namespace AIIL.Services.Api.Controllers
 
             try
             {
-                await _testExamService.CreateSkillsAsync(testId, skillsDto.Skills);
+                await _testRepository.CreateSkillsAsync(userId, testId, skillsDto.Skills);
                 return Ok("Skills created successfully.");
             }
             catch (Exception ex)
@@ -47,15 +57,46 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {
-            var result = await _testExamService.CreateTestAsync(model);
+
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                return Unauthorized("Invalid user ID.");
+            }
+
+            var result = await _testExamService.CreateTestAsync(userId, model);
             return Ok(result);
         }
 
-        [HttpGet("")]
+        [HttpGet("{userId}")]
         public async Task<IEnumerable<TestModel>> GetAllTestsAsync([FromRoute] Guid userId)
         {
+
             var tests = await _testRepository.GetAllTestsAsync(userId); 
             return _mapper.Map<IEnumerable<TestModel>>(tests);
+        }
+
+        [HttpGet("{id}/testDetail")]
+        public async Task<TestModel> GetTestAsync([FromRoute] Guid id)
+        {
+            var test = await _testRepository.GetTestAsync(id);
+            return _mapper.Map<TestModel>(test);
+        }
+
+
+        [HttpGet("{id}/skills")]
+        public async Task<List<Skill>> GetSkills([FromRoute] Guid id)
+        {
+            var skills = await _testRepository.GetSkills(id);
+            return skills;
+        }
+
+        [HttpGet("{id}/parts")]
+        public async Task<List<Part>> GetParts([FromRoute] Guid id)
+        {
+            var parts = await _testRepository.GetParts(id);
+            return parts;
         }
 
 
@@ -83,7 +124,6 @@ namespace AIIL.Services.Api.Controllers
                     await file.CopyToAsync(stream);
                     stream.Position = 0; // Reset stream position for reading
 
-                    // Create an IWorkbook instance from the stream
                     IWorkbook workbook = new XSSFWorkbook(stream);
                     ISheet worksheet = workbook.GetSheetAt(0); // Get the first worksheet
 
@@ -101,17 +141,35 @@ namespace AIIL.Services.Api.Controllers
                             Answers = new List<Answer>()
                         };
 
-                        // Assuming that answers are in the same row for simplicity
-                        var answerText = rowData.GetCell(4)?.ToString();
-                        var isCorrect = int.TryParse(rowData.GetCell(5)?.ToString(), out var correct) ? correct : 0;
-
-                        if (!string.IsNullOrWhiteSpace(answerText))
+                        var answerCell = rowData.GetCell(4)?.ToString();
+                        if (!string.IsNullOrWhiteSpace(answerCell))
                         {
-                            question.Answers.Add(new Answer
+                            // Detect if the answer is JSON or plain text
+                            if (answerCell.TrimStart().StartsWith("{"))
                             {
-                                AnswerText = answerText,
-                                IsCorrect = isCorrect
-                            });
+                                // Attempt to parse JSON format
+                                try
+                                {
+                                    var answerObj = JsonConvert.DeserializeObject<Answer>(answerCell);
+                                    if (answerObj != null)
+                                    {
+                                        question.Answers.Add(answerObj);
+                                    }
+                                }
+                                catch (JsonException jsonEx)
+                                {
+                                    return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+                                }
+                            }
+                            else
+                            {
+                                // Plain text answer, default TypeCorrect to 0
+                                question.Answers.Add(new Answer
+                                {
+                                    AnswerText = answerCell,
+                                    TypeCorrect = 0 // Default value for plain text answer
+                                });
+                            }
                         }
 
                         questions.Add(question);
