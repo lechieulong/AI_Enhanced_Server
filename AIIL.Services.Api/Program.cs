@@ -97,6 +97,8 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
 
 // Đăng ký Background Service
 builder.Services.AddHostedService<NotificationBackgroundService>();

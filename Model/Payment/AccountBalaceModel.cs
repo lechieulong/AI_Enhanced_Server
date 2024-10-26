@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace Model.Payment
 {
-    public class TransactionMode
+    public class AccountBalaceModel
     {
-        public int Id { get; set; }
-        public String UserId { get; set; }
+        public string UserId { get; set; }
 
-        public decimal Amount { get; set; }
+        public decimal Balance { get; set; }
 
-        public string PaymentStatus { get; set; }
+        public string Message { get; set; }
+        public string signature { get; set; }
 
-        public DateTime CreatedAt { get; set; }
     }
 }

@@ -26,11 +26,11 @@ namespace Repository
         {
             return await _context.Transactions.FirstOrDefaultAsync(p => p.Id == id);
         }
-        public async Task<TransactionMode> AddTransactionAsync(TransactionMode model)
+        public async Task<TransactionModel> AddTransactionAsync(TransactionModel model)
         {
             var Transaction = new Transaction
             {
-                Id = model.Id,
+                Id = 0,
                 Amount = model.Amount,
                 CreatedAt = DateTime.UtcNow,
                 PaymentStatus = model.PaymentStatus,
@@ -44,10 +44,10 @@ namespace Repository
             return model;
 
         }
-        public async Task<TransactionMode> UpdateTransactionAsync(TransactionMode model)
+        public async Task<TransactionModel> UpdateTransactionAsync(TransactionModel model)
         {
 
-            var existTransaction= GetTransactionByIdAsync(model.Id);
+            var existTransaction= await GetTransactionByIdAsync(model.Id);
             var Transaction = new Transaction
             {
                 Id = model.Id,

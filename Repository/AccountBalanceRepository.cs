@@ -1,5 +1,4 @@
-﻿using Entity;
-using Entity.Data;
+﻿using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Model;
@@ -13,6 +12,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Cryptography.Xml;
 using Microsoft.Extensions.Configuration;
+using Entity.Payment;
 
 namespace Repository
 {
@@ -53,29 +53,40 @@ namespace Repository
             return Balance;
         }
      
-        public async Task<Boolean> UpdateBalanceAsync(String UserId, int money, String signature)
+        public async Task<Boolean> UpdateBalanceAsync(AccountBalaceModel model)
         {
 
-            var existAccountBalance =  await _context.AccountBalances.FirstOrDefaultAsync(t => t.UserId.Equals(UserId));
+            var existAccountBalance =  await _context.AccountBalances.FirstOrDefaultAsync(t => t.UserId.Equals(model.UserId));
 
-            string data = $"UserId={UserId}&money={money}";
-            string checksumKey = _configuration["AppSettings:ChecksumKey"];
+            //string data = $"UserId={model.UserId}&money={model.Balance}";
+            //string checksumKey = _configuration["AppSettings:ChecksumKey"];
 
-            var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(checksumKey));
+            //var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(checksumKey));
             
-            var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-            String _signature= BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            //var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+            //String _signature= BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
             
-            if (existAccountBalance != null&& signature.Equals(_signature))
+            if (existAccountBalance != null/*&& signature.Equals(_signature)*/)
             {
                 var Bala = new AccountBalance
                 {
                     Id = existAccountBalance.Id,
-                    Balance= existAccountBalance.Balance+money,
+                    Balance= existAccountBalance.Balance+model.Balance,
                     LastUpdated=DateTime.Now,
-                    UserId = UserId
+                    UserId = model.UserId
 
                 };
+
+                var history = new Balance_History
+                {
+                    Id = Guid.NewGuid(),
+                    AccountBalanceId = existAccountBalance.Id,
+                    amount = model.Balance,
+                    Description = model.Message,
+                    CreateDate = DateTime.Now,
+
+                };
+                _context.Balance_Historys.Add(history);
                 _context.Entry(existAccountBalance).CurrentValues.SetValues(Bala);
                 await _context.SaveChangesAsync();
                 return true;
