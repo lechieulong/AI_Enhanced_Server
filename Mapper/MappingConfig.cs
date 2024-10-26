@@ -4,6 +4,7 @@ using Entity.Live;
 using Entity.Test;
 using Model;
 using Model.Live;
+using Model.Payment;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,9 @@ namespace Mapper
                 config.CreateMap<StreamSessionModel, StreamSessionModel>();
                 config.CreateMap<Ticket, TicketModel>();
                 config.CreateMap<TicketModel, Ticket>();
+                config.CreateMap<Transaction, TransactionModel>();
+                config.CreateMap<TransactionModel, Transaction>();
+
             });
             return mappingConfig;
         }
