@@ -1,4 +1,5 @@
 ﻿using Entity.Live;
+using Entity.Payment;
 using Entity.Test;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -47,16 +48,10 @@ namespace Entity.Data
         public DbSet<StreamSession> StreamSessions { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<User_Ticket> User_Tickets { get; set; }
+        public DbSet<Balance_History> Balance_Historys { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Thêm dữ liệu mặc định vào bảng Specializations
-            //modelBuilder.Entity<Specialization>().HasData(
-            //    new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
-            //    new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
-            //    new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
-            //    new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
-            //);
 
             modelBuilder.Entity<ApplicationUser>()
             .HasMany(u => u.TeacherAvailableSchedules)

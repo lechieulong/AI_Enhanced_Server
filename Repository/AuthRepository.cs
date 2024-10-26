@@ -73,7 +73,7 @@ namespace Repository
 
                     return new LoginReponseDto()
                     {
-                        User = null, Token = "", Message = $"Your account is locked due to too many failed login attempts. Please try again in {remainingMinutes} minutes."
+                        User = null, Token = "", Message = $"Your account is locked. Please try again in {remainingMinutes} minutes."
                     };
                 }
                 else
@@ -81,7 +81,7 @@ namespace Repository
                     // Nếu không có thời gian khóa cụ thể
                     return new LoginReponseDto()
                     {
-                        User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                        User = null, Token = "", Message = "Your account is locked. Please try again later."
                     };
                 }
             }
@@ -96,7 +96,7 @@ namespace Repository
                 {
                     return new LoginReponseDto()
                     {
-                        User = null, Token = "", Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                        User = null, Token = "", Message = "Your account is locked. Please try again later."
                     };
                 }
 
@@ -307,7 +307,7 @@ namespace Repository
                         {
                             User = null,
                             Token = "",
-                            Message = $"Your account is locked due to too many failed login attempts. Please try again in {remainingMinutes} minutes."
+                            Message = $"Your account is locked. Please try again in {remainingMinutes} minutes."
                         };
                     }
                     else
@@ -317,7 +317,7 @@ namespace Repository
                         {
                             User = null,
                             Token = "",
-                            Message = "Your account is locked due to too many failed login attempts. Please try again later."
+                            Message = "Your account is locked. Please try again later."
                         };
                     }
                 }

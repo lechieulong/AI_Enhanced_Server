@@ -97,6 +97,8 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
 
 // Đăng ký Background Service
 builder.Services.AddHostedService<NotificationBackgroundService>();
@@ -189,28 +191,10 @@ void ApplyMigration()
             _db.Database.Migrate();
         }
 
-        // Gọi SeedSpecializations để thêm dữ liệu nếu cần
-        SeedSpecializations(scope.ServiceProvider);
+        // Gọi Seeder để thêm dữ liệu nếu cần
+        DatabaseSeeder.SeedSpecializationsAndUserAsync(scope.ServiceProvider).GetAwaiter().GetResult();
     }
 }
 
-void SeedSpecializations(IServiceProvider serviceProvider)
-{
-    using (var scope = serviceProvider.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // Kiểm tra nếu bảng Specialization chưa có dữ liệu
-        if (!context.Specializations.Any())
-        {
-            context.Specializations.AddRange(
-                new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
-            );
 
-            context.SaveChanges();
-        }
-    }
-}
