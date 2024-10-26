@@ -1,4 +1,5 @@
 ﻿using IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
@@ -48,6 +49,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("AssignRole")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequestDto model)
         {
             var assignRoleSuccessful = await _authRepository.AssignRole(model.Email, model.Role.ToUpper());
@@ -97,6 +99,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("change-password")]
+        [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
         {
             var result = await _authRepository.ChangePassword(request.Email, request.CurrentPassword, request.NewPassword);
