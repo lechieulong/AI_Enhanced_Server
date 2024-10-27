@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
 using Model; // Thêm không gian tên cho DTO
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Auth.Controllers
 {
@@ -29,6 +32,7 @@ namespace Auth.Controllers
                 Title = ct.Title,
                 VideoUrl = ct.VideoUrl,
                 Topic = ct.Topic,
+                IsEnabled = ct.IsEnabled // Thêm IsEnabled vào DTO
             });
 
             return Ok(courseTimelineDetailsDto);
@@ -51,6 +55,7 @@ namespace Auth.Controllers
                 Title = courseTimelineDetail.Title,
                 VideoUrl = courseTimelineDetail.VideoUrl,
                 Topic = courseTimelineDetail.Topic,
+                IsEnabled = courseTimelineDetail.IsEnabled // Thêm IsEnabled vào DTO
             };
 
             return Ok(courseTimelineDetailDto);
@@ -66,6 +71,7 @@ namespace Auth.Controllers
                 Title = courseTimelineDetailDto.Title,
                 VideoUrl = courseTimelineDetailDto.VideoUrl,
                 Topic = courseTimelineDetailDto.Topic,
+                IsEnabled = true // Mặc định IsEnabled là true khi tạo mới
             };
 
             await _repository.CreateAsync(courseTimelineDetail);
@@ -87,6 +93,7 @@ namespace Auth.Controllers
                 Title = courseTimelineDetailDto.Title,
                 VideoUrl = courseTimelineDetailDto.VideoUrl,
                 Topic = courseTimelineDetailDto.Topic,
+                IsEnabled = courseTimelineDetailDto.IsEnabled // Cập nhật IsEnabled
             };
 
             await _repository.UpdateAsync(courseTimelineDetail);
@@ -121,7 +128,5 @@ namespace Auth.Controllers
             // Trả về danh sách chi tiết nếu tìm thấy
             return Ok(courseTimelineDetailsList);
         }
-
-
     }
 }

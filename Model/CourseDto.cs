@@ -11,17 +11,8 @@ namespace Model
         public string Content { get; set; }
         public int Hours { get; set; }
         public int Days { get; set; }
-        public string Category { get; set; }
+        public List<string> Categories { get; set; } = new List<string>(); // Allow multiple categories
         public double Price { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public bool IsEnabled { get; set; } = true; // Thêm thuộc tính IsEnabled
-
-        [JsonIgnore] // Bỏ qua khi tạo Course
-        public ICollection<CourseTimelineDto>? CourseTimelines { get; set; }
-
-        [JsonIgnore] // Bỏ qua khi tạo Course
-        public ICollection<UserDto>? Users { get; set; }
     }
 }
