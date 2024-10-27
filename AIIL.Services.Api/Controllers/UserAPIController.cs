@@ -4,6 +4,7 @@ using Entity.Data;
 using IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 
@@ -17,13 +18,15 @@ namespace AIIL.Services.Api.Controllers
         private readonly ResponseDto _response;
         private readonly AppDbContext _db;
         IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserAPIController(IUserRepository userRepository, IMapper mapper, AppDbContext db)
+        public UserAPIController(IUserRepository userRepository, IMapper mapper, AppDbContext db, UserManager<ApplicationUser> userManager)
         {
             _userRepository = userRepository;
             _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
+            _userManager = userManager;
         }
 
         [HttpGet("profile/{username}")]
@@ -37,6 +40,30 @@ namespace AIIL.Services.Api.Controllers
             }
 
             var userProfile = await _userRepository.GetUserProfileByUsernameAsync(username);
+
+            if (userProfile == null)
+            {
+                _response.IsSuccess = false;
+                _response.Message = "User not found.";
+                return NotFound(_response);
+            }
+
+            _response.IsSuccess = true;
+            _response.Result = userProfile;
+            return Ok(_response);
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _response.IsSuccess = false;
+                _response.Message = "UserId is required.";
+                return BadRequest(_response);
+            }
+
+            var userProfile = await _userRepository.GetUserUserByIdAsync(userId);
 
             if (userProfile == null)
             {
@@ -73,12 +100,12 @@ namespace AIIL.Services.Api.Controllers
         [HttpGet("top-teachers")]
         public async Task<IActionResult> GetTopTeachers()
         {
-
-            var topTeachers = await _userRepository.GetTopTeachersAsync();
+            var currentUserId = _userManager.GetUserId(User);
+            var topTeachers = await _userRepository.GetTopTeachersAsync(currentUserId);
 
             if (topTeachers == null || !topTeachers.Any())
             {
-                _response.IsSuccess = false;
+                _response.IsSuccess = true;
                 _response.Message = "No teachers found.";
                 return NotFound(_response);
             }
@@ -116,6 +143,50 @@ namespace AIIL.Services.Api.Controllers
             return Ok(teachers);
         }
 
+        [HttpGet("users")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetUsers(int page, int pageSize)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
 
+            var (users, totalCount) = await _userRepository.GetUsersAsync(page, pageSize);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                Users = users,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize) // Calculate total pages safely
+            };
+
+            return Ok(response);
+        }
+
+
+        [HttpPost("lock")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> LockUser([FromBody] LockUserRequestDto request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.UserId) || request.DurationInMinutes <= 0)
+            {
+                return BadRequest("Invalid request data.");
+            }
+
+            var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            await _userRepository.LockUserAsync(request.UserId, request.DurationInMinutes);
+            return Ok("User locked successfully.");
+        }
     }
 }

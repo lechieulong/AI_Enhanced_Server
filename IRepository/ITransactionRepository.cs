@@ -12,8 +12,8 @@ namespace IRepository
 {
     public interface ITransactionRepository
     {
-        Task<TransactionMode> AddTransactionAsync(TransactionMode model);
+        Task<TransactionModel> AddTransactionAsync(TransactionModel model);
         Task<Transaction> GetTransactionByIdAsync(int id);
-        Task<TransactionMode> UpdateTransactionAsync(TransactionMode model);
+        Task<TransactionModel> UpdateTransactionAsync(TransactionModel model);
     }
 }

@@ -17,6 +17,13 @@
         TrueFalse, // 3
     }
 
+    public enum TypeCorrect
+    {
+        True,    // 0
+        False,   // 1
+        NotGiven,   // 2
+    }
+
     public enum ScheduleStatus
     {
         Available = 0,
@@ -24,4 +31,10 @@
         Booked = 2
     }
 
+    public enum RequestStatusEnum
+    {
+        Pending = 0,
+        Approve = 1,
+        Reject = 2
+    }
 }

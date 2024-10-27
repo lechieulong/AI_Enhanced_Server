@@ -18,8 +18,6 @@ namespace Entity
         public string DegreeURL { get; set; }
         public string Career {  get; set; }
         public int YearExperience { get; set; }
-        public bool IsApprove { get; set; } = false;
-        public bool IsReject { get; set; } = false;
         public ICollection<Specialization>? Specializations { get; set; }
     }
 }

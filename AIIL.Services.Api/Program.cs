@@ -75,6 +75,7 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
 builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
+builder.Services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
 
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
@@ -96,6 +97,11 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
+
+// Đăng ký Background Service
+builder.Services.AddHostedService<NotificationBackgroundService>();
 
 // Register CORS services
 builder.Services.AddCors(options =>
@@ -185,28 +191,10 @@ void ApplyMigration()
             _db.Database.Migrate();
         }
 
-        // Gọi SeedSpecializations để thêm dữ liệu nếu cần
-        SeedSpecializations(scope.ServiceProvider);
+        // Gọi Seeder để thêm dữ liệu nếu cần
+        DatabaseSeeder.SeedSpecializationsAndUserAsync(scope.ServiceProvider).GetAwaiter().GetResult();
     }
 }
 
-void SeedSpecializations(IServiceProvider serviceProvider)
-{
-    using (var scope = serviceProvider.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // Kiểm tra nếu bảng Specialization chưa có dữ liệu
-        if (!context.Specializations.Any())
-        {
-            context.Specializations.AddRange(
-                new Specialization { Id = Guid.NewGuid(), Name = "Speaking" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Writing" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Reading" },
-                new Specialization { Id = Guid.NewGuid(), Name = "Listening" }
-            );
 
-            context.SaveChanges();
-        }
-    }
-}
