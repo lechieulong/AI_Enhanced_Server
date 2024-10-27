@@ -1,12 +1,13 @@
-﻿using IRepository;
+﻿using AutoMapper;
+using Entity;
+using Entity.Data;
+using IRepository;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Entity.Data;
-using Entity;
 
 namespace Repository
 {
@@ -24,41 +25,26 @@ namespace Repository
             return await _dbContext.Classes
                 .Select(c => new ClassDto
                 {
-                    Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
                     StartDate = c.StartDate,
                     EndDate = c.EndDate,
-                    StartTime = c.StartTime,
-                    EndTime = c.EndTime,
-                    ImageUrl = c.ImageUrl // Đảm bảo ImageUrl cũng được lấy
+                    IsEnabled = c.IsEnabled
                 }).ToListAsync();
         }
 
-        public async Task<ClassDto> GetByIdAsync(Guid id)
+        public async Task UpdateClassEnabledStatusAsync(Guid classId, bool isEnabled)
         {
-            var classEntity = await _dbContext.Classes.FindAsync(id);
-            if (classEntity == null)
+            var classEntity = await _dbContext.Classes.FindAsync(classId);
+            if (classEntity != null)
             {
-                return null;
+                classEntity.IsEnabled = isEnabled;
+                await _dbContext.SaveChangesAsync();
             }
-
-            return new ClassDto
-            {
-                Id = classEntity.Id,
-                ClassName = classEntity.ClassName,
-                ClassDescription = classEntity.ClassDescription,
-                CourseId = classEntity.CourseId,
-                StartDate = classEntity.StartDate,
-                EndDate = classEntity.EndDate,
-                StartTime = classEntity.StartTime,
-                EndTime = classEntity.EndTime,
-                ImageUrl = classEntity.ImageUrl // Đảm bảo ImageUrl cũng được lấy
-            };
         }
 
-        public async Task<ClassDto> CreateAsync(ClassDto newClassDto)
+        public async Task<ClassDto> CreateAsync(Class newClassDto)
         {
             if (newClassDto == null)
             {
@@ -67,14 +53,11 @@ namespace Repository
 
             var classEntity = new Class
             {
+                Id = Guid.NewGuid(), // Tạo ID mới cho lớp học
                 ClassName = newClassDto.ClassName,
                 ClassDescription = newClassDto.ClassDescription,
                 CourseId = newClassDto.CourseId,
-                StartDate = newClassDto.StartDate,
-                EndDate = newClassDto.EndDate,
-                StartTime = newClassDto.StartTime,
-                EndTime = newClassDto.EndTime,
-                ImageUrl = newClassDto.ImageUrl
+                IsEnabled = newClassDto.IsEnabled
             };
 
             try
@@ -82,9 +65,14 @@ namespace Repository
                 await _dbContext.Classes.AddAsync(classEntity);
                 await _dbContext.SaveChangesAsync();
 
-                newClassDto.Id = classEntity.Id;
-
-                return newClassDto;
+                // Trả về ClassDto tương ứng với lớp học vừa được tạo
+                return new ClassDto
+                {
+                    ClassName = classEntity.ClassName,
+                    ClassDescription = classEntity.ClassDescription,
+                    CourseId = classEntity.CourseId,
+                    IsEnabled = classEntity.IsEnabled
+                };
             }
             catch (DbUpdateException ex)
             {
@@ -92,37 +80,35 @@ namespace Repository
             }
         }
 
-        public async Task<ClassDto> UpdateAsync(ClassDto updatedClassDto)
+
+
+        public async Task<ClassDto> UpdateAsync(Guid classId, ClassDto updatedClassDto)
         {
-            var existingClass = await _dbContext.Classes.FindAsync(updatedClassDto.Id);
+            var existingClass = await _dbContext.Classes.FindAsync(classId);
             if (existingClass == null)
             {
                 return null;
             }
 
+            // Cập nhật các thuộc tính
             existingClass.ClassName = updatedClassDto.ClassName;
             existingClass.ClassDescription = updatedClassDto.ClassDescription;
             existingClass.CourseId = updatedClassDto.CourseId;
-            existingClass.StartDate = updatedClassDto.StartDate; // Cập nhật StartDate
-            existingClass.EndDate = updatedClassDto.EndDate; // Cập nhật EndDate
-            existingClass.StartTime = updatedClassDto.StartTime; // Cập nhật StartTime
-            existingClass.EndTime = updatedClassDto.EndTime; // Cập nhật EndTime
-            existingClass.ImageUrl = updatedClassDto.ImageUrl; // Cập nhật ImageUrl
+            existingClass.StartDate = updatedClassDto.StartDate;
+            existingClass.EndDate = updatedClassDto.EndDate;
+            existingClass.IsEnabled = updatedClassDto.IsEnabled;
 
             _dbContext.Classes.Update(existingClass);
             await _dbContext.SaveChangesAsync();
 
             return new ClassDto
             {
-                Id = existingClass.Id,
                 ClassName = existingClass.ClassName,
                 ClassDescription = existingClass.ClassDescription,
                 CourseId = existingClass.CourseId,
                 StartDate = existingClass.StartDate,
                 EndDate = existingClass.EndDate,
-                StartTime = existingClass.StartTime,
-                EndTime = existingClass.EndTime,
-                ImageUrl = existingClass.ImageUrl // Đảm bảo ImageUrl cũng được lấy
+                IsEnabled = existingClass.IsEnabled
             };
         }
 
@@ -145,17 +131,49 @@ namespace Repository
                 .Where(c => c.CourseId == courseId)
                 .Select(c => new ClassDto
                 {
-                    Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
-                    StartDate = c.StartDate, // Lấy StartDate
-                    EndDate = c.EndDate, // Lấy EndDate
-                    StartTime = c.StartTime, // Lấy StartTime
-                    EndTime = c.EndTime, // Lấy EndTime
-                    ImageUrl = c.ImageUrl // Lấy ImageUrl
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    IsEnabled = c.IsEnabled
                 })
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ClassDto>> GetByTeacherIdAsync(string teacherId)
+        {
+            return await _dbContext.Classes
+                .Where(c => c.Course.UserId == teacherId)
+                .Select(c => new ClassDto
+                {
+                    ClassName = c.ClassName,
+                    ClassDescription = c.ClassDescription,
+                    CourseId = c.CourseId,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    IsEnabled = c.IsEnabled
+                })
+                .ToListAsync();
+        }
+
+        public async Task<ClassDto> GetByIdAsync(Guid id)
+        {
+            var classEntity = await _dbContext.Classes.FindAsync(id);
+            if (classEntity == null)
+            {
+                return null;
+            }
+
+            return new ClassDto
+            {
+                ClassName = classEntity.ClassName,
+                ClassDescription = classEntity.ClassDescription,
+                CourseId = classEntity.CourseId,
+                StartDate = classEntity.StartDate,
+                EndDate = classEntity.EndDate,
+                IsEnabled = classEntity.IsEnabled
+            };
         }
     }
 }

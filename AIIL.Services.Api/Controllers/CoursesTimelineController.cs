@@ -79,7 +79,8 @@ namespace Auth.Controllers
                     EventDate = timelineDto.EventDate,
                     Title = timelineDto.Title,
                     Description = timelineDto.Description,
-                    Author = timelineDto.Author
+                    Author = timelineDto.Author,
+                    IsEnabled = timelineDto.IsEnabled // Gán IsEnabled từ DTO
                 };
 
                 // Add CourseTimeline to the list of added timelines
@@ -115,6 +116,7 @@ namespace Auth.Controllers
             existingTimeline.Title = timelineDto.Title;
             existingTimeline.Description = timelineDto.Description;
             existingTimeline.Author = timelineDto.Author;
+            existingTimeline.IsEnabled = timelineDto.IsEnabled; // Cập nhật IsEnabled
 
             await _repository.UpdateAsync(existingTimeline);
             return NoContent();
@@ -149,10 +151,32 @@ namespace Auth.Controllers
                 EventDateFormatted = ct.EventDate.ToString("dd/MM/yyyy"),
                 ct.Title,
                 ct.Description,
-                ct.Author
+                ct.Author,
+                ct.IsEnabled // Thêm IsEnabled vào phản hồi
             }).ToList();
 
             return Ok(courseTimelinesFormatted);
         }
+
+        [HttpPut("{id}/enabled")] // API endpoint cho việc cập nhật IsEnabled
+        public async Task<IActionResult> UpdateCourseTimelineEnabledStatus(Guid id, [FromBody] bool isEnabled)
+        {
+            // Kiểm tra xem timeline có tồn tại không
+            var existingTimeline = await _repository.GetByIdAsync(id);
+            if (existingTimeline == null)
+            {
+                return NotFound("CourseTimeline not found.");
+            }
+
+            // Cập nhật thuộc tính IsEnabled
+            existingTimeline.IsEnabled = isEnabled;
+
+            // Cập nhật trong cơ sở dữ liệu
+            await _repository.UpdateAsync(existingTimeline);
+
+            return Ok(new { id, IsEnabled = existingTimeline.IsEnabled }); // Trả về ID và trạng thái mới
+        }
+
+
     }
 }

@@ -105,6 +105,13 @@ namespace Entity.Data
                 .HasMany(ue => ue.Specializations)
                 .WithMany(s => s.UserEducations)
                 .UsingEntity(j => j.ToTable("UserEducationSpecializations"));
+            modelBuilder.Entity<Course>()
+                .Property(c => c.Categories)
+                .HasConversion(
+                    v => string.Join(',', v), // Convert list to a comma-separated string
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // Convert back to list
+                );
+
         }
 
     }
