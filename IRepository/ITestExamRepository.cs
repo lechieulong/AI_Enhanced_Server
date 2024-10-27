@@ -14,6 +14,9 @@ namespace IRepository
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<TestExam> GetTestAsync(Guid id);
         Task<List<Skill>> GetSkills(Guid testId);
+        Task<Skill> GetSkillByIdAsync(Guid SkillId);
+        Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
+
         Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
         Task<List<Question>> GetAllQuestionsAsync(Guid userId);

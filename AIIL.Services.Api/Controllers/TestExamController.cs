@@ -54,6 +54,9 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+
+
+       
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {
@@ -91,6 +94,128 @@ namespace AIIL.Services.Api.Controllers
             var skills = await _testRepository.GetSkills(id);
             return skills;
         }
+
+        [HttpGet("{skillId}/skill")]
+        public async Task<IActionResult> GetSkillData(Guid skillId)
+        {
+            var skill = await _testRepository.GetSkillByIdAsync(skillId);
+            if (skill == null)
+            {
+                return NotFound("Skill not found");
+            }
+
+            // Group the response data by skill type
+            var responseData = new Dictionary<string, object>();
+
+            string skillTypeKey = skill.Type switch
+            {
+                0 => "reading",
+                1 => "listening",
+                2 => "writing",
+                3 => "speaking",
+                _ => "unknown"
+            };
+
+            responseData[skillTypeKey] = new
+            {
+                id = skill.Id,
+                duration = skill.Duration,
+                type = skill.Type,
+                parts = skill.Parts.Select(part => new
+                {
+                    id = part.Id,
+                    partNumber = part.PartNumber,
+                    contentText = part.ContentText,
+                    audio = part.Audio,
+                    image = part.Image,
+                    questionName = $"Part {part.PartNumber}",
+                    sections = part.Sections.Select(section => new
+                    {
+                        id = section.Id,
+                        sectionGuide = section.SectionGuide,
+                        sectionType = section.SectionType,
+                        image = section.Image,
+                        questions = section.SectionQuestions.Select(sq => new
+                        {
+                            id = sq.Question.Id,
+                            questionName = sq.Question.QuestionName,
+                            answers = sq.Question.Answers?.Select(ans => new
+                            {
+                                id = ans.Id,
+                                answerText = ans.AnswerText,
+                                isCorrect = ans.TypeCorrect
+                            }).ToList() 
+                        }).ToList()
+                    }).ToList()
+                }).ToList()
+            };
+
+            return Ok(responseData);
+        }
+
+        [HttpGet("{testId}/testing")]
+        public async Task<IActionResult> GetTesting(Guid testId)
+        {
+            var skills = await _testRepository.GetSkillsByTestIdAsync(testId);
+
+            if (skills == null || !skills.Any())
+            {
+                return NotFound("No skills found for the given testId.");
+            }
+
+            var sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
+            var responseData = new Dictionary<string, object>();
+
+            foreach (var skill in sortedSkills)
+            {
+                string skillTypeKey = skill.Type switch
+                {
+                    0 => "reading",
+                    1 => "listening",
+                    2 => "writing",
+                    3 => "speaking",
+                    _ => "unknown"
+                };
+
+                // Add skill data to the response dictionary under its skill type
+                responseData[skillTypeKey] = new
+                {
+                    id = skill.Id,
+                    duration = skill.Duration,
+                    type = skill.Type,
+                    parts = skill.Parts.Select(part => new
+                    {
+                        id = part.Id,
+                        partNumber = part.PartNumber,
+                        contentText = part.ContentText,
+                        audio = part.Audio,
+                        image = part.Image,
+                        questionName = $"Part {part.PartNumber}",
+                        sections = part.Sections.Select(section => new
+                        {
+                            id = section.Id,
+                            sectionGuide = section.SectionGuide,
+                            sectionType = section.SectionType,
+                            image = section.Image,
+                            questions = section.SectionQuestions.Select(sq => new
+                            {
+                                id = sq.Question.Id,
+                                questionName = sq.Question.QuestionName,
+                                answers = sq.Question.Answers?.Select(ans => new
+                                {
+                                    id = ans.Id,
+                                    answerText = ans.AnswerText,
+                                    isCorrect = ans.TypeCorrect
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList()
+                };
+            }
+
+            return Ok(responseData);
+        }
+
 
         [HttpGet("{id}/parts")]
         public async Task<List<Part>> GetParts([FromRoute] Guid id)

@@ -85,12 +85,10 @@ namespace Repository
                                         SectionQuestions = new List<SectionQuestion>()
                                     };
 
-                                    // Check if Questions are not null or empty
                                     if (sectionDto.Questions != null && sectionDto.Questions.Any())
                                     {
                                         foreach (var questionDto in sectionDto.Questions)
                                         {
-                                            // Skip if the questionDto is null
                                             if (questionDto == null)
                                                 continue;
 
@@ -103,12 +101,10 @@ namespace Repository
                                                 Answers = new List<Answer>() // Initialize Answers collection
                                             };
 
-                                            // Check if Answers are not null or empty
                                             if (questionDto.Answers != null && questionDto.Answers.Any())
                                             {
                                                 foreach (var answerDto in questionDto.Answers)
                                                 {
-                                                    // Skip if the answerDto is null
                                                     if (answerDto == null)
                                                         continue;
 
@@ -284,6 +280,31 @@ namespace Repository
             return await _context.TestExams
                 .Where(test => test.UserID == userId) 
                 .ToListAsync();
+        }
+
+
+        public async Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId)
+        {
+            return await _context.Skills
+                .Where(s => s.TestId == testId)
+                .Include(s => s.Parts)
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .ToListAsync();
+        }
+
+
+        public async Task<Skill> GetSkillByIdAsync(Guid skillId)
+        {
+            return await _context.Skills
+                .Include(s => s.Parts)
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(s => s.Id == skillId);
         }
 
         public async Task<List<Skill>> GetSkills(Guid testId)
