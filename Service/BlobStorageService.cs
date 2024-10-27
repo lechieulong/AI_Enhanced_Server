@@ -19,6 +19,20 @@ public class BlobStorageService : IBlogStorageService
         var blobClient = blobContainerClient.GetBlobClient(fileName);
         await blobClient.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
 
-        return blobClient.Uri.ToString(); 
+        return blobClient.Uri.ToString();
     }
+
+    public async Task<string> DownloadTemplate()
+    {
+        var blobContainerClient = _blobServiceClient.GetBlobContainerClient("template");
+
+        var blobClient = blobContainerClient.GetBlobClient("QuestionTemplate.xlsx");
+
+        if (!await blobClient.ExistsAsync())
+        {
+            throw new FileNotFoundException("The template file does not exist.");
+        }
+        return blobClient.Uri.ToString();
+    }
+
 }
