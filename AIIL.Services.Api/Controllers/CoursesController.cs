@@ -22,11 +22,39 @@ namespace Auth.Controllers
             _classRepository = classRepository;
         }
 
+        //// GET: api/courses
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var courses = await _repository.GetAllAsync();
+        //    return Ok(courses.Select(course => new
+        //    {
+        //        course.Id,
+        //        course.CourseName,
+        //        course.Content,
+        //        course.Hours,
+        //        course.Days,
+        //        Categories = course.Categories, // Return the list of categories
+        //        course.Price,
+        //        course.UserId,
+        //        course.IsEnabled // Include IsEnabled status
+
+        //    }));
+        //}
+
         // GET: api/courses
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var courses = await _repository.GetAllAsync();
+            var categoryMapping = new Dictionary<string, int>
+    {
+        { "Reading", 0 },
+        { "Listening", 1 },
+        { "Writing", 2 },
+        { "Speaking", 3 }
+    };
+
             return Ok(courses.Select(course => new
             {
                 course.Id,
@@ -34,12 +62,18 @@ namespace Auth.Controllers
                 course.Content,
                 course.Hours,
                 course.Days,
-                Categories = course.Categories, // Return the list of categories
+                // Nếu Categories là List<string>, sử dụng trực tiếp
+                Categories = course.Categories
+                    .Select(c => categoryMapping.TryGetValue(c.Trim(), out var value) ? value : -1)
+                    .ToList(), // Không cần xử lý null vì đã chắc chắn là List<string>
                 course.Price,
                 course.UserId,
                 course.IsEnabled // Include IsEnabled status
             }));
         }
+
+
+
 
         // POST: api/courses
         [HttpPost]
