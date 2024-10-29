@@ -62,13 +62,14 @@ namespace AIIL.Services.Api.Controllers
         {
 
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userRoleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
             {
                 return Unauthorized("Invalid user ID.");
             }
 
-            var result = await _testExamService.CreateTestAsync(userId, model);
+            var result = await _testExamService.CreateTestAsync(userId, model, userRoleClaim);
             return Ok(result);
         }
 

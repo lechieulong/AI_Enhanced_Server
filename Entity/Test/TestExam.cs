@@ -12,5 +12,6 @@
         public Guid UserID { get; set; }
 
         public ICollection<Skill> SkillTests { get; set; } = new List<Skill>();
+        public int TestCreateBy { get; set; }
     }
 }

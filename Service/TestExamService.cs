@@ -3,6 +3,7 @@ using Entity.Test;
 using IRepository;
 using IService;
 using Model.Test;
+using Model.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,9 +113,10 @@ namespace Service
         //    }
         //}
 
-        public async Task<TestModel> CreateTestAsync(Guid userId,TestModel model)
+        public async Task<TestModel> CreateTestAsync(Guid userId,TestModel model, string userRoleClaim)
         {
-            return await _testExamRepository.AddTestAsync(userId,model);
+            int role = userRoleClaim.Equals(SD.Teacher) ? 0 : 1;
+            return await _testExamRepository.AddTestAsync(userId,model, role);
         }
       
     }

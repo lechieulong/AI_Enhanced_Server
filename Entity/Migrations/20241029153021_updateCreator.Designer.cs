@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241029153021_updateCreator")]
+    partial class updateCreator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,30 +133,6 @@ namespace Entity.Migrations
 
                     b.ToTable("Courses");
                 });
-
-            modelBuilder.Entity("Entity.AccountBalance", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
-
-                b.Property<decimal>("Balance")
-                    .HasColumnType("decimal(18,2)");
-
-                b.Property<DateTime>("LastUpdated")
-                    .HasColumnType("datetime2");
-
-                b.Property<string>("UserId")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(450)");
-
-                b.HasKey("Id");
-
-                b.HasIndex("UserId")
-                    .IsUnique();
-
-                b.ToTable("AccountBalances");
-            });
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
@@ -817,9 +796,6 @@ namespace Entity.Migrations
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreateBy")
-                      .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");

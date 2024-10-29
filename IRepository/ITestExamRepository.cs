@@ -10,7 +10,7 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
-        Task<TestModel> AddTestAsync(Guid userId, TestModel model);
+        Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<TestExam> GetTestAsync(Guid id);
         Task<List<Skill>> GetSkills(Guid testId);

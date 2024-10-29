@@ -152,7 +152,7 @@ namespace Repository
             }
         }
 
-        public async Task<TestModel> AddTestAsync(Guid userId, TestModel model)
+        public async Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role)
         {
             var newTest = new TestExam
             {
@@ -163,6 +163,7 @@ namespace Repository
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
                 UserID = userId,
+                TestCreateBy = role,
             };
             _context.TestExams.Add(newTest);
 
