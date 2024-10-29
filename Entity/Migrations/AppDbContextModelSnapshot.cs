@@ -1088,6 +1088,16 @@ namespace Entity.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Entity.AccountBalance", b =>
+            {
+                b.HasOne("Entity.ApplicationUser", "User")
+                    .WithOne("AccountBalances")
+                    .HasForeignKey("Entity.AccountBalance", "UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+                b.Navigation("User");
+            });
+
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "Learner")
