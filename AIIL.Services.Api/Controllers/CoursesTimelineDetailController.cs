@@ -66,36 +66,36 @@ namespace Auth.Controllers
             if (courseTimelineDetailDtos == null || !courseTimelineDetailDtos.Any())
             {
                 return BadRequest("At least one timeline detail is required.");
-        }
+            }
 
             var addedTimelineDetails = new List<CourseTimelineDetail>();
 
             foreach (var timelineDetailDto in courseTimelineDetailDtos)
-        {
+            {
                 // Validate required fields
                 if (timelineDetailDto.CourseTimelineId == Guid.Empty ||
                     string.IsNullOrWhiteSpace(timelineDetailDto.Title) ||
                     string.IsNullOrWhiteSpace(timelineDetailDto.Topic))
-            {
+                {
                     return BadRequest("Invalid timeline detail data.");
-            }
+                }
 
                 // Map DTO to Entity
                 var courseTimelineDetail = new CourseTimelineDetail
-            {
+                {
                     CourseTimelineId = timelineDetailDto.CourseTimelineId,
                     Title = timelineDetailDto.Title,
                     VideoUrl = timelineDetailDto.VideoUrl,
                     Topic = timelineDetailDto.Topic,
                     IsEnabled = timelineDetailDto.IsEnabled // Gán IsEnabled từ DTO
-            };
+                };
                 // Thêm CourseTimelineDetail vào cơ sở dữ liệu
                 addedTimelineDetails.Add(courseTimelineDetail);
-        }
+            }
             foreach (var timelineDetail in addedTimelineDetails)
-        {
+            {
                 await _repository.CreateAsync(timelineDetail);
-        }
+            }
             return CreatedAtAction(nameof(GetAll), addedTimelineDetails);
         }
 
