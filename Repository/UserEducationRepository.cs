@@ -59,7 +59,16 @@ namespace Repository
 
         public async Task<UserEducation> GetByIdAsync(string teacherId)
         {
-            return await _context.Set<UserEducation>().FindAsync(teacherId);
+            var education = await _context.UserEducations
+                .Include(ue => ue.Specializations) // Include related specializations
+                .FirstOrDefaultAsync(r => r.TeacherId == teacherId);
+
+            if (education == null)
+            {
+                throw new KeyNotFoundException("No user education found for the specified user ID.");
+            }
+
+            return education;
         }
 
         public async Task<UserEducation> UpdateAsync(UserEducation userEducation)

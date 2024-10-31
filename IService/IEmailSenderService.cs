@@ -13,5 +13,6 @@ namespace IService
         Task SendRegistrationGGSuccessEmail(string recipientEmail, string recipientName, string username, string password);
         Task SendResetPasswordRequestEmail(string email, string userName, string resetLink);
         Task SendResetPasswordConfirmationEmail(string email, string userName);
+        Task SendEmailUnlockUser(string email, string name, DateTime unlockDate);
     }
 }

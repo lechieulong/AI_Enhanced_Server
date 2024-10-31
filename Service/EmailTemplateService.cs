@@ -141,23 +141,52 @@ namespace Service
             {
                 Subject = "Password Reset Confirmation",
                 Body = $@"
-                    <html>
-                        <head>
-                            <style>
-                                body {{ font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }}
-                                .container {{ max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
-                            </style>
-                        </head>
-                        <body>
-                            <div>
-                                <p>Dear {recipientName},</p>
-                                <p>Your password has been successfully reset.</p>
+                <html>
+                    <head>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; background-color: #f9fafb; color: #333; }}
+                            .container {{ max-width: 600px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }}
+                            h1 {{ font-size: 24px; color: #1a202c; }}
+                            p {{ font-size: 16px; line-height: 1.6; }}
+                            .btn {{ display: inline-block; margin-top: 20px; padding: 10px 20px; background: #1d72b8; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; }}
+                            .footer {{ font-size: 12px; color: #888; text-align: center; margin-top: 30px; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <h1>Password Reset Confirmation</h1>
+                            <p>Dear {recipientName},</p>
+                            <p>Your password has been successfully reset. If you did not perform this action, please contact support.</p>
+                            <a href='http://localhost:5173/' class='btn'>Login to Your Account</a>
+                            <div class='footer'>
+                                <p>&copy; 2024 Nguyen Van Sy Dep Trai. All rights reserved.</p>
                             </div>
-                        </body>
-                    </html>"
+                        </div>
+                    </body>
+                </html>"
             };
         }
 
+        public EmailTemplate NotifyUnlockUserEmail(string recipientName, DateTime unlockDate)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Account Unlocked Notification",
+                Body = $@"
+                    <html>
+                    <body>
+                        <p>Dear {recipientName},</p>
+                        <p>We are pleased to inform you that your account has been successfully unlocked.</p>
+                        <p>Your account was unlocked on: <strong>{unlockDate.ToString("f")}</strong>.</p>
+                        <p>If you have any questions or need further assistance, feel free to contact us.</p>
+                        <p>Thank you!</p>
+                        <p>Best regards,<br/>
+                        AIILs support Team</p>
+                    </body>
+                    </html>
+                    "
+            };
+        }
 
     }
 }

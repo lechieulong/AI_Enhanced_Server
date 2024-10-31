@@ -1,4 +1,5 @@
 ﻿using Entity;
+using Microsoft.AspNetCore.Http;
 using Model;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,7 @@ namespace IRepository
         Task<ApplicationUser> GetUserByIdAsync(string userId);
         Task<(IEnumerable<UserDto> users, int totalCount)> GetUsersAsync(int page, int pageSize);
         Task LockUserAsync(string userId, int durationInMinutes);
+        Task UnlockUserAsync(string userId);
+        Task<IEnumerable<UserFromFileDto>> ImportUserAsync(IFormFile file);
     }
 }
