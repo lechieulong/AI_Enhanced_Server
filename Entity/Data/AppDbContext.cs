@@ -1,4 +1,5 @@
 ﻿using Entity.Live;
+using Entity.Payment;
 using Entity.Test;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,7 @@ namespace Entity.Data
         public DbSet<StreamSession> StreamSessions { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<User_Ticket> User_Tickets { get; set; }
+        public DbSet<Balance_History> Balance_Historys { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -103,6 +105,13 @@ namespace Entity.Data
                 .HasMany(ue => ue.Specializations)
                 .WithMany(s => s.UserEducations)
                 .UsingEntity(j => j.ToTable("UserEducationSpecializations"));
+            modelBuilder.Entity<Course>()
+                .Property(c => c.Categories)
+                .HasConversion(
+                    v => string.Join(',', v), // Convert list to a comma-separated string
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // Convert back to list
+                );
+
         }
 
     }

@@ -6,17 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Model
+namespace Model.Payment
 {
-    public class AccountBalaceModel
+    public class TransactionModel
     {
-
         public int Id { get; set; }
         public String UserId { get; set; }
 
-        public decimal Balance { get; set; }
+        public decimal Amount { get; set; }
 
-        public DateTime LastUpdated { get; set; }
+        public string PaymentStatus { get; set; }
 
+        public DateTime CreatedAt { get; set; }
     }
 }

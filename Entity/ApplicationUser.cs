@@ -1,4 +1,5 @@
 ﻿using Entity.Live;
+using Entity.Payment;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;

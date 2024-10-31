@@ -1,7 +1,7 @@
-﻿using Entity;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Entity;
 
 public class Course
 {
@@ -14,7 +14,10 @@ public class Course
     public string Content { get; set; }
     public int Hours { get; set; }
     public int Days { get; set; }
-    public string Category { get; set; }
+
+    // Change this property to a list of skills
+    public List<string> Categories { get; set; } = new List<string>(); // Allow multiple categories
+
     public double Price { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;

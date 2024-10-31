@@ -10,15 +10,20 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
-        Task<TestModel> AddTestAsync(TestModel model);
+        Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
+        Task<TestExam> GetTestAsync(Guid id);
+        Task<List<Skill>> GetSkills(Guid testId);
+        Task<Skill> GetSkillByIdAsync(Guid SkillId);
+        Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
+
+        Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
         Task<List<Question>> GetAllQuestionsAsync(Guid userId);
         Task AddQuestionsAsync(List<Question> questionModels);
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
         Task DeleteQuestionAsync(Guid id); // Added
-
-        Task AddSkillAsync(Skill skill);
+        Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
     }
 }

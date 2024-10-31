@@ -9,9 +9,9 @@ namespace Model.Test
 {
     public class PartDto
     {
-        public int PartNumber { get; set; }
-        public string ContentText { get; set; }
+        public string? ContentText { get; set; }
         public string? Audio { get; set; }
-        public List<SectionDto> Sections { get; set; }
+        public string? Image { get; set; }
+        public List<SectionDto> Sections { get; set; } = new List<SectionDto>();
     }
 }

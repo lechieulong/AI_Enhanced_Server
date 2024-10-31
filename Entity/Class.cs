@@ -19,10 +19,11 @@ public class Class
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; } // Thêm thuộc tính EndDate
 
-    public TimeSpan StartTime { get; set; } // Thời gian bắt đầu lớp học
-    public TimeSpan EndTime { get; set; } // Thời gian kết thúc lớp học
+    public TimeSpan? StartTime { get; set; } // Thời gian bắt đầu lớp học
+    public TimeSpan? EndTime { get; set; } // Thời gian kết thúc lớp học
 
     public string? ImageUrl { get; set; }
+    public bool IsEnabled { get; set; } = true; // Mặc định là true (enabled)
 
     // Quan hệ nhiều-nhiều với User thông qua UserClass
     public ICollection<Enrollment>? Enrollments { get; set; }

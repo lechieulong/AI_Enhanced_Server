@@ -1,30 +1,158 @@
-﻿using Common;
+﻿using AutoMapper;
+using Common;
 using Entity;
 using Entity.Data;
 using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Model.Test;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Repository
 {
     public class TestExamRepository : ITestExamRepository
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public TestExamRepository(AppDbContext context)
+        public TestExamRepository(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-
-        public async Task AddSkillAsync(Skill skill)
+        public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
         {
-            _context.Skills.Add(skill);
-            await _context.SaveChangesAsync();
+            // Check if the model is null or empty
+            if (model == null || !model.Any())
+                throw new ArgumentException("Model cannot be null or empty.", nameof(model));
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var skillKeyValue in model)
+                {
+                    var skillDto = skillKeyValue.Value;
+
+                    // Skip if the skillDto is null
+                    if (skillDto == null)
+                        continue;
+
+                    var skill = new Skill
+                    {
+                        Id = Guid.NewGuid(),
+                        TestId = testId,
+                        Duration = skillDto.Duration,
+                        Type = (int)skillDto.Type,
+                        Parts = new List<Part>()
+                    };
+
+                    // Check if Parts are not null or empty
+                    if (skillDto.Parts != null && skillDto.Parts.Any())
+                    {
+                        int partIndex = 1;
+
+                        foreach (var partDto in skillDto.Parts)
+                        {
+                            // Skip if the partDto is null
+                            if (partDto == null)
+                                continue;
+
+                            var part = new Part
+                            {
+                                Id = Guid.NewGuid(),
+                                PartNumber = partIndex,
+                                ContentText = partDto.ContentText,
+                                Audio = partDto.Audio,
+                                Image = partDto.Image,
+                                Skill = skill,
+                                Sections = new List<Section>()
+                            };
+
+                            // Check if Sections are not null or empty
+                            if (partDto.Sections != null && partDto.Sections.Any())
+                            {
+                                foreach (var sectionDto in partDto.Sections)
+                                {
+                                    // Skip if the sectionDto is null
+                                    if (sectionDto == null)
+                                        continue;
+
+                                    var section = new Section
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        SectionGuide = sectionDto.SectionGuide,
+                                        SectionType = sectionDto.SectionType,
+                                        Part = part,
+                                        SectionQuestions = new List<SectionQuestion>()
+                                    };
+
+                                    if (sectionDto.Questions != null && sectionDto.Questions.Any())
+                                    {
+                                        foreach (var questionDto in sectionDto.Questions)
+                                        {
+                                            if (questionDto == null)
+                                                continue;
+
+                                            var question = new Question
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                UserId = userId,
+                                                QuestionName = questionDto.QuestionName,
+                                                QuestionType = questionDto.QuestionType,
+                                                Answers = new List<Answer>() // Initialize Answers collection
+                                            };
+
+                                            if (questionDto.Answers != null && questionDto.Answers.Any())
+                                            {
+                                                foreach (var answerDto in questionDto.Answers)
+                                                {
+                                                    if (answerDto == null)
+                                                        continue;
+
+                                                    var newAnswer = new Answer
+                                                    {
+                                                        Id = Guid.NewGuid(),
+                                                        AnswerText = answerDto.AnswerText,
+                                                        TypeCorrect = (int)answerDto.IsCorrect
+                                                    };
+
+                                                    question.Answers.Add(newAnswer); // Add to the question's Answers collection
+                                                }
+                                            }
+
+                                            var sectionQuestion = new SectionQuestion
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                Section = section,
+                                                Question = question
+                                            };
+
+                                            section.SectionQuestions.Add(sectionQuestion); // Add the question to the section
+                                        }
+                                    }
+
+                                    part.Sections.Add(section); // Add the section to the part
+                                }
+                            }
+
+                            partIndex++;
+                            skill.Parts.Add(part); 
+                        }
+                    }
+
+                    await _context.Skills.AddAsync(skill);
+                }
+
+                await _context.SaveChangesAsync(); // Save all changes
+                await transaction.CommitAsync(); // Commit the transaction
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(); // Rollback on error
+                throw; // Rethrow the exception
+            }
         }
 
-        public async Task<TestModel> AddTestAsync(TestModel model)
+        public async Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role)
         {
             var newTest = new TestExam
             {
@@ -34,7 +162,8 @@ namespace Repository
                 EndTime = model.EndTime,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
-                CreateBy = model.CreateBy,
+                UserID = userId,
+                TestCreateBy = role,
             };
             _context.TestExams.Add(newTest);
 
@@ -90,7 +219,7 @@ namespace Repository
                             Id = Guid.NewGuid(), // Assign a new Guid
                             QuestionId = newQuestion.Id, // Associate with the new question
                             AnswerText = answer.AnswerText,
-                            IsCorrect = answer.IsCorrect
+                            TypeCorrect = answer.TypeCorrect
                         };
 
                         _context.Answers.Add(newAnswer); // Add to the Answers table
@@ -131,7 +260,7 @@ namespace Repository
                             Id = Guid.NewGuid(), // Assign a new Guid
                             QuestionId = newQuestion.Id, // Associate with the new question
                             AnswerText = answer.AnswerText,
-                            IsCorrect = answer.IsCorrect
+                            TypeCorrect = answer.TypeCorrect
                         };
 
                         _context.Answers.Add(newAnswer); // Add to the Answers table
@@ -150,8 +279,48 @@ namespace Repository
         public async Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId)
         {
             return await _context.TestExams
-                .Where(test => test.CreateBy == userId) 
+                .Where(test => test.UserID == userId) 
                 .ToListAsync();
+        }
+
+
+        public async Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId)
+        {
+            return await _context.Skills
+                .Where(s => s.TestId == testId)
+                .Include(s => s.Parts)
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .ToListAsync();
+        }
+
+
+        public async Task<Skill> GetSkillByIdAsync(Guid skillId)
+        {
+            return await _context.Skills
+                .Include(s => s.Parts)
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(s => s.Id == skillId);
+        }
+
+        public async Task<List<Skill>> GetSkills(Guid testId)
+        {
+            return await _context.Skills.Where(skill => skill.TestId == testId).ToListAsync();
+        }
+        public async Task<List<Part>> GetParts(Guid skillId)
+        {
+            return await _context.Parts.Where(part => part.Skill.Id == skillId).ToListAsync();
+        }
+
+        public async Task<TestExam> GetTestAsync(Guid id)
+        {
+            return await _context.TestExams
+                .FirstOrDefaultAsync(test => test.Id == id);
         }
 
         public async Task<Question> GetQuestionByIdAsync(Guid id)
@@ -187,7 +356,7 @@ namespace Repository
                     {
                         // Update existing answer
                         existingAnswer.AnswerText = answer.AnswerText;
-                        existingAnswer.IsCorrect = answer.IsCorrect;
+                        existingAnswer.TypeCorrect = answer.IsCorrect;
                         existingAnswers.Remove(existingAnswer); // Remove from list to keep track of updates
                     }
                     else
@@ -197,7 +366,7 @@ namespace Repository
                         {
                             Id = Guid.NewGuid(), // Ensure a new ID is assigned if it's a new answer
                             AnswerText = answer.AnswerText,
-                            IsCorrect = answer.IsCorrect
+                            TypeCorrect = answer.IsCorrect
                         });
                     }
                 }

@@ -7,6 +7,5 @@
         public int Duration { get; set; }
         public ICollection<Part> Parts { get; set; } = new List<Part>();
         public Guid TestId { get; set; }
-        public TestExam Test { get; set; }
     }
 }

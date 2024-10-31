@@ -35,5 +35,25 @@ namespace AIIL.Services.Api.Controllers
                 return Ok(new { FileUrl = fileUrl });
             }
         }
+
+        [HttpGet("template")]
+        public async Task<IActionResult> GetDownloadTemplate()
+        {
+            try
+            {
+                var fileUrl = await _blobStorageService.DownloadTemplate();
+                return Ok(new { FileUrl = fileUrl });
+            }
+            catch (FileNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+
     }
 }

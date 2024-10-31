@@ -1,5 +1,6 @@
-﻿using Entity;
+﻿using Entity.Payment;
 using Model;
+using Model.Payment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace IRepository
         Task<decimal> GetBalace(string UserId);
         Task<AccountBalance> AddNew(String UserId);
 
-        Task<Boolean> UpdateBalanceAsync(String UserId, int money,String signature);
+        Task<Boolean> UpdateBalanceAsync(AccountBalaceModel mode);
 
     }
 }

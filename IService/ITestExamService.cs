@@ -6,7 +6,7 @@ namespace IService
 {
     public interface ITestExamService
     {
-        Task<TestModel> CreateTestAsync(TestModel model);
-        Task CreateSkillsAsync(Guid testId, Dictionary<string, SkillDto> model);
+        Task<TestModel> CreateTestAsync(Guid userId,TestModel model, string userRoleClaim);
+        //Task CreateSkillsAsync(Guid userId,Guid testId, Dictionary<string, SkillDto> model);
     }
 }
