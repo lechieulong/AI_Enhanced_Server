@@ -16,8 +16,11 @@ using Repository;
 using Repository.Live;
 using Service;
 using Repositories;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 //Add to support Middleware get
 //builder.Services.AddHttpContextAccessor();

@@ -52,6 +52,12 @@ namespace Service
             var emailTemplate = _emailTemplateService.PasswordResetConfirmationEmail(recipientName);
             await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
         }
+
+        public async Task SendEmailUnlockUser(string recipientEmail, string name, DateTime unlockDate)
+        {
+            var emailTemplate = _emailTemplateService.NotifyUnlockUserEmail(name, unlockDate);
+            await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
+        }
     }
 
 }

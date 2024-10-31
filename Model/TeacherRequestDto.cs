@@ -16,5 +16,6 @@ namespace Model
         public DateTime CreateAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public RequestStatusEnum Status { get; set; }
+        public UserDto? User { get; set; }
     }
 }

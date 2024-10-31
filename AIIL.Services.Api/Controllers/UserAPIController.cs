@@ -2,11 +2,16 @@
 using Entity;
 using Entity.Data;
 using IRepository;
+using IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Model;
+using Model.Utility;
+using OfficeOpenXml;
+using Service;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -15,18 +20,24 @@ namespace AIIL.Services.Api.Controllers
     public class UserAPIController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly IAuthRepository _authRepository;
+        private readonly IEmailSenderService _emailSenderService;
+        private readonly IBlogStorageService _blobStorageService;
         private readonly ResponseDto _response;
         private readonly AppDbContext _db;
         IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserAPIController(IUserRepository userRepository, IMapper mapper, AppDbContext db, UserManager<ApplicationUser> userManager)
+        public UserAPIController(IUserRepository userRepository, IMapper mapper, AppDbContext db, UserManager<ApplicationUser> userManager, IBlogStorageService blogStorageService, IAuthRepository authRepository, IEmailSenderService emailSenderService)
         {
             _userRepository = userRepository;
             _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
             _userManager = userManager;
+            _blobStorageService = blogStorageService;
+            _authRepository = authRepository;
+            _emailSenderService = emailSenderService;
         }
 
         [HttpGet("profile/{username}")]
@@ -77,25 +88,46 @@ namespace AIIL.Services.Api.Controllers
             return Ok(_response);
         }
 
-        [HttpPut]
-        //[Authorize(Roles = "ADMIN")]
-        public ResponseDto Put([FromBody] UserDto userDto)
+        [HttpPut("update-profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto userDto)
         {
+            var currentUserId = _userManager.GetUserId(User);
+
+            if (currentUserId == null)
+            {
+                _response.IsSuccess = false;
+                _response.Result = null;
+                _response.Message = "User not found";
+                return NotFound(_response);
+            }
             try
             {
-                ApplicationUser obj = _mapper.Map<ApplicationUser>(userDto);
-                _db.ApplicationUsers.Update(obj);
-                _db.SaveChanges();
+                var existingUser = await _db.ApplicationUsers.FindAsync(currentUserId);
+                if (existingUser == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Result = null;
+                    _response.Message = "User not found";
+                    return NotFound(_response);
+                }
+                _mapper.Map(userDto, existingUser);
 
-                _response.Result = _mapper.Map<UserDto>(obj);
+                _db.ApplicationUsers.Update(existingUser);
+                await _db.SaveChangesAsync();
+
+                _response.IsSuccess = true;
+                _response.Result = _mapper.Map<UserDto>(existingUser);
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.Message = ex.Message;
+                _response.Message = $"Error updating profile: {ex.Message}";
+                return StatusCode(500, _response); // Return server error status code
             }
-            return _response;
+            return Ok(_response);
         }
+
 
         [HttpGet("top-teachers")]
         public async Task<IActionResult> GetTopTeachers()
@@ -169,7 +201,6 @@ namespace AIIL.Services.Api.Controllers
             return Ok(response);
         }
 
-
         [HttpPost("lock")]
         [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> LockUser([FromBody] LockUserRequestDto request)
@@ -188,5 +219,130 @@ namespace AIIL.Services.Api.Controllers
             await _userRepository.LockUserAsync(request.UserId, request.DurationInMinutes);
             return Ok("User locked successfully.");
         }
+
+        [HttpPost("unlock/{userId}")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> UnlockUser(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _response.IsSuccess = false;
+                _response.Message = "User ID is required.";
+                return BadRequest(_response);
+            }
+
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _response.IsSuccess = false;
+                _response.Message = "User not found.";
+                return NotFound(_response);
+            }
+
+            await _userRepository.UnlockUserAsync(user.Id);
+            _response.IsSuccess = true;
+            _response.Message = "User unlocked successfully.";
+
+            return Ok(_response);
+        }
+
+        [HttpPost("import-excel")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> ImportFromExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                _response.IsSuccess = false;
+                _response.Message = "Please upload a valid Excel file.";
+                return BadRequest(_response);
+            }
+
+            var importedUsers = new List<UserDto>();
+            var errors = new List<string>();
+
+            try
+            {
+                // Call the repository method to parse the file and get users
+                var users = await _userRepository.ImportUserAsync(file);
+                foreach (var userDto in users)
+                {
+                    var existingUserByUsername = await _userManager.FindByNameAsync(userDto.UserName);
+                    var existingUserByEmail = await _userManager.FindByEmailAsync(userDto.Email);
+                    if (existingUserByUsername != null || existingUserByEmail != null)
+                    {
+                        // Handle the case where the user already exists
+                        string errorMessage = existingUserByUsername != null
+                            ? $"Username '{userDto.UserName}' is already taken."
+                            : $"Email '{userDto.Email}' is already registered.";
+                        errors.Add(errorMessage); // Add error message to the list
+                        continue; // Skip to the next user
+                    }
+                    // Map UserFromFileDto to ApplicationUser
+                    var user = _mapper.Map<ApplicationUser>(userDto);
+                    // Attempt to create the user with a password
+                    var result = await _userManager.CreateAsync(user, userDto.Password);
+                    if (result.Succeeded)
+                    {
+                        await _authRepository.AssignRole(user.Email, SD.User);
+                        // Fetch the created user to return a UserDto
+                        var userToReturn = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == user.Email);
+                        if (userToReturn != null)
+                        {
+                            importedUsers.Add(new UserDto
+                            {
+                                ID = userToReturn.Id,
+                                Email = userToReturn.Email,
+                                Name = userToReturn.Name,
+                                PhoneNumber = userToReturn.PhoneNumber
+                            });
+                            await _emailSenderService.SendRegistrationSuccessEmail(user.Email, user.Name, user.UserName);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            errors.Add(error.Description);
+                        }
+                    }
+                }
+                // Set the response based on the outcome
+                if (errors.Any())
+                {
+                    _response.IsSuccess = true;
+                    _response.Message = "Some users could not be imported.";
+                    _response.Result = new
+                    {
+                        ImportedUsers = importedUsers,
+                        ImportedCount = importedUsers.Count,
+                        Errors = errors
+                    };
+
+                    return Ok(_response); // Ensure you return the response if there are errors
+                }
+                else
+                {
+                    _response.IsSuccess = true;
+                    _response.Message = "All users imported successfully.";
+                    _response.Result = new
+                    {
+                        ImportedUsers = importedUsers,
+                        ImportedCount = importedUsers.Count,
+                        Errors = errors
+                    };
+
+                    return Ok(_response); // Return the successful response
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = "An error occurred while importing users.";
+                _response.Result = new { Details = ex.Message };
+                return StatusCode(500, _response);
+            }
+
+        }
+
     }
 }

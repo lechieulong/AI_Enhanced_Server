@@ -24,20 +24,26 @@ namespace Mapper
                 config.CreateMap<ClassDto, Class>();
                 config.CreateMap<ApplicationUser, UserDto>();
                 config.CreateMap<UserDto, ApplicationUser>();
+                config.CreateMap<UpdateProfileDto, ApplicationUser>();
+                config.CreateMap<ApplicationUser, UpdateProfileDto>();
+                config.CreateMap<UserFromFileDto, ApplicationUser>();
+                config.CreateMap<ApplicationUser, UserFromFileDto>();
                 config.CreateMap<EventDto, Event>();
                 config.CreateMap<Event, EventDto>();
                 config.CreateMap<TeacherAvailableSchedule, TeacherAvailableScheduleDto>();
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<TestExam, TestModel>();
                 config.CreateMap<QuestionDto, Question>()
- .ForMember(dest => dest.Answers, opt => opt.Ignore()); // Ignore Answers during mapping, handled later
+                    .ForMember(dest => dest.Answers, opt => opt.Ignore()); // Ignore Answers during mapping, handled later
 
                 config.CreateMap<Question, QuestionResponse>()
                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers)); // Ensure answers are mapped
 
                 config.CreateMap<Answer, AnswerResponse>(); // Ensure Answer is mapped to AnswerResponse
 
-                config.CreateMap<UserEducation, UserEducationDto>();
+                config.CreateMap<UserEducation, UserEducationDto>()
+                    .ForMember(dest => dest.SpecializationIds,
+                       opt => opt.MapFrom(src => src.Specializations.Select(s => s.Id).ToList()));
                 config.CreateMap<UserEducationDto, UserEducation>();
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();

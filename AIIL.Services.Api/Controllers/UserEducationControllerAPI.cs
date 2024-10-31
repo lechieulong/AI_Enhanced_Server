@@ -2,6 +2,7 @@
 using Entity;
 using Entity.Data;
 using IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("beteacher")]
+        [Authorize]
         public async Task<IActionResult> RegisterTeacher([FromBody] UserEducationDto userEducationDto)
         {
             try
@@ -73,6 +75,44 @@ namespace AIIL.Services.Api.Controllers
                     IsSuccess = false,
                     Message = $"Internal server error: {ex.Message}"
                 });
+            }
+        }
+
+        [HttpGet("usereducation")]
+        [Authorize]
+        public async Task<IActionResult> GetUserEducation()
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "User not found."
+                    });
+                }
+
+                var userEducation = await _userEducationRepository.GetByIdAsync(userId);
+                var userEducationDto = _mapper.Map<UserEducationDto>(userEducation);
+
+                return Ok(new ResponseDto
+                {
+                    IsSuccess = true,
+                    Result = userEducationDto,
+                    Message = ""
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Return 404 if no request is found for the user
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Return 500 for other errors
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 

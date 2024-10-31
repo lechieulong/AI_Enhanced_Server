@@ -16,5 +16,6 @@ namespace IService
         EmailTemplate AccountRegistrationGGEmail(string recipientName, string username, string password);
         EmailTemplate ResetPasswordEmail(string recipientName, string resetLink);
         EmailTemplate PasswordResetConfirmationEmail(string recipientName);
+        EmailTemplate NotifyUnlockUserEmail(string recipientName, DateTime unlockDate);
     }
 }

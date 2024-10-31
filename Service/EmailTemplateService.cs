@@ -167,6 +167,26 @@ namespace Service
             };
         }
 
+        public EmailTemplate NotifyUnlockUserEmail(string recipientName, DateTime unlockDate)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Account Unlocked Notification",
+                Body = $@"
+                    <html>
+                    <body>
+                        <p>Dear {recipientName},</p>
+                        <p>We are pleased to inform you that your account has been successfully unlocked.</p>
+                        <p>Your account was unlocked on: <strong>{unlockDate.ToString("f")}</strong>.</p>
+                        <p>If you have any questions or need further assistance, feel free to contact us.</p>
+                        <p>Thank you!</p>
+                        <p>Best regards,<br/>
+                        AIILs support Team</p>
+                    </body>
+                    </html>
+                    "
+            };
+        }
 
     }
 }
