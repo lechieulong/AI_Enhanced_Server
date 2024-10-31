@@ -6,6 +6,7 @@ using Model; // Thêm không gian tên cho DTO
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Repository;
 
 namespace Auth.Controllers
 {
@@ -24,16 +25,15 @@ namespace Auth.Controllers
         public async Task<IActionResult> GetAll()
         {
             var courseTimelineDetails = await _repository.GetAllAsync();
-            // Chuyển đổi sang DTO nếu cần
+            // Chuyển đổi sang DTO
             var courseTimelineDetailsDto = courseTimelineDetails.Select(ct => new CourseTimelineDetailDto
             {
-                Id = ct.Id,
                 CourseTimelineId = ct.CourseTimelineId,
                 Title = ct.Title,
                 VideoUrl = ct.VideoUrl,
                 Topic = ct.Topic,
                 IsEnabled = ct.IsEnabled // Thêm IsEnabled vào DTO
-            });
+            }).ToList(); // Chuyển đổi thành danh sách
 
             return Ok(courseTimelineDetailsDto);
         }
@@ -50,7 +50,6 @@ namespace Auth.Controllers
             // Chuyển đổi sang DTO
             var courseTimelineDetailDto = new CourseTimelineDetailDto
             {
-                Id = courseTimelineDetail.Id,
                 CourseTimelineId = courseTimelineDetail.CourseTimelineId,
                 Title = courseTimelineDetail.Title,
                 VideoUrl = courseTimelineDetail.VideoUrl,
@@ -62,50 +61,83 @@ namespace Auth.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CourseTimelineDetailDto courseTimelineDetailDto)
+        public async Task<IActionResult> Create([FromBody] List<CourseTimelineDetailDto> courseTimelineDetailDtos)
         {
-            var courseTimelineDetail = new CourseTimelineDetailDto
+            if (courseTimelineDetailDtos == null || !courseTimelineDetailDtos.Any())
             {
-                Id = Guid.NewGuid(),
-                CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
-                Title = courseTimelineDetailDto.Title,
-                VideoUrl = courseTimelineDetailDto.VideoUrl,
-                Topic = courseTimelineDetailDto.Topic,
-                IsEnabled = true // Mặc định IsEnabled là true khi tạo mới
-            };
-
-            await _repository.CreateAsync(courseTimelineDetail);
-            return CreatedAtAction(nameof(GetById), new { id = courseTimelineDetail.Id }, courseTimelineDetailDto);
+                return BadRequest("At least one timeline detail is required.");
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, CourseTimelineDetailDto courseTimelineDetailDto)
+            var addedTimelineDetails = new List<CourseTimelineDetail>();
+
+            foreach (var timelineDetailDto in courseTimelineDetailDtos)
         {
-            if (id != courseTimelineDetailDto.Id)
+                // Validate required fields
+                if (timelineDetailDto.CourseTimelineId == Guid.Empty ||
+                    string.IsNullOrWhiteSpace(timelineDetailDto.Title) ||
+                    string.IsNullOrWhiteSpace(timelineDetailDto.Topic))
             {
-                return BadRequest();
+                    return BadRequest("Invalid timeline detail data.");
             }
 
-            var courseTimelineDetail = new CourseTimelineDetailDto
+                // Map DTO to Entity
+                var courseTimelineDetail = new CourseTimelineDetail
             {
-                Id = courseTimelineDetailDto.Id,
-                CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
-                Title = courseTimelineDetailDto.Title,
-                VideoUrl = courseTimelineDetailDto.VideoUrl,
-                Topic = courseTimelineDetailDto.Topic,
-                IsEnabled = courseTimelineDetailDto.IsEnabled // Cập nhật IsEnabled
+                    CourseTimelineId = timelineDetailDto.CourseTimelineId,
+                    Title = timelineDetailDto.Title,
+                    VideoUrl = timelineDetailDto.VideoUrl,
+                    Topic = timelineDetailDto.Topic,
+                    IsEnabled = timelineDetailDto.IsEnabled // Gán IsEnabled từ DTO
             };
-
-            await _repository.UpdateAsync(courseTimelineDetail);
-            return NoContent();
+                // Thêm CourseTimelineDetail vào cơ sở dữ liệu
+                addedTimelineDetails.Add(courseTimelineDetail);
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+            foreach (var timelineDetail in addedTimelineDetails)
         {
-            await _repository.DeleteAsync(id);
-            return NoContent();
+                await _repository.CreateAsync(timelineDetail);
         }
+            return CreatedAtAction(nameof(GetAll), addedTimelineDetails);
+        }
+
+
+
+
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateAsync(Guid id, CourseTimelineDetailDto courseTimelineDetailDto)
+        //{
+        //    // Kiểm tra nếu Id trong DTO không khớp với Id trong URL
+        //    if (id != courseTimelineDetailDto.Id)
+        //    {
+        //        return BadRequest("Id in URL and Id in body must match.");
+        //    }
+
+        //    var courseTimelineDetail = new CourseTimelineDetailDto
+        //    {
+        //        Id = id, // Gán Id từ URL cho đối tượng
+        //        CourseTimelineId = courseTimelineDetailDto.CourseTimelineId,
+        //        Title = courseTimelineDetailDto.Title,
+        //        VideoUrl = courseTimelineDetailDto.VideoUrl,
+        //        Topic = courseTimelineDetailDto.Topic,
+        //        IsEnabled = courseTimelineDetailDto.IsEnabled
+        //    };
+
+        //    await _repository.UpdateAsync(courseTimelineDetail);
+
+        //    return NoContent();
+        //}
+
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteAsync(Guid id)
+        //{
+        //    var deleted = await _repository.DeleteAsync(id);
+        //    if (!deleted)
+        //    {
+        //        return NotFound($"No timeline detail found with ID {id}.");
+        //    }
+
+        //    return NoContent();
+        //}
+
 
         [HttpGet("CourseTimelines/Details")]
         public async Task<IActionResult> GetByCourseTimelineIds([FromQuery(Name = "courseTimelineIds")] IEnumerable<Guid> courseTimelineIds)
@@ -125,8 +157,18 @@ namespace Auth.Controllers
                 return NotFound(new { message = "Không tìm thấy chi tiết nào cho các CourseTimelineId đã cho." });
             }
 
+            // Chuyển đổi sang DTO
+            var courseTimelineDetailsDto = courseTimelineDetailsList.Select(ct => new CourseTimelineDetailDto
+            {
+                CourseTimelineId = ct.CourseTimelineId,
+                Title = ct.Title,
+                VideoUrl = ct.VideoUrl,
+                Topic = ct.Topic,
+                IsEnabled = ct.IsEnabled
+            }).ToList();
+
             // Trả về danh sách chi tiết nếu tìm thấy
-            return Ok(courseTimelineDetailsList);
+            return Ok(courseTimelineDetailsDto);
         }
     }
 }

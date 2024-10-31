@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Entity
 {
@@ -8,6 +9,8 @@ namespace Entity
 
         // Khóa ngoại liên kết với CourseTimeline
         public Guid CourseTimelineId { get; set; } // Sửa tên biến để phản ánh rõ ràng mối quan hệ
+
+        [JsonIgnore]
         public CourseTimeline CourseTimeline { get; set; } // Khóa ngoại liên kết với CourseTimeline
 
         public string Title { get; set; }

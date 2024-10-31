@@ -74,5 +74,19 @@ namespace Repository
                 .Where(ct => ct.CourseId == courseId)
                 .ToListAsync();
         }
+
+        // Trong Repository/CourseRepository.cs
+        public async Task<List<CourseTimeline>> GetCourseTimelinesByCourseIdAsync(Guid courseId)
+        {
+            return await _context.CourseTimelines
+                .Where(ct => ct.CourseId == courseId)
+                .Select(ct => new CourseTimeline
+                {
+                    Id = ct.Id,
+                    Title = ct.Title
+                })
+                .ToListAsync();
+        }
+
     }
 }
