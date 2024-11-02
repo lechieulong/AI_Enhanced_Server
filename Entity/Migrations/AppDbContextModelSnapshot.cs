@@ -131,6 +131,24 @@ namespace Entity.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Entity.AccountBalance", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+                b.Property<decimal>("Balance")
+                    .HasColumnType("decimal(18,2)");
+                b.Property<DateTime>("LastUpdated")
+                    .HasColumnType("datetime2");
+                b.Property<string>("UserId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(450)");
+                b.HasKey("Id");
+                b.HasIndex("UserId")
+                    .IsUnique();
+                b.ToTable("AccountBalances");
+            });
+
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -1123,6 +1141,16 @@ namespace Entity.Migrations
 
                     b.Navigation("User");
                 });
+
+            modelBuilder.Entity("Entity.AccountBalance", b =>
+            {
+                b.HasOne("Entity.ApplicationUser", "User")
+                    .WithOne("AccountBalances")
+                    .HasForeignKey("Entity.AccountBalance", "UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+                b.Navigation("User");
+            });
 
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
                 {
