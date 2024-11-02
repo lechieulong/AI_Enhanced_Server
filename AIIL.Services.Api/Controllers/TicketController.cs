@@ -26,8 +26,8 @@ namespace AIIL.Services.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTicketByLiveId(Guid id)
         {
-            var Streamsession = await _repository.GetActiveTicketsByLiveIdAsync(id);
-            return Ok(Streamsession);
+            var Tikcet = await _repository.GetActiveTicketsByLiveIdAsync(id);
+            return Ok(Tikcet);
         }
         [HttpPost]
         public async Task<IActionResult> CreateTicket([FromBody] TicketModel ticketDto)

@@ -49,6 +49,8 @@ namespace Entity.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<User_Ticket> User_Tickets { get; set; }
         public DbSet<Balance_History> Balance_Historys { get; set; }
+        public DbSet<Gift> Gifts { get; set; }
+        public DbSet<User_Gift> User_Gifts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -105,6 +107,16 @@ namespace Entity.Data
                 .HasMany(ue => ue.Specializations)
                 .WithMany(s => s.UserEducations)
                 .UsingEntity(j => j.ToTable("UserEducationSpecializations"));
+
+            modelBuilder.Entity<User_Gift>()
+                .HasOne(ug => ug.User)
+                .WithMany(u => u.SentGifts) // Quà tặng đã gửi
+                .HasForeignKey(ug => ug.UserId);
+
+            modelBuilder.Entity<User_Gift>()
+                .HasOne(ug => ug.Receiver)
+                .WithMany(u => u.ReceivedGifts) // Quà tặng đã nhận
+                .HasForeignKey(ug => ug.ReceiverId);
             modelBuilder.Entity<Course>()
                 .Property(c => c.Categories)
                 .HasConversion(
