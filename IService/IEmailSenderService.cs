@@ -14,5 +14,7 @@ namespace IService
         Task SendResetPasswordRequestEmail(string email, string userName, string resetLink);
         Task SendResetPasswordConfirmationEmail(string email, string userName);
         Task SendEmailUnlockUser(string email, string name, DateTime unlockDate);
+        Task SendApproveTeacherRequestEmail(string email, string name, string description);
+        Task SendRejectTeacherRequestEmail(string email, string name, string description);
     }
 }

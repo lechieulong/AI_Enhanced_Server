@@ -58,6 +58,18 @@ namespace Service
             var emailTemplate = _emailTemplateService.NotifyUnlockUserEmail(name, unlockDate);
             await _emailSender.SendEmailAsync(recipientEmail, emailTemplate.Subject, emailTemplate.Body);
         }
+
+        public async Task SendApproveTeacherRequestEmail(string email, string name, string description)
+        {
+            var emailTemplate = _emailTemplateService.NotifyAcceptTeacherRequestTemplate(name, description);
+            await _emailSender.SendEmailAsync(email, emailTemplate.Subject, emailTemplate.Body);
+        }
+
+        public async Task SendRejectTeacherRequestEmail(string email, string name, string description)
+        {
+            var emailTemplate = _emailTemplateService.NotifyRejectTeacherRequestTemplate(name, description);
+            await _emailSender.SendEmailAsync(email, emailTemplate.Subject, emailTemplate.Body);
+        }
     }
 
 }

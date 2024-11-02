@@ -57,7 +57,9 @@ namespace Mapper
                 config.CreateMap<UserEducation, UserEducationDto>()
                     .ForMember(dest => dest.SpecializationIds,
                        opt => opt.MapFrom(src => src.Specializations.Select(s => s.Id).ToList()));
-                config.CreateMap<UserEducationDto, UserEducation>();
+                config.CreateMap<UserEducationDto, UserEducation>()
+                    .ForMember(dest => dest.Specializations, opt => opt.MapFrom(src =>
+                        src.SpecializationIds.Select(id => new Specialization { Id = id }).ToList()));
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();
                 config.CreateMap<TeacherRequest, TeacherRequestDto>();

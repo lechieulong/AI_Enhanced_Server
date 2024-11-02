@@ -17,5 +17,7 @@ namespace IService
         EmailTemplate ResetPasswordEmail(string recipientName, string resetLink);
         EmailTemplate PasswordResetConfirmationEmail(string recipientName);
         EmailTemplate NotifyUnlockUserEmail(string recipientName, DateTime unlockDate);
+        EmailTemplate NotifyAcceptTeacherRequestTemplate(string recipientName, string desciption);
+        EmailTemplate NotifyRejectTeacherRequestTemplate(string recipientName, string desciption);
     }
 }

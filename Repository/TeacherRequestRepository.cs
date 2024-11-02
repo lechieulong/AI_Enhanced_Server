@@ -1,10 +1,13 @@
-﻿using Common;
+﻿using Azure.Core;
+using Common;
 using Entity;
 using Entity.Data;
 using IRepository;
+using IService;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Model;
+using Model.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,8 +20,12 @@ namespace Repository
     public class TeacherRequestRepository : ITeacherRequestRepository
     {
         private readonly AppDbContext _context;
-        public TeacherRequestRepository(AppDbContext db)
+        private readonly IEmailSenderService _emailSenderService;
+        private readonly IAuthRepository _authRepository;
+        public TeacherRequestRepository(AppDbContext db, IEmailSenderService emailSenderService, IAuthRepository authRepository)
         {
+            _emailSenderService = emailSenderService;
+            _authRepository = authRepository;
             _context = db;
         }
         public async Task AddRequestAsync(TeacherRequest teacherRequest, UserEducation userEducation)
@@ -148,6 +155,114 @@ namespace Repository
                 .ToListAsync();
 
             return (requests, totalCount);
+        }
+
+        public async Task<TeacherRequestDto> ProcessRequest(Guid requestId, ProcessTeacherRequestDto processTeacherRequestDto)
+        {
+            var request = await _context.TeacherRequests.FindAsync(requestId);
+            if (request == null)
+            {
+                throw new KeyNotFoundException("Request not found");
+            }
+
+            request.Description = processTeacherRequestDto.Comment;
+            request.Status = (int)processTeacherRequestDto.Status; // Using the enum to set the status
+            request.UpdateAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            // Get user information for sending the email
+            var user = await _context.Users.FindAsync(request.UserId);
+            if (user != null)
+            {
+                try
+                {
+                    if (request.Status == (int)RequestStatusEnum.Approve) // Status is 1
+                    {
+                        var assignRoleSuccessful = await _authRepository.AssignRole(user.Email, SD.Teacher);
+                        if (!assignRoleSuccessful)
+                        {
+                            // Handle role assignment failure (logging, exception, etc.)
+                            throw new InvalidOperationException($"Failed to assign role to {user.Email}");
+                        }
+                        await _emailSenderService.SendApproveTeacherRequestEmail(user.Email, user.Name, request.Description);
+                    }
+                    else if (request.Status == (int)RequestStatusEnum.Reject) // Status is 2
+                    {
+                        await _emailSenderService.SendRejectTeacherRequestEmail(user.Email, user.Name, request.Description);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception and handle it as needed
+                    throw new Exception("An error occurred while processing the request.", ex);
+                }
+            }
+            // Return updated request DTO
+            var updatedRequestDto = new TeacherRequestDto
+            {
+                Id = request.Id,
+                UserId = request.UserId,
+                Description = request.Description,
+                Status = (RequestStatusEnum)request.Status,
+                CreateAt = request.CreateAt,
+                UpdateAt = request.UpdateAt
+            };
+
+            return updatedRequestDto;
+        }
+
+        public async Task UpdateRequestAsync(TeacherRequest teacherRequest, UserEducation userEducation)
+        {
+            // Get existing request
+            var existingRequest = await _context.TeacherRequests
+                .Include(tr => tr.User)
+                .FirstOrDefaultAsync(r => r.Id == teacherRequest.Id);
+
+            if (existingRequest == null)
+            {
+                throw new KeyNotFoundException("Teacher request not found.");
+            }
+
+            // Update request details
+            existingRequest.Description = teacherRequest.Description;
+            existingRequest.Status = (int)RequestStatusEnum.Pending;
+            existingRequest.UpdateAt = DateTime.UtcNow;
+
+            // Get or add user education
+            var existingEducation = await _context.UserEducations
+                .Include(e => e.Specializations) // Load specializations for updates
+                .FirstOrDefaultAsync(e => e.TeacherId == userEducation.TeacherId);
+
+            if (existingEducation != null)
+            {
+                // Update existing user education details
+                existingEducation.AboutMe = userEducation.AboutMe;
+                existingEducation.Grade = userEducation.Grade;
+                existingEducation.DegreeURL = userEducation.DegreeURL;
+                existingEducation.Career = userEducation.Career;
+                existingEducation.YearExperience = userEducation.YearExperience;
+
+                // Update specializations
+                existingEducation.Specializations.Clear();
+
+                foreach (var specialization in userEducation.Specializations)
+                {
+                    var specializationObject = GetSpecialization(specialization.Id);
+
+                    existingEducation.Specializations.Add(specializationObject);
+                }
+            }
+
+            // Save all changes to the database
+            await _context.SaveChangesAsync();
+        }
+
+        private Specialization GetSpecialization(Guid specializationId)
+        {
+            // Implement logic to retrieve the name, e.g., from the database or other source
+            var specialization = _context.Specializations.Find(specializationId);
+            return specialization;
         }
 
     }
