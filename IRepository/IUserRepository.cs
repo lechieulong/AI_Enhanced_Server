@@ -20,5 +20,6 @@ namespace IRepository
         Task LockUserAsync(string userId, int durationInMinutes);
         Task UnlockUserAsync(string userId);
         Task<IEnumerable<UserFromFileDto>> ImportUserAsync(IFormFile file);
+        Task<ApplicationUser> GetUserEducationByUSerName(string username);
     }
 }

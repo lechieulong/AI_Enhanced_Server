@@ -16,6 +16,6 @@ namespace Entity.Live
         public String Url { get; set; }
         public decimal Price { get; set; }
         public DateTime CreatedDate { get; set; }
-        public ICollection<User_Gift>? User_Gifts { get;set; }
+        public ICollection<User_Gift>? User_Gifts { get; set; }
     }
 }

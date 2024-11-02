@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241031134259_CheckAnyUpdate")]
+    partial class CheckAnyUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,24 +133,6 @@ namespace Entity.Migrations
 
                     b.ToTable("Courses");
                 });
-
-            modelBuilder.Entity("Entity.AccountBalance", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
-                b.Property<decimal>("Balance")
-                    .HasColumnType("decimal(18,2)");
-                b.Property<DateTime>("LastUpdated")
-                    .HasColumnType("datetime2");
-                b.Property<string>("UserId")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(450)");
-                b.HasKey("Id");
-                b.HasIndex("UserId")
-                    .IsUnique();
-                b.ToTable("AccountBalances");
-            });
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
@@ -361,7 +346,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailLogs", (string)null);
+                    b.ToTable("EmailLogs");
                 });
 
             modelBuilder.Entity("Entity.Enrollment", b =>
@@ -417,33 +402,8 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
-
-            modelBuilder.Entity("Entity.Live.Gift", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
-
-                b.Property<DateTime>("CreatedDate")
-                    .HasColumnType("datetime2");
-
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(max)");
-
-                b.Property<decimal>("Price")
-                    .HasColumnType("decimal(18,2)");
-
-                b.Property<string>("Url")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(max)");
-
-                b.HasKey("Id");
-
-                b.ToTable("Gifts");
-            });
 
             modelBuilder.Entity("Entity.Live.LiveStream", b =>
                 {
@@ -522,43 +482,8 @@ namespace Entity.Migrations
 
                     b.HasIndex("LiveStreamId");
 
-                    b.ToTable("Tickets", (string)null);
+                    b.ToTable("Tickets");
                 });
-
-            modelBuilder.Entity("Entity.Live.User_Gift", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
-
-                b.Property<decimal>("Amount")
-                    .HasColumnType("decimal(18,2)");
-
-                b.Property<Guid>("GiftId")
-                    .HasColumnType("uniqueidentifier");
-
-                b.Property<DateTime>("GiftTime")
-                    .HasColumnType("datetime2");
-
-                b.Property<string>("Message")
-                    .HasColumnType("nvarchar(max)");
-
-                b.Property<string>("ReceiverId")
-                    .HasColumnType("nvarchar(450)");
-
-                b.Property<string>("UserId")
-                    .HasColumnType("nvarchar(450)");
-
-                b.HasKey("Id");
-
-                b.HasIndex("GiftId");
-
-                b.HasIndex("ReceiverId");
-
-                b.HasIndex("UserId");
-
-                b.ToTable("User_Gifts");
-            });
 
             modelBuilder.Entity("Entity.Live.User_Ticket", b =>
                 {
@@ -872,9 +797,6 @@ namespace Entity.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreateBy")
-                      .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
@@ -1142,16 +1064,6 @@ namespace Entity.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entity.AccountBalance", b =>
-            {
-                b.HasOne("Entity.ApplicationUser", "User")
-                    .WithOne("AccountBalances")
-                    .HasForeignKey("Entity.AccountBalance", "UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-                b.Navigation("User");
-            });
-
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "Learner")
@@ -1251,29 +1163,6 @@ namespace Entity.Migrations
 
                     b.Navigation("LiveStream");
                 });
-
-            modelBuilder.Entity("Entity.Live.User_Gift", b =>
-            {
-                b.HasOne("Entity.Live.Gift", "Gift")
-                    .WithMany("User_Gifts")
-                    .HasForeignKey("GiftId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.HasOne("Entity.ApplicationUser", "Receiver")
-                    .WithMany("ReceivedGifts")
-                    .HasForeignKey("ReceiverId");
-
-                b.HasOne("Entity.ApplicationUser", "User")
-                    .WithMany("SentGifts")
-                    .HasForeignKey("UserId");
-
-                b.Navigation("Gift");
-
-                b.Navigation("Receiver");
-
-                b.Navigation("User");
-            });
 
             modelBuilder.Entity("Entity.Live.User_Ticket", b =>
                 {
@@ -1509,10 +1398,6 @@ namespace Entity.Migrations
 
                     b.Navigation("LiveStreams");
 
-                    b.Navigation("ReceivedGifts");
-
-                    b.Navigation("SentGifts");
-
                     b.Navigation("TeacherAvailableSchedules");
 
                     b.Navigation("TeacherRequest");
@@ -1527,11 +1412,6 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.CourseTimeline", b =>
                 {
                     b.Navigation("CourseTimelineDetails");
-                });
-
-            modelBuilder.Entity("Entity.Live.Gift", b =>
-                {
-                    b.Navigation("User_Gifts");
                 });
 
             modelBuilder.Entity("Entity.Live.LiveStream", b =>

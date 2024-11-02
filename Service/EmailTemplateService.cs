@@ -188,5 +188,44 @@ namespace Service
             };
         }
 
+        public EmailTemplate NotifyAcceptTeacherRequestTemplate(string recipientName, string description)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Request Approved to Become a Teacher",
+                Body = $@"
+                    <html>
+                        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                            <h2>Congratulations, {recipientName}!</h2>
+                            <p>We are pleased to inform you that your request to become a teacher on our platform has been approved.</p>
+                            <p><strong>Description:</strong> {description}</p>
+                            <p>You may now access additional features available to teachers. We are excited to see your valuable contributions to our learning community.</p>
+                            <p>If you have any questions, please feel free to reach out to our support team.</p>
+                            <br />
+                            <p>Best regards,<br />The AI-Enhanced IELTS Prep Team</p>
+                        </body>
+                    </html>"
+            };
+        }
+
+        public EmailTemplate NotifyRejectTeacherRequestTemplate(string recipientName, string description)
+        {
+            return new EmailTemplate
+            {
+                Subject = "Request Rejected to Become a Teacher",
+                Body = $@"
+                    <html>
+                        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                            <h2>Dear {recipientName},</h2>
+                            <p>We regret to inform you that your request to become a teacher on our platform has been rejected.</p>
+                            <p><strong>Description:</strong> {description}</p>
+                            <p>We appreciate your interest in joining our teaching team. If you have any questions regarding this decision or would like feedback, please feel free to reach out to our support team.</p>
+                            <br />
+                            <p>Thank you for your understanding,<br />The AI-Enhanced IELTS Prep Team</p>
+                        </body>
+                    </html>"
+            };
+        }
+
     }
 }
