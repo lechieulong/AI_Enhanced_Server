@@ -160,6 +160,7 @@ namespace Auth.Controllers
             // Chuyển đổi sang DTO
             var courseTimelineDetailsDto = courseTimelineDetailsList.Select(ct => new CourseTimelineDetailDto
             {
+                Id = ct.Id,
                 CourseTimelineId = ct.CourseTimelineId,
                 Title = ct.Title,
                 VideoUrl = ct.VideoUrl,

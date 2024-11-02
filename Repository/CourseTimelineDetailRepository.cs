@@ -94,15 +94,17 @@ public class CourseTimelineDetailRepository : ICourseTimelineDetailRepository
     }
 
     // Chuyển đổi từ CourseTimelineDetail sang CourseTimelineDetailDto
-    private CourseTimelineDetailDto MapToDto(CourseTimelineDetail courseTimelineDetail)
+    private CourseTimelineDetailDto MapToDto(CourseTimelineDetail entity)
     {
         return new CourseTimelineDetailDto
         {
-            CourseTimelineId = courseTimelineDetail.CourseTimelineId,
-            Title = courseTimelineDetail.Title,
-            VideoUrl = courseTimelineDetail.VideoUrl,
-            Topic = courseTimelineDetail.Topic,
-            IsEnabled = courseTimelineDetail.IsEnabled
+            Id = entity.Id,
+            CourseTimelineId = entity.CourseTimelineId,
+            Title = entity.Title,
+            VideoUrl = entity.VideoUrl,
+            Topic = entity.Topic,
+            IsEnabled = entity.IsEnabled
         };
     }
+
 }

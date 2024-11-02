@@ -131,6 +131,7 @@ namespace Repository
                 .Where(c => c.CourseId == courseId)
                 .Select(c => new ClassDto
                 {
+                    Id = c.Id,
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
