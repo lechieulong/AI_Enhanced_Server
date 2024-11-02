@@ -2,6 +2,7 @@
 {
     public class CourseTimelineDetailDto
     {
+        public Guid Id { get; set; }
         public Guid CourseTimelineId { get; set; }
         public string Title { get; set; }
         public string VideoUrl { get; set; }
