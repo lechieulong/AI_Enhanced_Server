@@ -11,7 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Utility;
 using OfficeOpenXml;
+using Repository;
 using Service;
+using System.Security.Claims;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -342,6 +344,50 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, _response);
             }
 
+        }
+
+        [HttpGet("usereducation/{username}")]
+        public async Task<IActionResult> GetUserEducation(string username)
+        {
+            try
+            {
+                var userEducation = await _userRepository.GetUserEducationByUSerName(username);
+                if (userEducation == null)
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "User not found."
+                    });
+                }
+                if (userEducation?.UserEducation == null)
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "User education data not found."
+                    });
+                }
+
+                var userEducationDto = _mapper.Map<UserDto>(userEducation);
+
+                return Ok(new ResponseDto
+                {
+                    IsSuccess = true,
+                    Result = userEducationDto,
+                    Message = ""
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Return 404 if no request is found for the user
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Return 500 for other errors
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
     }
