@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Live
 {
-    public class TicketRepository:ITicketRepository
+    public class TicketRepository : ITicketRepository
     {
 
         private readonly AppDbContext _context;
@@ -22,9 +22,9 @@ namespace Repository.Live
         }
         public async Task<IEnumerable<Ticket>> GetActiveTicketsByLiveIdAsync(Guid liveId)
         {
-            var currentTime = DateTime.UtcNow;
+            var currentTime = DateTime.Now;
             return await _context.Tickets
-                .Where(o => o.LiveStreamId.Equals(liveId) && o.StartTime < currentTime && currentTime < o.EndTime)
+                .Where(o => o.LiveStreamId.Equals(liveId) && o.StartTime <= currentTime && currentTime < o.EndTime)
                 .ToListAsync();
         }
         public async Task<Ticket> addTicketAsync(Ticket mode)

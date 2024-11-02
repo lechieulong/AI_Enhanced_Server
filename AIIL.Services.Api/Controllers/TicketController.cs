@@ -20,14 +20,14 @@ namespace AIIL.Services.Api.Controllers
         public TicketController(ITicketRepository repository, IMapper Mapper)
         {
             _repository = repository;
-            _Mapper = Mapper; 
+            _Mapper = Mapper;
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTicketByLiveId(Guid id)
         {
-            var Streamsession = await _repository.GetActiveTicketsByLiveIdAsync(id);
-            return Ok(Streamsession);
+            var Tikcet = await _repository.GetActiveTicketsByLiveIdAsync(id);
+            return Ok(Tikcet);
         }
         [HttpPost]
         public async Task<IActionResult> CreateTicket([FromBody] TicketModel ticketDto)
@@ -36,8 +36,8 @@ namespace AIIL.Services.Api.Controllers
             {
                 return BadRequest("Invalid data.");
             }
-            var ticket=_Mapper.Map<Ticket>(ticketDto);
-            ticket.Id=Guid.NewGuid();
+            var ticket = _Mapper.Map<Ticket>(ticketDto);
+            ticket.Id = Guid.NewGuid();
 
             var result = await _repository.addTicketAsync(ticket);
             return Ok(ticketDto);

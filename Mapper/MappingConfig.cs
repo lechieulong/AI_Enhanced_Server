@@ -75,6 +75,12 @@ namespace Mapper
                 config.CreateMap<TicketModel, Ticket>();
                 config.CreateMap<Transaction, TransactionModel>();
                 config.CreateMap<TransactionModel, Transaction>();
+                config.CreateMap<Gift, GiftModel>();
+                config.CreateMap<GiftModel, Gift>();
+                config.CreateMap<User_Gift, User_GiftModel>();
+                config.CreateMap<User_GiftModel, User_Gift>();
+                config.CreateMap<User_Ticket, User_TicketModel>();
+                config.CreateMap<User_TicketModel, User_Ticket>();
 
             });
             return mappingConfig;

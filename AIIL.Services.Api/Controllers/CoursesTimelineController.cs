@@ -176,6 +176,20 @@ namespace Auth.Controllers
 
             return Ok(new { id, IsEnabled = existingTimeline.IsEnabled }); // Trả về ID và trạng thái mới
         }
+        // Trong Auth/Controllers/CoursesController.cs
+        // GET: api/courses/{courseId}/timelines
+        [HttpGet("{courseId:guid}/timelines")]
+        public async Task<IActionResult> GetTimelinesByCourseId(Guid courseId)
+        {
+            var timelines = await _repository.GetCourseTimelinesByCourseIdAsync(courseId);
+            return timelines == null || !timelines.Any()
+                ? NotFound("No timelines found for this course.")
+                : Ok(timelines.Select(t => new
+                {
+                    t.Id, // CourseTimelineId
+                    t.Title // Title
+                }));
+        }
 
 
     }

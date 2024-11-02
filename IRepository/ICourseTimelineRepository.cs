@@ -12,4 +12,5 @@ public interface ICourseTimelineRepository
     Task DeleteAsync(Guid id);
     Task<bool> CheckExistCourseIdAsync(Guid courseId);
     Task<IEnumerable<CourseTimeline>> GetByCourseIdAsync(Guid courseId);
+    Task<List<CourseTimeline>> GetCourseTimelinesByCourseIdAsync(Guid courseId);
 }
