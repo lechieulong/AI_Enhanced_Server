@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241027201933_gift")]
+    partial class gift
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,19 +63,16 @@ namespace Entity.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<TimeSpan?>("EndTime")
+                    b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<TimeSpan?>("StartTime")
+                    b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
                     b.HasKey("Id");
@@ -88,7 +88,7 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Categories")
+                    b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -130,24 +130,6 @@ namespace Entity.Migrations
 
                     b.ToTable("Courses");
                 });
-
-            modelBuilder.Entity("Entity.AccountBalance", b =>
-            {
-                b.Property<Guid>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("uniqueidentifier");
-                b.Property<decimal>("Balance")
-                    .HasColumnType("decimal(18,2)");
-                b.Property<DateTime>("LastUpdated")
-                    .HasColumnType("datetime2");
-                b.Property<string>("UserId")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(450)");
-                b.HasKey("Id");
-                b.HasIndex("UserId")
-                    .IsUnique();
-                b.ToTable("AccountBalances");
-            });
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
@@ -287,9 +269,6 @@ namespace Entity.Migrations
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -309,9 +288,6 @@ namespace Entity.Migrations
 
                     b.Property<Guid>("CourseTimelineId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -721,13 +697,14 @@ namespace Entity.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AnswerText")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IsCorrect")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("TypeCorrect")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -746,9 +723,7 @@ namespace Entity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContentText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PartNumber")
@@ -798,6 +773,7 @@ namespace Entity.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Image")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PartId")
@@ -847,9 +823,6 @@ namespace Entity.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("TestExamId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("TestId")
                         .HasColumnType("uniqueidentifier");
 
@@ -858,7 +831,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TestExamId");
+                    b.HasIndex("TestId");
 
                     b.ToTable("Skills");
                 });
@@ -873,7 +846,7 @@ namespace Entity.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("CreateBy")
-                      .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
@@ -884,18 +857,12 @@ namespace Entity.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("TestCreateBy")
-                        .HasColumnType("int");
-
                     b.Property<string>("TestName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -1142,16 +1109,6 @@ namespace Entity.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entity.AccountBalance", b =>
-            {
-                b.HasOne("Entity.ApplicationUser", "User")
-                    .WithOne("AccountBalances")
-                    .HasForeignKey("Entity.AccountBalance", "UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-                b.Navigation("User");
-            });
-
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "Learner")
@@ -1390,9 +1347,13 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Test.Skill", b =>
                 {
-                    b.HasOne("Entity.Test.TestExam", null)
+                    b.HasOne("Entity.Test.TestExam", "Test")
                         .WithMany("SkillTests")
-                        .HasForeignKey("TestExamId");
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
                 });
 
             modelBuilder.Entity("Entity.Transaction", b =>

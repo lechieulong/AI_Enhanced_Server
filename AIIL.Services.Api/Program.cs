@@ -102,6 +102,9 @@ builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
+builder.Services.AddScoped<IGiftRepository, GiftRepository>();
+builder.Services.AddScoped<IUser_GiftRepository, User_GiftRepository>();
+builder.Services.AddScoped<IUser_TicketRepository, User_TicketRepository>();
 
 // Đăng ký Background Service
 builder.Services.AddHostedService<NotificationBackgroundService>();

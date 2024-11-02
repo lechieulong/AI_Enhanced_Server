@@ -25,5 +25,7 @@ namespace Entity
         public ICollection<LiveStream>? LiveStreams { get; set; }
         public ICollection<User_Ticket>? User_Tickets { get; set; }
         public AccountBalance? AccountBalances { get; set; }
+        public ICollection<User_Gift>? SentGifts { get; set; }
+        public ICollection<User_Gift>? ReceivedGifts { get; set; }
     }
 }
