@@ -46,7 +46,6 @@ namespace Auth.Controllers
 
         // POST: api/courses
         [HttpPost]
-        [Authorize(Roles = SD.Teacher)]
         public async Task<IActionResult> Create([FromBody] CourseDto courseDto) // Sử dụng CourseDto
         {
             if (courseDto == null || string.IsNullOrWhiteSpace(courseDto.CourseName) ||
