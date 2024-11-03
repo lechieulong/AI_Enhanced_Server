@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Model;
 using Microsoft.AspNetCore.Authorization;
 using Model.Utility;
-
+using Entity.CourseFolder;
 namespace Auth.Controllers
 {
     [Route("api/[controller]")]
@@ -46,7 +46,7 @@ namespace Auth.Controllers
 
         // POST: api/courses
         [HttpPost]
-        [Authorize(Roles = SD.Teacher)]
+        //[Authorize(Roles = SD.Teacher)]
         public async Task<IActionResult> Create([FromBody] CourseDto courseDto) // Sử dụng CourseDto
         {
             if (courseDto == null || string.IsNullOrWhiteSpace(courseDto.CourseName) ||

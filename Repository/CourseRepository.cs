@@ -6,7 +6,7 @@ using Entity;
 using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
-
+using Entity.CourseFolder;
 namespace Repository
 {
     public class CourseRepository : ICourseRepository

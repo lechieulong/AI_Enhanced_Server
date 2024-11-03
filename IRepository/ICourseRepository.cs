@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity;
-
+using Entity.CourseFolder;
 namespace IRepository
 {
     public interface ICourseRepository

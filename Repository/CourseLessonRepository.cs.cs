@@ -1,0 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Entity.CourseFolder;
+using Entity.Data;
+
+namespace Repository
+{
+    public class CourseLessonRepository : ICourseLessonRepository
+    {
+        private readonly AppDbContext _context;
+
+        public CourseLessonRepository(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<CourseLesson>> GetAllAsync()
+        {
+            return await _context.Set<CourseLesson>().ToListAsync();
+        }
+
+        public async Task<CourseLesson> GetByIdAsync(Guid id)
+        {
+            return await _context.Set<CourseLesson>().FindAsync(id);
+        }
+
+        public async Task<CourseLesson> AddAsync(CourseLesson courseLesson)
+        {
+            await _context.Set<CourseLesson>().AddAsync(courseLesson);
+            await _context.SaveChangesAsync();
+            return courseLesson;
+        }
+
+        public async Task<CourseLesson> UpdateAsync(CourseLesson courseLesson)
+        {
+            _context.Set<CourseLesson>().Update(courseLesson);
+            await _context.SaveChangesAsync();
+            return courseLesson;
+        }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var courseLesson = await _context.Set<CourseLesson>().FindAsync(id);
+            if (courseLesson == null)
+                return false;
+
+            _context.Set<CourseLesson>().Remove(courseLesson);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    }
+}

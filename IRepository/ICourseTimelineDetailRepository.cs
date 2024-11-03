@@ -1,4 +1,4 @@
-﻿using Entity;
+﻿using Entity.CourseFolder;
 using Model;
 
 public interface ICourseTimelineDetailRepository

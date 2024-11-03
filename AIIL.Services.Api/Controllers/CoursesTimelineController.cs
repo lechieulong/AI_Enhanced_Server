@@ -1,9 +1,9 @@
 ﻿using IRepository;
 using Microsoft.AspNetCore.Mvc;
-using Entity;
 using Model; // Đừng quên thêm namespace cho DTO
 using System.Linq;
 using System.Threading.Tasks;
+using Entity.CourseFolder;
 
 namespace Auth.Controllers
 {
@@ -55,8 +55,7 @@ namespace Auth.Controllers
                 // Validate required fields
                 if (timelineDto.CourseId == Guid.Empty || // Assuming CourseId is a Guid
                     string.IsNullOrWhiteSpace(timelineDto.Title) ||
-                    string.IsNullOrWhiteSpace(timelineDto.Description) ||
-                    timelineDto.EventDate == default)
+                    string.IsNullOrWhiteSpace(timelineDto.Description))
                 {
                     return BadRequest("Invalid timeline data.");
                 }
@@ -76,7 +75,7 @@ namespace Auth.Controllers
                 var courseTimeline = new CourseTimeline
                 {
                     CourseId = timelineDto.CourseId,
-                    EventDate = timelineDto.EventDate,
+                    Order = timelineDto.Order,
                     Title = timelineDto.Title,
                     Description = timelineDto.Description,
                     Author = timelineDto.Author,
@@ -112,7 +111,7 @@ namespace Auth.Controllers
             }
 
             // Map DTO to Entity for update
-            existingTimeline.EventDate = timelineDto.EventDate;
+            existingTimeline.Order = timelineDto.Order;
             existingTimeline.Title = timelineDto.Title;
             existingTimeline.Description = timelineDto.Description;
             existingTimeline.Author = timelineDto.Author;
@@ -148,7 +147,7 @@ namespace Auth.Controllers
             {
                 ct.Id,
                 ct.CourseId,
-                EventDateFormatted = ct.EventDate.ToString("dd/MM/yyyy"),
+                ct.Order,
                 ct.Title,
                 ct.Description,
                 ct.Author,

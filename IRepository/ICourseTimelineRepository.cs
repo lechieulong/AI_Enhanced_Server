@@ -1,8 +1,7 @@
-﻿using Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using Entity.CourseFolder;
 public interface ICourseTimelineRepository
 {
     Task<CourseTimeline> GetByIdAsync(Guid id);

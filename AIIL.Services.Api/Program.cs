@@ -87,7 +87,6 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
-
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
@@ -105,6 +104,9 @@ builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>(
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IUser_GiftRepository, User_GiftRepository>();
 builder.Services.AddScoped<IUser_TicketRepository, User_TicketRepository>();
+builder.Services.AddScoped<ICourseSkillRepository, CourseSkillRepository>();
+builder.Services.AddScoped<ICoursePartRepository, CoursePartRepository>();
+builder.Services.AddScoped<ICourseLessonRepository, CourseLessonRepository>();
 
 // Đăng ký Background Service
 builder.Services.AddHostedService<NotificationBackgroundService>();

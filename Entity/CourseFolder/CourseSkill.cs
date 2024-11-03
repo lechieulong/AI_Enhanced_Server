@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Entity.CourseFolder
 {
-    public class Enrollment
+    public class CourseSkill
     {
         [Key]
         public Guid Id { get; set; }
@@ -15,20 +16,14 @@ namespace Entity.CourseFolder
 
         [ForeignKey("CourseId")]
         [JsonIgnore]
-        public Course? Course { get; set; }
-
-        // Thay đổi ClassId thành Nullable Guid
-        public Guid? ClassId { get; set; } // Cho phép null
-
-        [ForeignKey("ClassId")]
-        [JsonIgnore]
-        public Class? Class { get; set; }
+        public Course Course { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public string Type { get; set; }
 
-        [ForeignKey("UserId")]
+        public string Description { get; set; }
+
         [JsonIgnore]
-        public ApplicationUser? User { get; set; }
+        public ICollection<CoursePart> CourseParts { get; set; } = new List<CoursePart>();
     }
 }

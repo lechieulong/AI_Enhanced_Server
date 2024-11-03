@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Entity;
 using Entity.Data;
 using Microsoft.EntityFrameworkCore;
-
+using Entity.CourseFolder;
 namespace Repositories
 {
     public class EnrollmentRepository : IEnrollmentRepository

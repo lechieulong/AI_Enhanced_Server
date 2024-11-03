@@ -1,7 +1,7 @@
 ﻿using Entity;
+using Entity.CourseFolder;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-
 public class Class
 {
     [Key]

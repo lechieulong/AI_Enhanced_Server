@@ -1,7 +1,7 @@
 ﻿using Entity.Data;
-using Entity;
 using Microsoft.EntityFrameworkCore;
 using Model;
+using Entity.CourseFolder;
 
 public class CourseTimelineDetailRepository : ICourseTimelineDetailRepository
 {

@@ -1,10 +1,10 @@
-﻿using Entity;
-using IRepository;
+﻿using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Entity.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Entity.CourseFolder;
 
 namespace Repository
 {
