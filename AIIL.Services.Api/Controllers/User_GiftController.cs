@@ -22,14 +22,14 @@ namespace AIIL.Services.Api.Controllers
         public User_GiftController(IUser_GiftRepository userGiftRepository, IMapper Mapper)
         {
             _userGiftRepository = userGiftRepository;
-            _Mapper = Mapper; 
+            _Mapper = Mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUser_Gifts()
         {
             var userGifts = await _userGiftRepository.GetUser_GiftAsync();
-            var result=_Mapper.Map<List<User_GiftModel>>(userGifts);
+            var result = _Mapper.Map<List<User_GiftModel>>(userGifts);
             return Ok(result);
         }
 

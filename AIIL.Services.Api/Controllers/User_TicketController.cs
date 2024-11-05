@@ -18,7 +18,7 @@ namespace AIIL.Services.Api.Controllers
     {
         private readonly IUser_TicketRepository _userTicketRepository;
         private readonly IMapper _Mapper;
-        public User_TicketController(IUser_TicketRepository userTicketRepository,IMapper mapper)
+        public User_TicketController(IUser_TicketRepository userTicketRepository, IMapper mapper)
         {
             _userTicketRepository = userTicketRepository;
             _Mapper = mapper;
@@ -34,7 +34,7 @@ namespace AIIL.Services.Api.Controllers
 
         // GET: api/UserTicket/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult>GetUserTicketById(Guid id)
+        public async Task<IActionResult> GetUserTicketById(Guid id)
         {
             var userTicket = await _userTicketRepository.GetUser_TicketByIdAsync(id);
             return Ok(userTicket);
@@ -56,9 +56,9 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserTicket([FromBody] User_TicketModel model)
         {
-            model.Id=Guid.NewGuid();
+            model.Id = Guid.NewGuid();
             model.CreateDate = DateTime.Now;
-            var userTicket =_Mapper.Map<User_Ticket>(model);
+            var userTicket = _Mapper.Map<User_Ticket>(model);
             var createdUserTicket = await _userTicketRepository.AddUser_TicketAsync(userTicket);
             return Ok(model);
         }

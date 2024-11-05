@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Live
 {
-    public class TicketRepository:ITicketRepository
+    public class TicketRepository : ITicketRepository
     {
 
         private readonly AppDbContext _context;

@@ -21,10 +21,10 @@ namespace AIIL.Services.Api.Controllers
         public GiftController(IGiftRepository repository, IMapper Mapper)
         {
             _repository = repository;
-            _Mapper = Mapper; 
+            _Mapper = Mapper;
         }
         [HttpGet]
-        public async Task< IActionResult> Get()
+        public async Task<IActionResult> Get()
         {
             var model = await _repository.GetGiftAsync();
             var result = _Mapper.Map<List<GiftModel>>(model);
@@ -35,7 +35,7 @@ namespace AIIL.Services.Api.Controllers
         public async Task<IActionResult> GetGiftById(Guid id)
         {
             var model = await _repository.GetGiftByIDAsync(id);
-            var result=_Mapper.Map<GiftModel>(model);
+            var result = _Mapper.Map<GiftModel>(model);
             return Ok(result);
         }
         [HttpPost]
@@ -46,7 +46,7 @@ namespace AIIL.Services.Api.Controllers
                 return BadRequest(model);
             }
             var gift = _Mapper.Map<Gift>(model);
-          var result = await _repository.AddGiftAsync(gift);
+            var result = await _repository.AddGiftAsync(gift);
             return Ok(_Mapper.Map<GiftModel>(result));
         }
         [HttpPut]

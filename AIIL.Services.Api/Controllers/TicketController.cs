@@ -20,7 +20,7 @@ namespace AIIL.Services.Api.Controllers
         public TicketController(ITicketRepository repository, IMapper Mapper)
         {
             _repository = repository;
-            _Mapper = Mapper; 
+            _Mapper = Mapper;
         }
 
         [HttpGet("{id}")]
@@ -36,8 +36,8 @@ namespace AIIL.Services.Api.Controllers
             {
                 return BadRequest("Invalid data.");
             }
-            var ticket=_Mapper.Map<Ticket>(ticketDto);
-            ticket.Id=Guid.NewGuid();
+            var ticket = _Mapper.Map<Ticket>(ticketDto);
+            ticket.Id = Guid.NewGuid();
 
             var result = await _repository.addTicketAsync(ticket);
             return Ok(ticketDto);

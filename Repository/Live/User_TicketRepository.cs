@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Live
 {
-    public class User_TicketRepository:IUser_TicketRepository
+    public class User_TicketRepository : IUser_TicketRepository
     {
         private readonly AppDbContext _context;
 
@@ -27,10 +27,11 @@ namespace Repository.Live
             return await _context.User_Tickets.FirstOrDefaultAsync(o => o.Id.Equals(Id));
         }
 
-        public async Task<User_Ticket> GetUser_TicketByUserIdTicketIdAsync(Guid TicketId,String UserId)
+        public async Task<User_Ticket> GetUser_TicketByUserIdTicketIdAsync(Guid TicketId, String UserId)
         {
-            var User_Ticket =await _context.User_Tickets.FirstOrDefaultAsync(o => o.TicketId.Equals(TicketId) && o.UserId.Equals(UserId));
-            if (User_Ticket != null) {
+            var User_Ticket = await _context.User_Tickets.FirstOrDefaultAsync(o => o.TicketId.Equals(TicketId) && o.UserId.Equals(UserId));
+            if (User_Ticket != null)
+            {
                 return User_Ticket;
             }
             return null;
