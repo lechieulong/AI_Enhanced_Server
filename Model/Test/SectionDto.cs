@@ -8,6 +8,7 @@ namespace Model.Test
         public string SectionGuide { get; set; }
         public int SectionType { get; set; }
         public string? Image { get; set; }
+        public string? Summary { get; set; }    
         public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
     }
 }
