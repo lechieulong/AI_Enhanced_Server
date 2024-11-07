@@ -6,6 +6,7 @@ using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Model.Test;
+using System.Text.RegularExpressions;
 
 namespace Repository
 {
@@ -21,7 +22,6 @@ namespace Repository
         }
         public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
         {
-            // Check if the model is null or empty
             if (model == null || !model.Any())
                 throw new ArgumentException("Model cannot be null or empty.", nameof(model));
 
@@ -32,7 +32,6 @@ namespace Repository
                 {
                     var skillDto = skillKeyValue.Value;
 
-                    // Skip if the skillDto is null
                     if (skillDto == null)
                         continue;
 
@@ -45,14 +44,12 @@ namespace Repository
                         Parts = new List<Part>()
                     };
 
-                    // Check if Parts are not null or empty
                     if (skillDto.Parts != null && skillDto.Parts.Any())
                     {
                         int partIndex = 1;
 
                         foreach (var partDto in skillDto.Parts)
                         {
-                            // Skip if the partDto is null
                             if (partDto == null)
                                 continue;
 
@@ -67,12 +64,10 @@ namespace Repository
                                 Sections = new List<Section>()
                             };
 
-                            // Check if Sections are not null or empty
                             if (partDto.Sections != null && partDto.Sections.Any())
                             {
                                 foreach (var sectionDto in partDto.Sections)
                                 {
-                                    // Skip if the sectionDto is null
                                     if (sectionDto == null)
                                         continue;
 
@@ -81,9 +76,25 @@ namespace Repository
                                         Id = Guid.NewGuid(),
                                         SectionGuide = sectionDto.SectionGuide,
                                         SectionType = sectionDto.SectionType,
+                                        Image = sectionDto.Image,
                                         Part = part,
                                         SectionQuestions = new List<SectionQuestion>()
                                     };
+
+                                    if (!string.IsNullOrEmpty(sectionDto.Summary))
+                                    {
+                                        var parsedQuestions = ParseSummaryToQuestions(sectionDto.Summary, userId);
+                                        foreach (var parsedQuestion in parsedQuestions)
+                                        {
+                                            var sectionQuestion = new SectionQuestion
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                Section = section,
+                                                Question = parsedQuestion
+                                            };
+                                            section.SectionQuestions.Add(sectionQuestion);
+                                        }
+                                    }
 
                                     if (sectionDto.Questions != null && sectionDto.Questions.Any())
                                     {
@@ -98,10 +109,32 @@ namespace Repository
                                                 UserId = userId,
                                                 QuestionName = questionDto.QuestionName,
                                                 QuestionType = questionDto.QuestionType,
-                                                Answers = new List<Answer>() // Initialize Answers collection
+                                                Answers = new List<Answer>()
                                             };
 
-                                            if (questionDto.Answers != null && questionDto.Answers.Any())
+                                            if (
+                                                (skill.Type == 0 && (section.SectionType == 8 || section.SectionType == 9)) ||
+                                                (skill.Type == 1 && (section.SectionType == 2 || section.SectionType == 7))
+                                            )
+                                            {
+                                                var answerMatch = System.Text.RegularExpressions.Regex.Match(questionDto.QuestionName, @"\[(.*?)\]");
+                                                if (answerMatch.Success)
+                                                {
+                                                    question.QuestionName = System.Text.RegularExpressions.Regex.Replace(questionDto.QuestionName, @"\[(.*?)\]", "[]").Trim();
+
+                                                    var answerText = answerMatch.Groups[1].Value.Trim();
+
+                                                    var generatedAnswer = new Answer
+                                                    {
+                                                        Id = Guid.NewGuid(),
+                                                        AnswerText = answerText,
+                                                        TypeCorrect = 1
+                                                    };
+
+                                                    question.Answers.Add(generatedAnswer);
+                                                }
+                                            }
+                                            else if (questionDto.Answers != null && questionDto.Answers.Any())
                                             {
                                                 foreach (var answerDto in questionDto.Answers)
                                                 {
@@ -115,7 +148,7 @@ namespace Repository
                                                         TypeCorrect = (int)answerDto.IsCorrect
                                                     };
 
-                                                    question.Answers.Add(newAnswer); // Add to the question's Answers collection
+                                                    question.Answers.Add(newAnswer);
                                                 }
                                             }
 
@@ -126,30 +159,67 @@ namespace Repository
                                                 Question = question
                                             };
 
-                                            section.SectionQuestions.Add(sectionQuestion); // Add the question to the section
+                                            section.SectionQuestions.Add(sectionQuestion);
                                         }
                                     }
 
-                                    part.Sections.Add(section); // Add the section to the part
+                                    part.Sections.Add(section);
                                 }
                             }
 
                             partIndex++;
-                            skill.Parts.Add(part); 
+                            skill.Parts.Add(part);
                         }
                     }
 
                     await _context.Categories.AddAsync(skill);
                 }
 
-                await _context.SaveChangesAsync(); // Save all changes
-                await transaction.CommitAsync(); // Commit the transaction
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync(); // Rollback on error
-                throw; // Rethrow the exception
+                await transaction.RollbackAsync();
+                throw;
             }
+        }
+
+        private List<Question> ParseSummaryToQuestions(string summary, Guid userId)
+        {
+            var questions = new List<Question>();
+
+            // Regular expression to match sections of text containing placeholders in square brackets
+            var pattern = @"(.*?)(\[(.*?)\])(.*?)(\.|$)";
+            var matches = Regex.Matches(summary, pattern);
+
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    var beforePlaceholder = match.Groups[1].Value.Trim();
+                    var answerText = match.Groups[3].Value.Trim();
+                    var afterPlaceholder = match.Groups[4].Value.Trim();
+
+                    var questionText = $"{beforePlaceholder} [] {afterPlaceholder}".Trim();
+
+                    var question = new Question
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        QuestionName = questionText,
+                        QuestionType = 1,  
+                        Answers = new List<Answer>
+                {
+                    new Answer { Id = Guid.NewGuid(), AnswerText = answerText, TypeCorrect = 1 }
+                }
+                    };
+
+                    questions.Add(question);
+                }
+            }
+
+            return questions;
         }
 
         public async Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role)
