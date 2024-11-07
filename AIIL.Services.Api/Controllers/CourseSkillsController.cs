@@ -83,18 +83,29 @@ namespace API.Controllers
 
             return NoContent();
         }
-        [HttpGet("Course/{courseId}")]
-        public async Task<ActionResult<IEnumerable<string>>> GetSkillsByCourseId(Guid courseId)
+        [HttpGet("Course/{courseId}/FullSkills")]
+        public async Task<ActionResult<IEnumerable<string>>> GetSkillDescriptionsByCourseId(Guid courseId)
         {
             var courseSkills = await _courseSkillRepository.GetByCourseIdAsync(courseId);
 
             if (courseSkills == null || !courseSkills.Any())
                 return NotFound("No skills found for this course.");
 
-            // Chỉ lấy thuộc tính `Description` và trả về dưới dạng danh sách chuỗi
             var skillDescriptions = courseSkills.Select(skill => skill.Description).ToList();
             return Ok(skillDescriptions);
         }
+
+        [HttpGet("Course/{courseId}")]
+        public async Task<ActionResult<IEnumerable<CourseSkill>>> GetFullSkillsByCourseId(Guid courseId)
+        {
+            var courseSkills = await _courseSkillRepository.GetByCourseIdAsync(courseId);
+
+            if (courseSkills == null || !courseSkills.Any())
+                return NotFound("No skills found for this course.");
+
+            return Ok(courseSkills);
+        }
+
 
         [HttpGet("DescriptionByCourseLesson/{courseLessonId}")]
         public async Task<ActionResult<string>> GetDescriptionByCourseLessonId(Guid courseLessonId)
