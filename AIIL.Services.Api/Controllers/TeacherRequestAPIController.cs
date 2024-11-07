@@ -32,6 +32,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("beteacher")]
+        [Authorize]
         public async Task<IActionResult> RegisterTeacher([FromBody] UserEducationDto userEducationDto)
         {
             try
@@ -98,6 +99,55 @@ namespace AIIL.Services.Api.Controllers
                 });
             }
         }
+
+        [HttpPost("update-request")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTeacherRequest([FromBody] UserEducationDto userEducationDto)
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "User not found."
+                    });
+                }
+
+                userEducationDto.TeacherId = userId;
+
+                UserEducation userEducation = _mapper.Map<UserEducation>(userEducationDto);
+
+                var existingRequest = await _teacherRequestRepository.GetRequestByUserId(userId);
+                if (existingRequest == null)
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "Teacher request not found."
+                    });
+                }
+
+                await _teacherRequestRepository.UpdateRequestAsync(existingRequest, userEducation);
+
+                return Ok(new ResponseDto
+                {
+                    IsSuccess = true,
+                    Message = "Teacher request and user education updated successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
 
         [HttpGet("teacher-request")]
         [Authorize]
@@ -171,7 +221,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpGet("get-request-by-id/{requestId}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize]
         public async Task<IActionResult> GetTeacherRequestByRequestId(Guid requestId)
         {
             var requestData = await _teacherRequestRepository.GetRequestByRequestId(requestId);
@@ -188,6 +238,55 @@ namespace AIIL.Services.Api.Controllers
             _response.Message = "Get request successful";
             _response.Result = requestData;
             return Ok(_response);
+        }
+
+        [HttpPost("process-request/{requestId}")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> ProcessTeacherRequest(Guid requestId, [FromBody] ProcessTeacherRequestDto processTeacherRequestDto)
+        {
+            if (processTeacherRequestDto == null)
+            {
+                return BadRequest(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Invalid request data."
+                });
+            }
+
+            try
+            {
+                var updatedRequest = await _teacherRequestRepository.ProcessRequest(requestId, processTeacherRequestDto);
+
+                if (updatedRequest == null)
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "Teacher request not found."
+                    });
+                }
+
+                _response.IsSuccess = true;
+                _response.Message = "Teacher request processed successfully.";
+                _response.Result = updatedRequest;
+
+                return Ok(_response);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Teacher request not found."
+                });
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, _response);
+            }
         }
 
     }

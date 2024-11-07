@@ -16,4 +16,3 @@ namespace IRepository.Live
         Task<Gift> UpdateGiftAsync(Gift model);
     }
 }
-

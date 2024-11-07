@@ -323,6 +323,12 @@ namespace Repository
                 .FirstOrDefaultAsync(test => test.Id == id);
         }
 
+        public async Task<TestExam> GetTestBySecionCourseId(Guid id)
+        {
+            return await _context.TestExams
+                .FirstOrDefaultAsync(test => test.SectionCourseId == id);
+        }
+
         public async Task<Question> GetQuestionByIdAsync(Guid id)
         {
             return await _context.Questions

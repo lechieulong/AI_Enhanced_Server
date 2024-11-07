@@ -23,6 +23,6 @@ namespace Entity.Live
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
         [ForeignKey("ReceiverId")]
-        public ApplicationUser? Receiver {get; set; }
+        public ApplicationUser? Receiver { get; set; }
     }
 }

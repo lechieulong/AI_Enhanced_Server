@@ -222,5 +222,19 @@ namespace Repository
             return users;
         }
 
+        public async Task<ApplicationUser> GetUserEducationByUSerName(string username)
+        {
+            var userEducation = await _db.ApplicationUsers
+                .Include(ue => ue.UserEducation)
+                .ThenInclude(ue => ue.Specializations)
+                .FirstOrDefaultAsync(r => r.UserName == username);
+
+            if (userEducation == null)
+            {
+                throw new KeyNotFoundException("No user education found for the specified user ID.");
+            }
+
+            return userEducation;
+        }
     }
 }

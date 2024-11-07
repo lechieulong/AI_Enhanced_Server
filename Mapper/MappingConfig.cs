@@ -23,7 +23,11 @@ namespace Mapper
                 //Register mapper here nhe:))
                 config.CreateMap<Class, ClassDto>();
                 config.CreateMap<ClassDto, Class>();
-                config.CreateMap<ApplicationUser, UserDto>();
+                //config.CreateMap<ApplicationUser, UserDto>();
+                config.CreateMap<ApplicationUser, UserDto>()
+                    .ForMember(dest => dest.UserEducationDto,
+                        opt => opt.MapFrom(src => src.UserEducation));
+
                 config.CreateMap<UserDto, ApplicationUser>();
                 config.CreateMap<UpdateProfileDto, ApplicationUser>();
                 config.CreateMap<ApplicationUser, UpdateProfileDto>();
@@ -57,7 +61,9 @@ namespace Mapper
                 config.CreateMap<UserEducation, UserEducationDto>()
                     .ForMember(dest => dest.SpecializationIds,
                        opt => opt.MapFrom(src => src.Specializations.Select(s => s.Id).ToList()));
-                config.CreateMap<UserEducationDto, UserEducation>();
+                config.CreateMap<UserEducationDto, UserEducation>()
+                    .ForMember(dest => dest.Specializations, opt => opt.MapFrom(src =>
+                        src.SpecializationIds.Select(id => new Specialization { Id = id }).ToList()));
                 config.CreateMap<SpecializationDto, Specialization>();
                 config.CreateMap<Specialization, SpecializationDto>();
                 config.CreateMap<TeacherRequest, TeacherRequestDto>();

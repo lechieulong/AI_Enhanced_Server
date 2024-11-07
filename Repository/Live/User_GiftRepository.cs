@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Live
 {
-    public class User_GiftRepository:IUser_GiftRepository
+    public class User_GiftRepository : IUser_GiftRepository
     {
         private readonly AppDbContext _context;
 
@@ -24,7 +24,7 @@ namespace Repository.Live
         }
         public async Task<User_Gift> GetUser_GiftByIDAsync(Guid id)
         {
-            return await _context.User_Gifts.FirstOrDefaultAsync(o=>o.Id.Equals(id));
+            return await _context.User_Gifts.FirstOrDefaultAsync(o => o.Id.Equals(id));
         }
         public async Task<IEnumerable<User_Gift>> GetUser_GiftByUserId(String id)
         {

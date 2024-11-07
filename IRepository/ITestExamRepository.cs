@@ -13,6 +13,8 @@ namespace IRepository
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<TestExam> GetTestAsync(Guid id);
+        Task<TestExam> GetTestBySecionCourseId(Guid id);
+
         Task<List<Skill>> GetSkills(Guid testId);
         Task<Skill> GetSkillByIdAsync(Guid SkillId);
         Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
