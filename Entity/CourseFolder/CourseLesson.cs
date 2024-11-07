@@ -1,5 +1,5 @@
-﻿using Entity.CourseFolder;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,11 +19,7 @@ namespace Entity.CourseFolder
         [Required]
         public string Title { get; set; }
 
-        [Required]
-        public string ContentType { get; set; }
-
-        public string ContentUrl { get; set; }
-
-        public int Order { get; set; }
+        // Quan hệ một-nhiều với CourseLessonContent
+        public ICollection<CourseLessonContent> Contents { get; set; } = new List<CourseLessonContent>();
     }
 }

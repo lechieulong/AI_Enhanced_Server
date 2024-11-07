@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
 using Repository;
+using Model;
 
 namespace API.Controllers
 {
@@ -36,26 +37,53 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CoursePart>> Create(CoursePart coursePart)
+        public async Task<IActionResult> Create([FromBody] CoursePartDto coursePartDto)
         {
-            if (coursePart == null)
-                return BadRequest();
+            // Kiểm tra dữ liệu đầu vào
+            if (coursePartDto == null || coursePartDto.CourseSkillId == Guid.Empty ||
+                string.IsNullOrWhiteSpace(coursePartDto.Title) || string.IsNullOrWhiteSpace(coursePartDto.ContentType))
+            {
+                return BadRequest("Invalid course part data.");
+            }
 
-            var createdCoursePart = await _coursePartRepository.AddAsync(coursePart);
-            return CreatedAtAction(nameof(GetById), new { id = createdCoursePart.Id }, createdCoursePart);
+            // Chuyển đổi từ CoursePartDto sang CoursePart entity
+            var coursePart = new CoursePart
+            {
+                Id = Guid.NewGuid(), // Tạo ID mới cho CoursePart
+                CourseSkillId = coursePartDto.CourseSkillId,
+                Title = coursePartDto.Title,
+                ContentType = coursePartDto.ContentType,
+                ContentUrl = coursePartDto.ContentUrl,
+                Order = coursePartDto.Order
+            };
+
+            // Lưu CoursePart vào cơ sở dữ liệu
+            await _coursePartRepository.AddAsync(coursePart);
+            return CreatedAtAction(nameof(GetById), new { id = coursePart.Id }, coursePart);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, CoursePart coursePart)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CoursePartDto coursePartDto)
         {
-            if (id != coursePart.Id)
-                return BadRequest();
+            // Kiểm tra dữ liệu đầu vào
+            if (coursePartDto == null || id == Guid.Empty ||
+                string.IsNullOrWhiteSpace(coursePartDto.Title) || string.IsNullOrWhiteSpace(coursePartDto.ContentType))
+            {
+                return BadRequest("Invalid course part data.");
+            }
 
             var existingCoursePart = await _coursePartRepository.GetByIdAsync(id);
             if (existingCoursePart == null)
                 return NotFound();
 
-            await _coursePartRepository.UpdateAsync(coursePart);
+            // Cập nhật các thuộc tính từ DTO
+            existingCoursePart.CourseSkillId = coursePartDto.CourseSkillId;
+            existingCoursePart.Title = coursePartDto.Title;
+            existingCoursePart.ContentType = coursePartDto.ContentType;
+            existingCoursePart.ContentUrl = coursePartDto.ContentUrl;
+            existingCoursePart.Order = coursePartDto.Order;
+
+            await _coursePartRepository.UpdateAsync(existingCoursePart);
             return NoContent();
         }
 
@@ -68,5 +96,24 @@ namespace API.Controllers
 
             return NoContent();
         }
+        [HttpGet("ByCourse/{courseId}")]
+        public async Task<ActionResult<IEnumerable<CoursePart>>> GetByCourseId(Guid courseId)
+        {
+            var courseParts = await _coursePartRepository.GetByCourseIdAsync(courseId);
+            if (courseParts == null || !courseParts.Any())
+                return NotFound();
+
+            return Ok(courseParts);
+        }
+        [HttpGet("ByCourseSkill/{courseSkillId}")]
+        public async Task<ActionResult<IEnumerable<CoursePart>>> GetByCourseSkillId(Guid courseSkillId)
+        {
+            var courseParts = await _coursePartRepository.GetByCourseSkillIdAsync(courseSkillId);
+            if (courseParts == null || !courseParts.Any())
+                return NotFound();
+
+            return Ok(courseParts);
+        }
+
     }
 }

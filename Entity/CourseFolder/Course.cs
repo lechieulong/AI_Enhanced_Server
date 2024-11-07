@@ -24,8 +24,8 @@ namespace Entity.CourseFolder
 
         public double Price { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
         [JsonIgnore]
         public ICollection<CourseTimeline> CourseTimelines { get; set; }
@@ -33,7 +33,7 @@ namespace Entity.CourseFolder
         [JsonIgnore]
         public ICollection<Class> Classes { get; set; }
 
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
 
         public string UserId { get; set; }
 
@@ -44,5 +44,8 @@ namespace Entity.CourseFolder
 
         [JsonIgnore]
         public ICollection<Enrollment> Enrollments { get; set; }
+        [JsonIgnore]
+        public ICollection<CourseRating> CourseRatings { get; set; } = new List<CourseRating>();
+
     }
 }

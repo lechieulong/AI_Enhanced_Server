@@ -50,5 +50,12 @@ namespace Repository
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<IEnumerable<CourseLesson>> GetByCoursePartIdAsync(Guid coursePartId)
+        {
+            return await _context.CourseLessons
+                .Where(cl => cl.CoursePartId == coursePartId)
+                .ToListAsync();
+
+        }
     }
 }

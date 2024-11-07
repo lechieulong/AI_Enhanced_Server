@@ -7,6 +7,6 @@ namespace IService
     {
         Task<string> UploadFileAsync(string userId, Stream fileStream, string fileName, string contentType);
         Task<string> DownloadTemplate();
-
     }
+
 }

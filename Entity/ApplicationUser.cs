@@ -1,12 +1,9 @@
-﻿using Entity.Live;
+﻿using Entity.CourseFolder;
+using Entity.Live;
 using Entity.Payment;
 using Microsoft.AspNetCore.Identity;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Entity.CourseFolder;
+
 namespace Entity
 {
     public class ApplicationUser : IdentityUser
@@ -27,5 +24,6 @@ namespace Entity
         public AccountBalance? AccountBalances { get; set; }
         public ICollection<User_Gift>? SentGifts { get; set; }
         public ICollection<User_Gift>? ReceivedGifts { get; set; }
+        public ICollection<CourseRating> CourseRatings { get; set; } = new List<CourseRating>();
     }
 }

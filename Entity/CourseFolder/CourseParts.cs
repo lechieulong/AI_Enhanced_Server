@@ -12,25 +12,21 @@ namespace Entity.CourseFolder
         public Guid Id { get; set; }
 
         [Required]
-        public Guid SkillId { get; set; }
+        public Guid CourseSkillId { get; set; }  // Thay vì CoursePartId, nên đặt là CourseSkillId
 
-        [ForeignKey("SkillId")]
+        [ForeignKey("CourseSkillId")]
         [JsonIgnore]
         public CourseSkill Skill { get; set; }
 
         [Required]
-        public int PartNumber { get; set; }
-
-        [Required]
         public string Title { get; set; }
 
-        public string ContentText { get; set; }
+        [Required]
+        public string ContentType { get; set; }
 
-        public string Audio { get; set; }
+        public string ContentUrl { get; set; }
 
-        public string Image { get; set; }
-
-        public string VideoUrl { get; set; }
+        public int Order { get; set; }
 
         [JsonIgnore]
         public ICollection<CourseLesson> CourseLessons { get; set; } = new List<CourseLesson>();

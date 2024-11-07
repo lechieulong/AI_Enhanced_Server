@@ -17,6 +17,7 @@ using Repository.Live;
 using Service;
 using Repositories;
 using OfficeOpenXml;
+using YourNamespace.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,7 +108,8 @@ builder.Services.AddScoped<IUser_TicketRepository, User_TicketRepository>();
 builder.Services.AddScoped<ICourseSkillRepository, CourseSkillRepository>();
 builder.Services.AddScoped<ICoursePartRepository, CoursePartRepository>();
 builder.Services.AddScoped<ICourseLessonRepository, CourseLessonRepository>();
-
+builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRepository>();
+builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 // Đăng ký Background Service
 builder.Services.AddHostedService<NotificationBackgroundService>();
 

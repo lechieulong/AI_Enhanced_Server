@@ -25,7 +25,7 @@ namespace Entity.Data
         public DbSet<Class> Classes { get; set; }
         // Test Exam 
         public DbSet<TestExam> TestExams { get; set; }
-        public DbSet<Skill> Skills { get; set; }
+        public DbSet<Skill> Categories { get; set; }
         public DbSet<Part> Parts { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<SectionQuestion> SectionQuestion { get; set; }
@@ -55,6 +55,8 @@ namespace Entity.Data
         public DbSet<CourseSkill> CourseSkills { get; set; }
         public DbSet<CoursePart> CourseParts { get; set; }
         public DbSet<CourseLesson> CourseLessons { get; set; }
+        public DbSet<CourseLessonContent> CourseLessonContents { get; set; }
+        public DbSet<CourseRating> CourseRatings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -127,6 +129,17 @@ namespace Entity.Data
                     v => string.Join(',', v), // Convert list to a comma-separated string
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // Convert back to list
                 );
+            modelBuilder.Entity<CourseRating>()
+    .HasOne(cr => cr.Course)
+    .WithMany(c => c.CourseRatings)
+    .HasForeignKey(cr => cr.CourseId)
+    .OnDelete(DeleteBehavior.Restrict); // Đổi CASCADE thành RESTRICT
+
+            modelBuilder.Entity<CourseRating>()
+                .HasOne(cr => cr.User)
+                .WithMany(u => u.CourseRatings)
+                .HasForeignKey(cr => cr.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
 

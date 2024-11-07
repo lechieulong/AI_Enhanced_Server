@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241104044159_CreateCourseLessonContent")]
+    partial class CreateCourseLessonContent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,7 +280,7 @@ namespace Entity.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ContentText")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
@@ -328,38 +331,6 @@ namespace Entity.Migrations
                     b.HasIndex("CourseSkillId");
 
                     b.ToTable("CourseParts");
-                });
-
-            modelBuilder.Entity("Entity.CourseFolder.CourseRating", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("RatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("RatingValue")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Review")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CourseRatings");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseSkill", b =>
@@ -1313,25 +1284,6 @@ namespace Entity.Migrations
                     b.Navigation("Skill");
                 });
 
-            modelBuilder.Entity("Entity.CourseFolder.CourseRating", b =>
-                {
-                    b.HasOne("Entity.CourseFolder.Course", "Course")
-                        .WithMany("CourseRatings")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany("CourseRatings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entity.CourseFolder.CourseSkill", b =>
                 {
                     b.HasOne("Entity.CourseFolder.Course", "Course")
@@ -1666,8 +1618,6 @@ namespace Entity.Migrations
 
                     b.Navigation("BookedTeacherSessions");
 
-                    b.Navigation("CourseRatings");
-
                     b.Navigation("Courses");
 
                     b.Navigation("Enrollments");
@@ -1692,8 +1642,6 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.CourseFolder.Course", b =>
                 {
                     b.Navigation("Classes");
-
-                    b.Navigation("CourseRatings");
 
                     b.Navigation("CourseTimelines");
 
