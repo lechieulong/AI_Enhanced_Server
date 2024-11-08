@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
 
-namespace YourNamespace.Repositories
+namespace IRepository
 {
     public interface ICourseRatingRepository
     {

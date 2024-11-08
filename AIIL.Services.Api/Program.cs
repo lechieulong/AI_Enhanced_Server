@@ -17,7 +17,6 @@ using Repository.Live;
 using Service;
 using Repositories;
 using OfficeOpenXml;
-using YourNamespace.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

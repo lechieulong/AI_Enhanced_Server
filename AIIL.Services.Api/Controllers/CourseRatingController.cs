@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using YourNamespace.Repositories;
 using Entity.CourseFolder;
 using Model;
+using IRepository;
 
 namespace YourNamespace.Controllers
 {

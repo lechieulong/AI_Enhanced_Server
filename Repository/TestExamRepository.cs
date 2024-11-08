@@ -172,7 +172,7 @@ namespace Repository
                         }
                     }
 
-                    await _context.Categories.AddAsync(skill);
+                    await _context.Skills.AddAsync(skill);
                 }
 
                 await _context.SaveChangesAsync();
@@ -356,7 +356,7 @@ namespace Repository
 
         public async Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId)
         {
-            return await _context.Categories
+            return await _context.Skills
                 .Where(s => s.TestId == testId)
                 .Include(s => s.Parts)
                     .ThenInclude(p => p.Sections)
@@ -369,7 +369,7 @@ namespace Repository
 
         public async Task<Skill> GetSkillByIdAsync(Guid skillId)
         {
-            return await _context.Categories
+            return await _context.Skills
                 .Include(s => s.Parts)
                     .ThenInclude(p => p.Sections)
                         .ThenInclude(sec => sec.SectionQuestions)
@@ -380,7 +380,7 @@ namespace Repository
 
         public async Task<List<Skill>> GetSkills(Guid testId)
         {
-            return await _context.Categories.Where(skill => skill.TestId == testId).ToListAsync();
+            return await _context.Skills.Where(skill => skill.TestId == testId).ToListAsync();
         }
         public async Task<List<Part>> GetParts(Guid skillId)
         {

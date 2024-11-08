@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Entity.CourseFolder;
 using Entity.Data;
+using IRepository;
 
 namespace Repository
 {

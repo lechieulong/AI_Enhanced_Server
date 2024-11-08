@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
 using Entity.Data;
+using IRepository;
 using Microsoft.EntityFrameworkCore;
 
-namespace YourNamespace.Repositories
+namespace Repository
 {
     public class CourseRatingRepository : ICourseRatingRepository
     {

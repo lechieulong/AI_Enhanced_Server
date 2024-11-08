@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
 
-namespace Repository
+namespace IRepository
 {
     public interface ICoursePartRepository
     {
