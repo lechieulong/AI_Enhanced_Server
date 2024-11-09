@@ -6,7 +6,7 @@ using Entity;
 using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
-
+using Entity.CourseFolder;
 namespace Repository
 {
     public class CourseRepository : ICourseRepository
@@ -87,5 +87,19 @@ namespace Repository
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<Guid?> GetCourseIdByLessonContentIdAsync(Guid courseLessonContentId)
+        {
+            var courseId = await (from clc in _context.CourseLessonContents
+                                  join cl in _context.CourseLessons on clc.CourseLessonId equals cl.Id
+                                  join cp in _context.CourseParts on cl.CoursePartId equals cp.Id
+                                  join cs in _context.CourseSkills on cp.CourseSkillId equals cs.Id
+                                  join c in _context.Courses on cs.CourseId equals c.Id
+                                  where clc.Id == courseLessonContentId
+                                  select c.Id)
+                                 .FirstOrDefaultAsync();
+
+            return courseId == Guid.Empty ? (Guid?)null : courseId;
+        }
+
     }
 }

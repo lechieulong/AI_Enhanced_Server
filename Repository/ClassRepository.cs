@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Entity;
+using Entity.CourseFolder;
 using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,17 @@ namespace Repository
             {
                 throw new Exception("An error occurred while creating the class.", ex);
             }
+        }
+
+        public async Task<Enrollment> GetEnrollmentAsync(Guid courseId, string userId)
+        {
+            return await _dbContext.Enrollments
+                .FirstOrDefaultAsync(e => e.CourseId == courseId && e.UserId == userId);
+        }
+
+        public async Task<Class> GetEntityByIdAsync(Guid classId)
+        {
+            return await _dbContext.Classes.FirstOrDefaultAsync(c => c.Id == classId);
         }
 
 

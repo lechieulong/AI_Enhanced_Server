@@ -22,10 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-//Add to support Middleware get
-//builder.Services.AddHttpContextAccessor();
-
-// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -41,13 +37,11 @@ builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-// Register EmailSenderService and EmailTemplateService
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -55,18 +49,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
 
-    // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 
-    // User settings
     options.User.RequireUniqueEmail = false;
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-//DataProtectionTokenProviderOptions chỉ áp dụng cho các loại mã thông báo (token) được tạo ra bởi Identity Token Providers
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromMinutes(15);
@@ -87,7 +78,6 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
 builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
-
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
@@ -105,11 +95,13 @@ builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>(
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IUser_GiftRepository, User_GiftRepository>();
 builder.Services.AddScoped<IUser_TicketRepository, User_TicketRepository>();
-
-// Đăng ký Background Service
+builder.Services.AddScoped<ICourseSkillRepository, CourseSkillRepository>();
+builder.Services.AddScoped<ICoursePartRepository, CoursePartRepository>();
+builder.Services.AddScoped<ICourseLessonRepository, CourseLessonRepository>();
+builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRepository>();
+builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 
-// Register CORS services
 builder.Services.AddCors(options =>
 {
     var allowedOrigin = builder.Configuration.GetValue<string>("AllowedOrigins:FrontendUrl");
@@ -120,8 +112,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod());
 });
 
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -132,7 +122,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for AI-Enhanced IELTS Prep application"
     });
 
-    // Cấu hình Bearer Token cho Swagger
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -164,7 +153,6 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -178,9 +166,6 @@ app.UseHttpsRedirection();
 app.UseCors("AllowMyOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
-
-//Add middleware when neccesary
-//app.UseMiddleware<LockoutCheckMiddleware>();
 
 app.MapControllers();
 
@@ -197,10 +182,6 @@ void ApplyMigration()
             _db.Database.Migrate();
         }
 
-        // Gọi Seeder để thêm dữ liệu nếu cần
         DatabaseSeeder.SeedSpecializationsAndUserAsync(scope.ServiceProvider).GetAwaiter().GetResult();
     }
 }
-
-
-
