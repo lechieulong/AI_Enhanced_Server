@@ -278,8 +278,8 @@ namespace Entity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
