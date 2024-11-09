@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Entity;
 using Entity.Data;
+using Entity.CourseFolder;
 using Microsoft.EntityFrameworkCore;
 using Entity.CourseFolder;
 namespace Repositories

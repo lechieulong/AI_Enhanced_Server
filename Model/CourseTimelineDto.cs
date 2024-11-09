@@ -14,7 +14,7 @@ namespace Model
         [JsonIgnore]
         public CourseDto? Course { get; set; } // Có thể giữ lại nhưng không yêu cầu trong việc tạo
 
-        public DateTime EventDate { get; set; }
+        public int Order { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Model;
 using Microsoft.AspNetCore.Authorization;
 using Model.Utility;
-
+using Entity.CourseFolder;
 namespace Auth.Controllers
 {
     [Route("api/[controller]")]

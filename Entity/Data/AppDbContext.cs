@@ -5,7 +5,7 @@ using Entity.Test;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
+using Entity.CourseFolder;
 namespace Entity.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>

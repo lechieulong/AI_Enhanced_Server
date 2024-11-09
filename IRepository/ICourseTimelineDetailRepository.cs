@@ -1,6 +1,6 @@
 ﻿using Entity;
 using Model;
-
+using Entity.CourseFolder;
 public interface ICourseTimelineDetailRepository
 {
     Task<CourseTimelineDetailDto> GetByIdAsync(Guid id);

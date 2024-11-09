@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241109071923_UpdateAboutCourse")]
-    partial class UpdateAboutCourse
+    [Migration("20241109080726_UpdateNewCourse")]
+    partial class UpdateNewCourse
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,105 +38,6 @@ namespace Entity.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("UserEvents", (string)null);
-                });
-
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ClassDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CourseId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan?>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan?>("StartTime")
-                        .HasColumnType("time");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("CourseId1");
-
-                    b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("Course", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Categories")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Days")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Hours")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
@@ -240,6 +141,51 @@ namespace Entity.Migrations
                     b.ToTable("BookedTeacherSessions");
                 });
 
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClassDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan?>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan?>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Classes");
+                });
+
             modelBuilder.Entity("Entity.ClassRelationShip", b =>
                 {
                     b.Property<Guid>("Id")
@@ -304,7 +250,7 @@ namespace Entity.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Course");
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseLesson", b =>
@@ -474,7 +420,7 @@ namespace Entity.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseTimeline");
+                    b.ToTable("CourseTimelines");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseTimelineDetail", b =>
@@ -500,71 +446,6 @@ namespace Entity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VideoUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseTimelineId");
-
-                    b.ToTable("CourseTimelineDetail");
-                });
-
-            modelBuilder.Entity("Entity.CourseTimeline", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("CourseTimelines");
-                });
-
-            modelBuilder.Entity("Entity.CourseTimelineDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseTimelineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VideoUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -618,9 +499,6 @@ namespace Entity.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CourseId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -630,8 +508,6 @@ namespace Entity.Migrations
                     b.HasIndex("ClassId");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("CourseId1");
 
                     b.HasIndex("UserId");
 
@@ -1366,30 +1242,6 @@ namespace Entity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.HasOne("Course", "Course")
-                        .WithMany("Classes")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Entity.CourseFolder.Course", null)
-                        .WithMany("Classes")
-                        .HasForeignKey("CourseId1");
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("Course", b =>
-                {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany("Courses")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "Learner")
@@ -1409,10 +1261,21 @@ namespace Entity.Migrations
                     b.Navigation("TeacherAvailableSchedule");
                 });
 
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.HasOne("Entity.CourseFolder.Course", "Course")
+                        .WithMany("Classes")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Entity.CourseFolder.Course", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Courses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1505,44 +1368,18 @@ namespace Entity.Migrations
                     b.Navigation("CourseTimeline");
                 });
 
-            modelBuilder.Entity("Entity.CourseTimeline", b =>
-                {
-                    b.HasOne("Course", "Course")
-                        .WithMany("CourseTimelines")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("Entity.CourseTimelineDetail", b =>
-                {
-                    b.HasOne("Entity.CourseTimeline", "CourseTimeline")
-                        .WithMany("CourseTimelineDetails")
-                        .HasForeignKey("CourseTimelineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CourseTimeline");
-                });
-
             modelBuilder.Entity("Entity.Enrollment", b =>
                 {
-                    b.HasOne("Class", "Class")
+                    b.HasOne("Entity.Class", "Class")
                         .WithMany("Enrollments")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Course", "Course")
+                    b.HasOne("Entity.CourseFolder.Course", "Course")
                         .WithMany("Enrollments")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("Entity.CourseFolder.Course", null)
-                        .WithMany("Enrollments")
-                        .HasForeignKey("CourseId1");
 
                     b.HasOne("Entity.ApplicationUser", "User")
                         .WithMany("Enrollments")
@@ -1821,20 +1658,6 @@ namespace Entity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Class", b =>
-                {
-                    b.Navigation("Enrollments");
-                });
-
-            modelBuilder.Entity("Course", b =>
-                {
-                    b.Navigation("Classes");
-
-                    b.Navigation("CourseTimelines");
-
-                    b.Navigation("Enrollments");
-                });
-
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
                     b.Navigation("AccountBalances");
@@ -1860,6 +1683,11 @@ namespace Entity.Migrations
                     b.Navigation("UserEducation");
 
                     b.Navigation("User_Tickets");
+                });
+
+            modelBuilder.Entity("Entity.Class", b =>
+                {
+                    b.Navigation("Enrollments");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.Course", b =>
@@ -1889,11 +1717,6 @@ namespace Entity.Migrations
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseTimeline", b =>
-                {
-                    b.Navigation("CourseTimelineDetails");
-                });
-
-            modelBuilder.Entity("Entity.CourseTimeline", b =>
                 {
                     b.Navigation("CourseTimelineDetails");
                 });
