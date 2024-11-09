@@ -9,6 +9,9 @@ using Model;
 using Microsoft.AspNetCore.Authorization;
 using Model.Utility;
 using Entity.CourseFolder;
+using Microsoft.EntityFrameworkCore;
+using Repository;
+
 namespace Auth.Controllers
 {
     [Route("api/[controller]")]
@@ -16,15 +19,16 @@ namespace Auth.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly ICourseRepository _repository;
-        private readonly IClassRepository _classRepository; // Keep or remove based on your need
+        private readonly IClassRepository _classRepository;
+        private readonly ICourseSkillRepository _courseSkillRepository;
 
-        public CoursesController(ICourseRepository repository, IClassRepository classRepository)
+        public CoursesController(ICourseRepository repository, IClassRepository classRepository, ICourseSkillRepository courseSkillRepository)
         {
             _repository = repository;
             _classRepository = classRepository;
+            _courseSkillRepository = courseSkillRepository;
         }
 
-        // GET: api/courses
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -36,31 +40,28 @@ namespace Auth.Controllers
                 course.Content,
                 course.Hours,
                 course.Days,
-                Categories = course.Categories, // Return the list of categories
+                Categories = course.Categories,
                 course.Price,
                 course.UserId,
-                course.IsEnabled // Include IsEnabled status
-
+                course.IsEnabled
             }));
         }
 
-        // POST: api/courses
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CourseDto courseDto) // Sử dụng CourseDto
+        public async Task<IActionResult> Create([FromBody] CourseDto courseDto)
         {
             if (courseDto == null || string.IsNullOrWhiteSpace(courseDto.CourseName) ||
                 string.IsNullOrWhiteSpace(courseDto.Content) || courseDto.Hours <= 0 ||
                 courseDto.Days <= 0 || courseDto.Categories == null ||
-                !courseDto.Categories.Any() || // Ensure at least one category is provided
-                courseDto.Price <= 0 || string.IsNullOrWhiteSpace(courseDto.UserId))
+                !courseDto.Categories.Any() || courseDto.Price <= 0 ||
+                string.IsNullOrWhiteSpace(courseDto.UserId))
             {
                 return BadRequest("Invalid course data.");
             }
 
-            // Chuyển đổi từ CourseDto sang Course entity
             var course = new Course
             {
-                Id = Guid.NewGuid(), // Tạo ID mới cho khóa học
+                Id = Guid.NewGuid(),
                 CourseName = courseDto.CourseName,
                 Content = courseDto.Content,
                 Hours = courseDto.Hours,
@@ -70,14 +71,39 @@ namespace Auth.Controllers
                 UserId = courseDto.UserId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                IsEnabled = true // Default IsEnabled to true if not specified
+                IsEnabled = true
             };
 
             await _repository.CreateAsync(course);
+
+            foreach (var category in courseDto.Categories)
+            {
+                var courseSkill = new CourseSkill
+                {
+                    Id = Guid.NewGuid(),
+                    CourseId = course.Id,
+                    Type = category,
+                    Description = GetSkillDescription(category)
+                };
+
+                await _courseSkillRepository.AddAsync(courseSkill);
+            }
+
             return Ok(course);
         }
 
-        // PUT: api/courses/{id}
+        private string GetSkillDescription(string category)
+        {
+            return category switch
+            {
+                "0" => "Reading",
+                "1" => "Listening",
+                "2" => "Writing",
+                "3" => "Speaking",
+                _ => "Unknown skill"
+            };
+        }
+
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Course course)
         {
@@ -86,12 +112,10 @@ namespace Auth.Controllers
                 return BadRequest("Course ID mismatch.");
             }
 
-            // You can also add validations for the Categories here if needed
             await _repository.UpdateAsync(course);
             return NoContent();
         }
 
-        // DELETE: api/courses/{id}
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -99,7 +123,6 @@ namespace Auth.Controllers
             return NoContent();
         }
 
-        // GET: api/courses/{courseId}/classes
         [HttpGet("{courseId:guid}/classes")]
         public async Task<IActionResult> GetClassesByCourseId(Guid courseId)
         {
@@ -107,7 +130,6 @@ namespace Auth.Controllers
             return classes == null || !classes.Any() ? NotFound("No classes found.") : Ok(classes);
         }
 
-        // GET: api/courses/user/{userId}
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetAllCourseByUserId(string userId)
         {
@@ -115,7 +137,6 @@ namespace Auth.Controllers
             return courses == null || !courses.Any() ? NotFound("No courses found.") : Ok(courses);
         }
 
-        // GET: api/courses/enabled
         [HttpGet("enabled")]
         public async Task<IActionResult> GetEnabledCourses()
         {
@@ -123,7 +144,6 @@ namespace Auth.Controllers
             return courses == null || !courses.Any() ? NotFound("No enabled courses found.") : Ok(courses);
         }
 
-        // GET: api/courses/disabled
         [HttpGet("disabled")]
         public async Task<IActionResult> GetDisabledCourses()
         {
@@ -131,7 +151,6 @@ namespace Auth.Controllers
             return courses == null || !courses.Any() ? NotFound("No disabled courses found.") : Ok(courses);
         }
 
-        // GET: api/courses/{id}/enabled
         [HttpGet("{id:guid}/enabled")]
         public async Task<IActionResult> IsCourseEnabled(Guid id)
         {
@@ -144,7 +163,6 @@ namespace Auth.Controllers
             return Ok(new { course.Id, course.IsEnabled });
         }
 
-        // PUT: api/courses/{courseId}/enabled
         [HttpPut("{courseId:guid}/enabled")]
         public async Task<IActionResult> UpdateCourseEnabledStatus(Guid courseId, [FromBody] bool isEnabled)
         {
@@ -157,5 +175,30 @@ namespace Auth.Controllers
             await _repository.UpdateCourseEnabledStatusAsync(courseId, isEnabled);
             return Ok(new { courseId, IsEnabled = isEnabled });
         }
+
+        [HttpGet("courseLessonContent/{courseLessonContentId}/courseId")]
+        public async Task<IActionResult> GetCourseIdByLessonContentId(Guid courseLessonContentId)
+        {
+            var courseId = await _repository.GetCourseIdByLessonContentIdAsync(courseLessonContentId);
+
+            if (courseId == null)
+                return NotFound("Course ID not found for the provided CourseLessonContent ID.");
+
+            return Ok(new { CourseId = courseId });
+        }
+        // CoursesController.cs
+        [HttpGet("DescriptionBySkill/{skillId:guid}")]
+        public async Task<IActionResult> GetDescriptionBySkillId(Guid skillId)
+        {
+            var courseSkill = await _courseSkillRepository.GetBySkillIdAsync(skillId);
+
+            if (courseSkill == null)
+            {
+                return NotFound("No description found for the provided Skill ID.");
+            }
+
+            return Ok(new { Description = courseSkill.Description });
+        }
+
     }
 }
