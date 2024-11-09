@@ -26,9 +26,6 @@ namespace Entity.CourseFolder
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
         [JsonIgnore]
-        public ICollection<CourseTimeline> CourseTimelines { get; set; } = new List<CourseTimeline>();
-
-        [JsonIgnore]
         public ICollection<Class> Classes { get; set; } = new List<Class>();
 
         public string? ImageUrl { get; set; }
