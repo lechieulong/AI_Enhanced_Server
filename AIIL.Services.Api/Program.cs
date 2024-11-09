@@ -75,8 +75,6 @@ builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
 
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<ICourseTimelineRepository, CourseTimelineRepository>();
-builder.Services.AddScoped<ICourseTimelineDetailRepository, CourseTimelineDetailRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();

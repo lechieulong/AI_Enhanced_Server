@@ -35,8 +35,6 @@ namespace Entity.Data
         public DbSet<ClassRelationShip> ClassRelationShip { get; set; }
 
         public DbSet<Course> Courses { get; set; }
-        public DbSet<CourseTimeline> CourseTimelines { get; set; }
-        public DbSet<CourseTimelineDetail> CourseTimelineDetails { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<TeacherAvailableSchedule> TeacherAvailableSchedules { get; set; }
