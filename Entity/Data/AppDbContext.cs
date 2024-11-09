@@ -1,10 +1,11 @@
-﻿using Entity.Live;
+﻿using Entity.CourseFolder;
+using Entity.Live;
 using Entity.Payment;
 using Entity.Test;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
+using Entity.CourseFolder;
 namespace Entity.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
@@ -51,6 +52,11 @@ namespace Entity.Data
         public DbSet<Balance_History> Balance_Historys { get; set; }
         public DbSet<Gift> Gifts { get; set; }
         public DbSet<User_Gift> User_Gifts { get; set; }
+        public DbSet<CourseSkill> CourseSkills { get; set; }
+        public DbSet<CoursePart> CourseParts { get; set; }
+        public DbSet<CourseLesson> CourseLessons { get; set; }
+        public DbSet<CourseLessonContent> CourseLessonContents { get; set; }
+        public DbSet<CourseRating> CourseRatings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

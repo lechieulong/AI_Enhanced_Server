@@ -5,7 +5,7 @@ using Entity.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using Entity.CourseFolder;
 namespace Repository
 {
     public class CourseTimelineRepository : ICourseTimelineRepository

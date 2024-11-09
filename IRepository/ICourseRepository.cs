@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity;
-
+using Entity.CourseFolder;
 namespace IRepository
 {
     public interface ICourseRepository
@@ -16,5 +16,6 @@ namespace IRepository
         Task<List<Course>> GetAllDisabledCoursesAsync();
         Task<List<Course>> GetAllCourseByUserIdAsync(string userId);
         Task UpdateCourseEnabledStatusAsync(Guid courseId, bool isEnabled);
+        Task<Guid?> GetCourseIdByLessonContentIdAsync(Guid courseLessonContentId);
     }
 }

@@ -2,7 +2,7 @@
 using Entity;
 using Microsoft.EntityFrameworkCore;
 using Model;
-
+using Entity.CourseFolder;
 public class CourseTimelineDetailRepository : ICourseTimelineDetailRepository
 {
     private readonly AppDbContext _context;

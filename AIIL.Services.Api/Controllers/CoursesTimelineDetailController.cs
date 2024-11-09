@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Entity;
-using Model; // Thêm không gian tên cho DTO
+using Model; 
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Repository;
-
+using Entity.CourseFolder;
 namespace Auth.Controllers
 {
     [Route("api/[controller]")]
