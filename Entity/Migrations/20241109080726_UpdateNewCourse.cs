@@ -16,7 +16,7 @@ namespace Entity.Migrations
                 table: "Courses");
 
             migrationBuilder.DropColumn(
-                name: "EventDate",
+                name: "Order",
                 table: "CourseTimelines");
 
             migrationBuilder.AddColumn<int>(
@@ -341,12 +341,12 @@ namespace Entity.Migrations
                 name: "Skill",
                 table: "CourseTimelineDetails");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EventDate",
+            migrationBuilder.AddColumn<int>(
+                name: "Order",
                 table: "CourseTimelines",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: 0);
 
             migrationBuilder.AlterColumn<string>(
                 name: "VideoUrl",
