@@ -194,17 +194,20 @@ namespace Service
             {
                 Subject = "Request Approved to Become a Teacher",
                 Body = $@"
-                    <html>
-                        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                            <h2>Congratulations, {recipientName}!</h2>
-                            <p>We are pleased to inform you that your request to become a teacher on our platform has been approved.</p>
-                            <p><strong>Description:</strong> {description}</p>
-                            <p>You may now access additional features available to teachers. We are excited to see your valuable contributions to our learning community.</p>
-                            <p>If you have any questions, please feel free to reach out to our support team.</p>
-                            <br />
-                            <p>Best regards,<br />The AI-Enhanced IELTS Prep Team</p>
-                        </body>
-                    </html>"
+            <html>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; background-color: #f9f9f9; padding: 20px;'>
+                    <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
+                        <h2 style='color: #333333; text-align: center;'>Congratulations, {recipientName}!</h2>
+                        <p style='color: #555555; font-size: 16px;'>We are pleased to inform you that your request to become a teacher on our platform has been approved.</p>
+                        <p style='color: #555555; font-size: 16px;'><strong>Description:</strong> {description}</p>
+                        <p style='color: #b22222; font-weight: bold; font-size: 16px;'>Attention: If your request not update yet. Please click (Update role) in your request.</p>
+                        <p style='color: #555555; font-size: 16px;'>You may now access additional features available to teachers. We are excited to see your valuable contributions to our learning community.</p>
+                        <p style='color: #555555; font-size: 16px;'>If you have any questions, please feel free to reach out to our support team.</p>
+                        <br />
+                        <p style='color: #555555; font-size: 16px;'>Best regards,<br /><span style='font-weight: bold;'>The AI-Enhanced IELTS Prep Team</span></p>
+                    </div>
+                </body>
+            </html>"
             };
         }
 

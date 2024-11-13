@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using Common;
+using Entity;
 using Entity.Data;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -110,5 +111,11 @@ namespace Repository
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<TeacherAvailableSchedule>> GetAllPendingAsync()
+        {
+            return await _db.TeacherAvailableSchedules
+                .Where(schedule => schedule.Status == (int)ScheduleStatus.Pending)
+                .ToListAsync();
+        }
     }
 }

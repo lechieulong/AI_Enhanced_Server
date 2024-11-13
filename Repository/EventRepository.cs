@@ -40,6 +40,7 @@ namespace Repository
 
         public async Task<Event> CreateEventAsync(Event eventEntity, List<string> userIds)
         {
+            eventEntity.Id = Guid.NewGuid();
             await _db.Events.AddAsync(eventEntity);
             await _db.SaveChangesAsync();
 

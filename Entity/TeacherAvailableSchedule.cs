@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Entity
         public ApplicationUser Teacher { get; set; }
         // 0 is availabe, 1 is pending, 2 is booked
         public int Status { get; set; }
+        public DateTime? PendingTime { get; set; }
+
         public BookedTeacherSession? BookedTeacherSession { get; set; }
         [NotMapped]
         public DateTime EndTime => StartTime.AddMinutes(Minutes);

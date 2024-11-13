@@ -125,6 +125,7 @@ namespace AIIL.Services.Api.Controllers
                 Event = await _eventRepository.CreateEventAsync(Event, eventDto.UserIds);
                 _response.Result = _mapper.Map<EventDto>(Event);
             }
+            
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
