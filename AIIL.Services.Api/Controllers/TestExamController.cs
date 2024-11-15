@@ -95,13 +95,11 @@ namespace AIIL.Services.Api.Controllers
             var test = await _testRepository.GetTestBySecionCourseId(sectionCourseId);
             return _mapper.Map<TestModel>(test);
         }
-        
 
-
-        [HttpGet("{id}/skills")]
-        public async Task<List<Skill>> GetSkills([FromRoute] Guid id)
+        [HttpGet("{testId}/skills")]
+        public async Task<List<Skill>> GetSkills([FromRoute] Guid testId)
         {
-            var skills = await _testRepository.GetSkills(id);
+            var skills = await _testRepository.GetSkills(testId);
             return skills;
         }
 
