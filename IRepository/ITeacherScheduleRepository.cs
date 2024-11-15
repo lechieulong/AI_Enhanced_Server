@@ -12,6 +12,7 @@ namespace IRepository
     {
         Task<TeacherAvailableSchedule> GetByIdAsync(Guid id);
         Task<IEnumerable<TeacherAvailableSchedule>> GetAllAsync();
+        Task<IEnumerable<TeacherAvailableSchedule>> GetAllPendingAsync();
         Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherNameAsync(string userName);
         Task<IEnumerable<TeacherAvailableSchedule>> GetByTeacherName7DaysAsync(string userName);
         Task<TeacherAvailableSchedule> CreateAsync(TeacherAvailableSchedule newSchedule);

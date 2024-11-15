@@ -21,12 +21,14 @@ namespace Repository
     {
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IEmailSenderService _emailSenderService;
-        public UserRepository(AppDbContext context, UserManager<ApplicationUser> userManager, IEmailSenderService emailSender)
+        public UserRepository(AppDbContext context, UserManager<ApplicationUser> userManager, IEmailSenderService emailSender, IJwtTokenGenerator jwtTokenGenerator)
         {
             _db = context;
             _userManager = userManager;
             _emailSenderService = emailSender;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
         public async Task<IEnumerable<ApplicationUser>> GetTopTeachersAsync(string currentUserId)
@@ -78,6 +80,7 @@ namespace Repository
                 .Where(u => u.UserName.ToLower() == username.ToLower())
                 .Select(u => new UserDto
                 {
+                    ID = u.Id,
                     UserName = u.UserName,
                     Name = u.Name,
                     Email = u.Email,
@@ -102,7 +105,7 @@ namespace Repository
                     Email = u.Email,
                     PhoneNumber = u.PhoneNumber,
                     DOB = u.DOB,
-                    ImageURL = u.ImageURL
+                    ImageURL = u.ImageURL,
                 })
                 .FirstOrDefaultAsync();
 
@@ -168,14 +171,12 @@ namespace Repository
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                user.LockoutEnd = DateTime.UtcNow;
+                user.LockoutEnd = DateTime.Now;
                 var result = await _userManager.UpdateAsync(user);
 
                 if (result.Succeeded)
                 {
-                    // Convert the current UTC time to Vietnam time (UTC+7)
-                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                    var unlockDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+                    var unlockDate = DateTime.Now;
                     var email = user.Email; // Assuming user has an Email property
                     var name = user.Name; // Assuming user has a UserName property
 
@@ -235,6 +236,17 @@ namespace Repository
             }
 
             return userEducation;
+        }
+
+        public async Task<string> UpdateRole(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var token = _jwtTokenGenerator.GenerateToken(user, roles);
+            return token;
         }
     }
 }

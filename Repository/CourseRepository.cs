@@ -20,12 +20,17 @@ namespace Repository
 
         public async Task<List<Course>> GetAllAsync()
         {
-            return await _context.Courses.ToListAsync();
+            return await _context.Courses
+                .Include(course => course.User)
+                .Where(course => course.IsEnabled)
+                .ToListAsync();
         }
 
         public async Task<Course> GetByIdAsync(Guid id)
         {
-            return await _context.Courses.FindAsync(id);
+            return await _context.Courses
+                .Include(c => c.User) // Include the related User entity
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task CreateAsync(Course course)
@@ -78,6 +83,15 @@ namespace Repository
             return await _context.Courses.Where(c => c.UserId == userId).ToListAsync();
         }
 
+        public async Task<List<Course>> GetCreatedCourses(string userId)
+        {
+            return await _context.Courses
+                .Include(course => course.User)
+                .Where(c => c.UserId == userId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task UpdateCourseEnabledStatusAsync(Guid courseId, bool isEnabled)
         {
             var course = await _context.Courses.FindAsync(courseId);
@@ -99,6 +113,27 @@ namespace Repository
                                  .FirstOrDefaultAsync();
 
             return courseId == Guid.Empty ? (Guid?)null : courseId;
+        }
+
+        public async Task<bool> CheckLecturerOfCourse(string userId, Guid courseId)
+        {
+            try
+            {
+                var course = await _context.Courses
+                    .Where(c => c.Id == courseId)
+                    .FirstOrDefaultAsync();
+
+                if (course == null)
+                {
+                    return false;
+                }
+
+                return course.UserId == userId;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
     }

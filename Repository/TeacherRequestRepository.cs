@@ -167,7 +167,7 @@ namespace Repository
 
             request.Description = processTeacherRequestDto.Comment;
             request.Status = (int)processTeacherRequestDto.Status; // Using the enum to set the status
-            request.UpdateAt = DateTime.UtcNow;
+            request.UpdateAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
 
@@ -227,7 +227,7 @@ namespace Repository
             // Update request details
             existingRequest.Description = teacherRequest.Description;
             existingRequest.Status = (int)RequestStatusEnum.Pending;
-            existingRequest.UpdateAt = DateTime.UtcNow;
+            existingRequest.UpdateAt = DateTime.Now;
 
             // Get or add user education
             var existingEducation = await _context.UserEducations
