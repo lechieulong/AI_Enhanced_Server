@@ -2,6 +2,7 @@
 using Entity.Test;
 using IRepository;
 using IService;
+using Microsoft.EntityFrameworkCore;
 using Model.Test;
 using Model.Utility;
 using System;
@@ -21,102 +22,108 @@ namespace Service
             _testExamRepository = testExamRepository;
         }
 
+        public async Task<TestResult> CalculateScore(Guid testId, Guid userId,  Dictionary<string, UserAnswersDto> payload)
+        {
+            var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(payload.Values.First().SkillId);
+            var userAnswers = new List<UserAnswers>();
+            decimal totalScore = 0;
+            int totalCorrectAnswer = 0;
 
-        //public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
-        //{
-        //    foreach (var skillKeyValue in model)
-        //    {
-        //        var skillDto = skillKeyValue.Value;
+            foreach (var entry in payload)
+            {
+                var questionDetail = entry.Value;
 
-        //        var skill = new Skill
-        //        {
-        //            Id = Guid.NewGuid(),
-        //            TestId = testId,
-        //            Duration = skillDto.Duration,
-        //            Type = (int)skillDto.Type
-        //        };
+                bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
-        //        int partIndex = 1;
-        //        foreach (var partDto in skillDto.Parts)
-        //        {
-        //            // Manually create Part entity without mapping
-        //            var part = new Part
-        //            {
-        //                Id = Guid.NewGuid(),
-        //                PartNumber = partIndex,
-        //                ContentText = partDto.ContentText,
-        //                Audio = partDto.Audio,
-        //                Image = partDto.Image,
-        //                Skill = skill,
-        //                Sections = new List<Section>() // Initialize Sections
-        //            };
+                decimal questionScore = isCorrect ? 1 : 0;
+                int correctQuestion = isCorrect ? 1 : 0;
+                totalScore += questionScore;
+                totalCorrectAnswer += correctQuestion;
+                foreach (var answer in questionDetail.Answers)
+                {
+                    var userAnswer = new UserAnswers
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        QuestionId = questionDetail.QuestionId,
+                        TestId = testId,
+                        AnswerText = answer.AnswerText,
+                        AnswerId = answer.AnswerId.HasValue ? answer.AnswerId.Value : (Guid?)null,
+                    };
+                    userAnswers.Add(userAnswer);
 
-        //            foreach (var sectionDto in partDto.Sections)
-        //            {
-        //                // Manually create Section entity without mapping
-        //                var section = new Section
-        //                {
-        //                    Id = Guid.NewGuid(),
-        //                    SectionGuide = sectionDto.SectionGuide,
-        //                    SectionType = sectionDto.SectionType,
-        //                    Part = part,
-        //                    SectionQuestions = new List<SectionQuestion>() // Initialize SectionQuestions
-        //                };
+                }
 
-        //                foreach (var questionDto in sectionDto.Questions)
-        //                {
-        //                    // Manually create Question entity without mapping
-        //                    var question = new Question
-        //                    {
-        //                        Id = Guid.NewGuid(),
-        //                        UserId = userId,
-        //                        QuestionName = questionDto.QuestionName,
-        //                        Answers = new List<Answer>() 
-        //                    };
+            }
 
-        //                    // Manually map answers from QuestionDto to Question entity
-        //                    question.Answers = questionDto.Answers.Select(answerDto =>
-        //                    {
-        //                        return new Answer
-        //                        {
-        //                            Id = Guid.NewGuid(),
-        //                            AnswerText = answerDto.AnswerText,
-        //                            TypeCorrect = (int)answerDto.TypeCorrect,
-        //                            QuestionId = question.Id,
-        //                            Question = question
-        //                        };
-        //                    }).ToList();
+            await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
-        //                    // Link the question to the section through SectionQuestion
-        //                    var sectionQuestion = new SectionQuestion
-        //                    {
-        //                        Id = Guid.NewGuid(),
-        //                        Section = section,
-        //                        Question = question,
-        //                        SectionId = section.Id,
-        //                        QuestionId = question.Id
-        //                    };
+            var testResult = new TestResult
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                TestId = testId,
+                SkillType = payload.Values.First().Skill,
+                Score = ScaleScore(totalScore, totalQuestion), 
+                NumberOfCorrect = totalCorrectAnswer,
+                TotalQuestion = totalQuestion
 
-        //                    section.SectionQuestions.Add(sectionQuestion);
-        //                }
+            };
 
-        //                // Add section to part
-        //                part.Sections.Add(section);
-        //            }
+            // Save test result using repository
+            await _testExamRepository.SaveTestResultAsync(testResult);
 
-        //            partIndex++;
-        //            skill.Parts.Add(part);
-        //        }
+            return testResult;
+        }
 
-        //        // Persist the skill with all its related entities
-        //        await _testExamRepository.AddSkillAsync(skill);
-        //    }
-        //}
+        private async Task<bool> ValidateAnswer(Guid questionId, List<AnswerDto> answers, int sectionType, int skill)
+        {
+            var correctAnswer =  await _testExamRepository.GetAnswerByQuestionId(questionId);
 
-        public async Task<TestModel> CreateTestAsync(Guid userId,TestModel model, string userRoleClaim)
+            if (correctAnswer == null)
+            {
+                Console.WriteLine($"No correct answer found for question ID: {questionId}");
+                return false;
+            }
+
+            try
+            {
+                switch (skill)
+                {
+                    case 0:
+                        if (sectionType == 2)
+                        {
+                            if (int.TryParse(answers[0].AnswerText, out int userAnswerNumber))
+                            {
+                                return userAnswerNumber == correctAnswer.TypeCorrect;
+                            }
+                        }
+                        break;
+                    case 1: 
+                        break;
+                  
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors and log them
+                Console.WriteLine($"Error validating answer for question ID: {questionId}, Error: {ex.Message}");
+            }
+
+            return false;
+        }
+
+
+        private decimal ScaleScore(decimal rawScore, int totalQuestion)
+        {
+            if (totalQuestion == 0) return 0; // Prevent division by zero
+            return Math.Round((rawScore / totalQuestion) * 9, 2);
+        }
+
+        public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, string userRoleClaim)
         {
             int role = userRoleClaim.Equals(SD.Teacher) ? 0 : 1;
-            return await _testExamRepository.AddTestAsync(userId,model, role);
+            return await _testExamRepository.AddTestAsync(userId, model, role);
         }
       
     }
