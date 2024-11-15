@@ -91,7 +91,10 @@ namespace API.Controllers
             if (courseLessons == null || !courseLessons.Any())
                 return NotFound("No lessons found for the specified CoursePartId.");
 
-            return Ok(courseLessons);
+            return Ok(new
+            {
+                CourseLessons = courseLessons,
+            });
         }
 
     }

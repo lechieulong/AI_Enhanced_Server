@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Entity;
+using Entity.CourseFolder;
 using Entity.Live;
 using Entity.Test;
 using Model;
 using Model.Live;
 using Model.Payment;
 using Model.Test;
+using Model.Course;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +86,12 @@ namespace Mapper
                 config.CreateMap<User_Ticket, User_TicketModel>();
                 config.CreateMap<User_TicketModel, User_Ticket>();
 
+                //Course
+                config.CreateMap<Course, GetCourseListDto>()
+                    .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.User.Name))
+                    .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.UserName))
+                    .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id));
+                config.CreateMap<GetCourseListDto, Course>();
             });
             return mappingConfig;
         }
