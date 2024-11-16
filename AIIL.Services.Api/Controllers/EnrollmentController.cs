@@ -101,16 +101,11 @@ namespace API.Controllers
         [HttpGet("check")]
         public async Task<IActionResult> CheckEnrollment(Guid courseId, string userId)
         {
-            // Kiểm tra xem user đã đăng ký khóa học với courseId và userId chưa
             var enrollment = await _enrollmentRepository.GetEnrollment(courseId, userId);
 
-            // Trả về kết quả check (true/false) và classId nếu có
-            return Ok(new
-            {
-                isEnrolled = enrollment != null,
-                classId = enrollment?.ClassId // Trả về classId nếu enrollment tồn tại, nếu không trả về null
-            });
+            return Ok(enrollment != null);
         }
+
 
     }
 }
