@@ -25,6 +25,8 @@ namespace Entity.Data
         public DbSet<Class> Classes { get; set; }
         // Test Exam 
         public DbSet<TestExam> TestExams { get; set; }
+        public DbSet<UserAnswers> UserAnswers { get; set; }
+        public DbSet<TestResult> TestResult { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<Part> Parts { get; set; }
         public DbSet<Section> Sections { get; set; }
