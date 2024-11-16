@@ -43,9 +43,10 @@ namespace Repository
                 .CountAsync(); // Count all questions
         }
 
-        public async Task<Answer?> GetAnswerByQuestionId(Guid questionId)
+        public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
-            return await  _context.Answers.FirstOrDefaultAsync(a => a.QuestionId == questionId);
+            return await  _context.Answers
+                    .Where(answer => answer.QuestionId == questionId).ToListAsync();
         }
 
         public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)

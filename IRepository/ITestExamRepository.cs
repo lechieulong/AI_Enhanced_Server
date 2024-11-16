@@ -13,7 +13,7 @@ namespace IRepository
     {
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
         Task SaveTestResultAsync(TestResult testResult);
-        Task<Answer> GetAnswerByQuestionId(Guid questionId);
+        Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
         Task<int> GetTotalQuestionBySkillId(Guid skillId);
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);

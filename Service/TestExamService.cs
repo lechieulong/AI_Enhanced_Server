@@ -76,11 +76,11 @@ namespace Service
             return testResult;
         }
 
-        private async Task<bool> ValidateAnswer(Guid questionId, List<AnswerDto> answers, int sectionType, int skill)
+        private async Task<bool> ValidateAnswer(Guid questionId, List<AnswerDto> usewrAnswers, int sectionType, int skill)
         {
-            var correctAnswer =  await _testExamRepository.GetAnswerByQuestionId(questionId);
+            var correctAnswers = await _testExamRepository.GetAnswerByQuestionId(questionId);
 
-            if (correctAnswer == null)
+            if (correctAnswers == null)
             {
                 Console.WriteLine($"No correct answer found for question ID: {questionId}");
                 return false;
@@ -91,26 +91,51 @@ namespace Service
                 switch (skill)
                 {
                     case 0:
-                        if (sectionType == 2)
+                        if (sectionType == 2 )
                         {
-                            if (int.TryParse(answers[0].AnswerText, out int userAnswerNumber))
+                            if (int.TryParse(usewrAnswers[0].AnswerText, out int userAnswerNumber))
                             {
-                                return userAnswerNumber == correctAnswer.TypeCorrect;
+                                return userAnswerNumber == correctAnswers[0].TypeCorrect;
                             }
                         }
+                        else if (sectionType == 1)
+                            return CompareMutipleAnswerSets(correctAnswers, usewrAnswers);
+                        else if(sectionType == 4 || sectionType== 5 || sectionType == 6)
+                                return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
+                        else
+                            return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                         break;
-                    case 1: 
-                        break;
-                  
+                    case 1:
+                        if (sectionType == 8)
+                            return CompareMutipleAnswerSets(correctAnswers, usewrAnswers);
+                        else if (sectionType == 1)
+                            return true;
+                        else
+                            return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
+                    default:
+                        return false;
                 }
             }
             catch (Exception ex)
             {
-                // Handle any unexpected errors and log them
                 Console.WriteLine($"Error validating answer for question ID: {questionId}, Error: {ex.Message}");
             }
 
             return false;
+        }
+
+        private bool CompareMutipleAnswerSets(List<Answer> correctAnswers, List<AnswerDto> userAnswers)
+        {
+            var correctIds = correctAnswers
+                             .Where(a => a.TypeCorrect == 1)
+                             .Select(a => a.Id)
+                             .ToHashSet();
+
+            var userAnswerIds = userAnswers
+                                .Select(ua => ua.AnswerId.GetValueOrDefault())
+                                .ToHashSet();
+
+            return correctIds.SetEquals(userAnswerIds);
         }
 
 
