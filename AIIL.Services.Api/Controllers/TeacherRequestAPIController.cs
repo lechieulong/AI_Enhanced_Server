@@ -54,7 +54,7 @@ namespace AIIL.Services.Api.Controllers
                 {
                     UserId = userId,
                     Description = "Request to become a teacher",
-                    CreateAt = DateTime.UtcNow,
+                    CreateAt = DateTime.Now,
                     Status = RequestStatusEnum.Pending
                 };
 

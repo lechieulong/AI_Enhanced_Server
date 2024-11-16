@@ -20,6 +20,35 @@ namespace Repository
             _context = context;
             _mapper = mapper;
         }
+
+        public async Task SaveUserAnswerAsync(List<UserAnswers> userAnswers)
+        {
+            await _context.UserAnswers.AddRangeAsync(userAnswers);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveTestResultAsync(TestResult testResult)
+        {
+            await _context.TestResult.AddAsync(testResult);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetTotalQuestionBySkillId(Guid skillId)
+        {
+            return await _context.Skills
+                .Where(skill => skill.Id == skillId)
+                .SelectMany(skill => skill.Parts) // Get all parts of the skill
+                .SelectMany(part => part.Sections) // Get all sections of each part
+                .SelectMany(section => section.SectionQuestions) // Get all section questions
+                .CountAsync(); // Count all questions
+        }
+
+        public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
+        {
+            return await  _context.Answers
+                    .Where(answer => answer.QuestionId == questionId).ToListAsync();
+        }
+
         public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
         {
             if (model == null || !model.Any())

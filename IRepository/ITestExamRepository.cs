@@ -1,4 +1,5 @@
 ﻿using Entity.Test;
+using Microsoft.EntityFrameworkCore;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,10 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
+        Task SaveTestResultAsync(TestResult testResult);
+        Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
+        Task<int> GetTotalQuestionBySkillId(Guid skillId);
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<TestExam> GetTestAsync(Guid id);

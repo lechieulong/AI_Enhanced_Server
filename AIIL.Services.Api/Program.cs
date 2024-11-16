@@ -70,6 +70,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
 builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 builder.Services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
+builder.Services.AddScoped<IBookedScheduleSessionRepository, BookedScheduleSessionRepository>();
 
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
@@ -99,6 +100,7 @@ builder.Services.AddScoped<ICourseLessonRepository, CourseLessonRepository>();
 builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRepository>();
 builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddHostedService<StatusBackgroundService>();
 
 builder.Services.AddCors(options =>
 {

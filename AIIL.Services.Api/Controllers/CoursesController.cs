@@ -11,6 +11,9 @@ using Model.Utility;
 using Entity.CourseFolder;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using AutoMapper;
+using Model.Course;
+using System.Security.Claims;
 
 namespace Auth.Controllers
 {
@@ -21,30 +24,31 @@ namespace Auth.Controllers
         private readonly ICourseRepository _repository;
         private readonly IClassRepository _classRepository;
         private readonly ICourseSkillRepository _courseSkillRepository;
+        private readonly IMapper _mapper;
+        private readonly ResponseDto _response;
 
-        public CoursesController(ICourseRepository repository, IClassRepository classRepository, ICourseSkillRepository courseSkillRepository)
+        public CoursesController(ICourseRepository repository, IClassRepository classRepository, ICourseSkillRepository courseSkillRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _repository = repository;
             _classRepository = classRepository;
             _courseSkillRepository = courseSkillRepository;
+            _response = new ResponseDto();
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var courses = await _repository.GetAllAsync();
-            return Ok(courses.Select(course => new
+
+            if (courses == null || !courses.Any())
             {
-                course.Id,
-                course.CourseName,
-                course.Content,
-                course.Hours,
-                course.Days,
-                Categories = course.Categories,
-                course.Price,
-                course.UserId,
-                course.IsEnabled
-            }));
+                return NotFound();
+            }
+
+            var coursesDto = _mapper.Map<List<GetCourseListDto>>(courses);
+
+            return Ok(coursesDto);
         }
 
         [HttpPost]
@@ -71,7 +75,7 @@ namespace Auth.Controllers
                 UserId = courseDto.UserId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                IsEnabled = true
+                IsEnabled = false
             };
 
             await _repository.CreateAsync(course);
@@ -123,6 +127,21 @@ namespace Auth.Controllers
             return NoContent();
         }
 
+        [HttpGet("course-info/{courseId}")]
+        public async Task<IActionResult> GetCourseInfo(Guid courseId)
+        {
+            var course = await _repository.GetByIdAsync(courseId);
+            var courseDto = _mapper.Map<GetCourseListDto>(course);
+            if (course == null)
+            {
+                _response.Result = null;
+                _response.Message = "No course found.";
+                return Ok(_response);
+            }
+            _response.Result = courseDto;
+            return Ok(_response);
+        }
+
         [HttpGet("{courseId:guid}/classes")]
         public async Task<IActionResult> GetClassesByCourseId(Guid courseId)
         {
@@ -136,6 +155,56 @@ namespace Auth.Controllers
             var courses = await _repository.GetAllCourseByUserIdAsync(userId);
             return courses == null || !courses.Any() ? NotFound("No courses found.") : Ok(courses);
         }
+
+        [HttpGet("created-courses")]
+        [Authorize]
+        public async Task<IActionResult> GetCreatedCourses()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authorized.");
+            }
+
+            var courses = await _repository.GetCreatedCourses(userId);
+
+            if (courses == null || !courses.Any())
+            {
+                return Ok("No courses found.");
+            }
+
+            var coursesDto = _mapper.Map<List<GetCourseListDto>>(courses);
+
+            return Ok(coursesDto);
+        }
+
+        [HttpGet("check-lecturer/{courseId}")]
+        public async Task<IActionResult> CheckLecturerOfCourse(Guid courseId)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                _response.Result = false;
+                _response.Message = "User is does not login.";
+                return Ok(_response);
+            }
+            bool isLecturer = await _repository.CheckLecturerOfCourse(userId, courseId);
+
+            if (isLecturer)
+            {
+                _response.Result = true;
+                _response.Message = "User is the lecturer of this course.";
+                return Ok(_response);
+            }
+            else
+            {
+                _response.Result = false;
+                _response.Message = "User is not the lecturer of this course.";
+                return Ok(_response);
+            }
+        }
+
 
         [HttpGet("enabled")]
         public async Task<IActionResult> GetEnabledCourses()

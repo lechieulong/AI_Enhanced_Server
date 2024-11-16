@@ -15,7 +15,9 @@ namespace IRepository
         Task<List<Course>> GetAllEnabledCoursesAsync();
         Task<List<Course>> GetAllDisabledCoursesAsync();
         Task<List<Course>> GetAllCourseByUserIdAsync(string userId);
+        Task<List<Course>> GetCreatedCourses(string userId);
         Task UpdateCourseEnabledStatusAsync(Guid courseId, bool isEnabled);
         Task<Guid?> GetCourseIdByLessonContentIdAsync(Guid courseLessonContentId);
+        Task<bool> CheckLecturerOfCourse(string userId, Guid courseId);
     }
 }

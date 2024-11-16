@@ -59,13 +59,14 @@ namespace Repository
                 .ToListAsync();
         }
 
-        // New method for fetching by courseSkillId
         public async Task<IEnumerable<CoursePart>> GetByCourseSkillIdAsync(Guid courseSkillId)
         {
             return await _context.Set<CoursePart>()
                 .Where(cp => cp.CourseSkillId == courseSkillId)
+                .OrderBy(cp => cp.Order)
                 .ToListAsync();
         }
+
     }
 
 }

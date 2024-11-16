@@ -7,7 +7,8 @@ using Model.Test;
 using System.Security.Claims;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using Newtonsoft.Json; // For .xlsx files
+using Newtonsoft.Json;
+using Service; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -54,9 +55,14 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpPost("{testId}/submitTest/{userId}")]
+        public async Task<IActionResult> CalculateScore( [FromRoute] Guid userId , [FromRoute] Guid testId, Dictionary<string, UserAnswersDto> model)
+        {
+            var result = await  _testExamService.CalculateScore( testId, userId, model);
+            return Ok(result);
+        }
 
 
-       
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {

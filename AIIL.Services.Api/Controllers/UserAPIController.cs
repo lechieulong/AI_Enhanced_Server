@@ -390,5 +390,47 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpPost("update-role")]
+        [Authorize]
+        public async Task<IActionResult> UpdateRole()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _response.IsSuccess = false;
+                _response.Message = "User not found.";
+                return NotFound(_response);
+            }
+
+            try
+            {
+                var token = await _userRepository.UpdateRole(userId);
+                
+                if(token == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "Can't update role";
+                    return BadRequest(_response);
+                }
+
+                _response.IsSuccess = true;
+                _response.Message = "Update role succesful";
+                _response.Result = token;
+                return Ok(_response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = $"User not found: {ex.Message}";
+                return NotFound(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, _response);
+            }
+        }
     }
 }

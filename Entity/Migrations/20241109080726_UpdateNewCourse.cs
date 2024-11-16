@@ -15,10 +15,6 @@ namespace Entity.Migrations
                 name: "FK_Courses_AspNetUsers_UserId",
                 table: "Courses");
 
-            migrationBuilder.DropColumn(
-                name: "Order",
-                table: "CourseTimelines");
-
             migrationBuilder.AddColumn<int>(
                 name: "Order",
                 table: "CourseTimelines",
