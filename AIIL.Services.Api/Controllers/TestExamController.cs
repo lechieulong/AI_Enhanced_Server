@@ -275,10 +275,19 @@ namespace AIIL.Services.Api.Controllers
                     IWorkbook workbook = new XSSFWorkbook(stream);
                     ISheet worksheet = workbook.GetSheetAt(0); // Get the first worksheet
 
+                    // Debugging log for row detection
+                    Console.WriteLine($"Total rows in worksheet (LastRowNum): {worksheet.LastRowNum}");
+
                     for (int row = 1; row <= worksheet.LastRowNum; row++) // Start from the second row
                     {
                         var rowData = worksheet.GetRow(row);
-                        if (rowData == null) continue; // Skip empty rows
+
+                        // Check if the row is null or all cells are empty
+                        if (rowData == null || rowData.Cells.All(cell => cell == null || string.IsNullOrWhiteSpace(cell.ToString())))
+                        {
+                            Console.WriteLine($"Skipping empty row: {row}");
+                            continue;
+                        }
 
                         var question = new Question
                         {
@@ -293,15 +302,48 @@ namespace AIIL.Services.Api.Controllers
                         if (!string.IsNullOrWhiteSpace(answerCell))
                         {
                             // Detect if the answer is JSON or plain text
-                            if (answerCell.TrimStart().StartsWith("{"))
+                            if (answerCell.TrimStart().StartsWith("[") && answerCell.TrimEnd().EndsWith("]"))
                             {
-                                // Attempt to parse JSON format
+                                // Attempt to parse JSON array format
+                                try
+                                {
+                                    var answers = JsonConvert.DeserializeObject<List<Answer>>(answerCell);
+                                    if (answers != null && answers.Any())
+                                    {
+                                        foreach (var answer in answers)
+                                        {
+                                            // Validate individual answer
+                                            if (!string.IsNullOrWhiteSpace(answer.AnswerText))
+                                            {
+                                                question.Answers.Add(new Answer
+                                                {
+                                                    Id = Guid.NewGuid(),
+                                                    AnswerText = answer.AnswerText,
+                                                    TypeCorrect = answer.TypeCorrect
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (JsonException jsonEx)
+                                {
+                                    return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+                                }
+                            }
+                            else if (answerCell.TrimStart().StartsWith("{"))
+                            {
+                                // Attempt to parse single JSON object format
                                 try
                                 {
                                     var answerObj = JsonConvert.DeserializeObject<Answer>(answerCell);
-                                    if (answerObj != null)
+                                    if (answerObj != null && !string.IsNullOrWhiteSpace(answerObj.AnswerText))
                                     {
-                                        question.Answers.Add(answerObj);
+                                        question.Answers.Add(new Answer
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            AnswerText = answerObj.AnswerText,
+                                            TypeCorrect = answerObj.TypeCorrect
+                                        });
                                     }
                                 }
                                 catch (JsonException jsonEx)
@@ -314,11 +356,13 @@ namespace AIIL.Services.Api.Controllers
                                 // Plain text answer, default TypeCorrect to 0
                                 question.Answers.Add(new Answer
                                 {
+                                    Id = Guid.NewGuid(),
                                     AnswerText = answerCell,
                                     TypeCorrect = 0 // Default value for plain text answer
                                 });
                             }
                         }
+
 
                         questions.Add(question);
                     }
@@ -335,12 +379,17 @@ namespace AIIL.Services.Api.Controllers
         }
 
 
-        [HttpGet("questionsBank/{userId}")]
-        public async Task<IActionResult> GetQuestionsAsync([FromRoute] Guid userId)
+
+        [HttpGet("{sectionType}/questionsBank/{userId}")]
+        public async Task<IActionResult> GetQuestionsAsync(
+             [FromRoute] Guid userId,
+             [FromRoute] int sectionType,
+             [FromQuery] int page ,  // Default page is 1
+             [FromQuery] int pageSize) // Default pageSize is 10
         {
             try
             {
-                var questions = await _testRepository.GetAllQuestionsAsync(userId);
+                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, sectionType, page, pageSize);
 
                 if (questions == null || !questions.Any())
                 {
@@ -354,6 +403,53 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+
+        [HttpGet("questionsBank/{userId}")]
+        public async Task<IActionResult> GetQuestionsAsync(
+             [FromRoute] Guid userId,
+             [FromQuery] int page,  // Default page is 1
+             [FromQuery] int pageSize) // Default pageSize is 10
+        {
+            try
+            {
+                var questions = await _testRepository.GetQuestionsAsync(userId,  page, pageSize);
+
+                if (questions == null || !questions.Any())
+                {
+                    return NotFound("No questions found for the specified user.");
+                }
+
+                return Ok(_mapper.Map<List<QuestionResponse>>(questions));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("testSubmitted/{userId}")]
+        public async Task<IActionResult> GetTestSubmitted(
+          [FromRoute] Guid userId,
+          [FromQuery] int page,  // Default page is 1
+          [FromQuery] int pageSize) // Default pageSize is 10
+        {
+            try
+            {
+                var tests = await _testRepository.GetTestSubmittedAsync(userId, page, pageSize);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
+
         [HttpPost("questionsBank")]
         public async Task<IActionResult> CreateQuestionsAsync([FromBody] List<QuestionDto> questionModels)
         {
