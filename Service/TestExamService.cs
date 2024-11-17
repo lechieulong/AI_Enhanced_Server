@@ -22,14 +22,14 @@ namespace Service
             _testExamRepository = testExamRepository;
         }
 
-        public async Task<TestResult> CalculateScore(Guid testId, Guid userId,  Dictionary<string, UserAnswersDto> payload)
+        public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
-            var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(payload.Values.First().SkillId);
+            var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
 
-            foreach (var entry in payload)
+            foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
 
@@ -63,11 +63,13 @@ namespace Service
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 TestId = testId,
-                SkillType = payload.Values.First().Skill,
-                Score = ScaleScore(totalScore, totalQuestion), 
+                SkillType = model.UserAnswers.Values.First().Skill,
+                Score = ScaleScore(totalScore, totalQuestion),
                 NumberOfCorrect = totalCorrectAnswer,
-                TotalQuestion = totalQuestion
-
+                TotalQuestion = totalQuestion,
+                TestDate = DateTime.UtcNow,
+                TimeMinutesTaken = model.TimeMinutesTaken,
+                SecondMinutesTaken = model.TimeSecondsTaken,
             };
 
             // Save test result using repository
