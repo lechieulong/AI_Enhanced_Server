@@ -55,10 +55,11 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+
         [HttpPost("{testId}/submitTest/{userId}")]
-        public async Task<IActionResult> CalculateScore( [FromRoute] Guid userId , [FromRoute] Guid testId, Dictionary<string, UserAnswersDto> model)
+        public async Task<IActionResult> CalculateScore([FromRoute] Guid testId, [FromRoute] Guid userId, [FromBody] SubmitTestDto model)
         {
-            var result = await  _testExamService.CalculateScore( testId, userId, model);
+            var result = await _testExamService.CalculateScore(testId, userId, model);
             return Ok(result);
         }
 
@@ -83,7 +84,7 @@ namespace AIIL.Services.Api.Controllers
         public async Task<IEnumerable<TestModel>> GetAllTestsAsync([FromRoute] Guid userId)
         {
 
-            var tests = await _testRepository.GetAllTestsAsync(userId); 
+            var tests = await _testRepository.GetAllTestsAsync(userId);
             return _mapper.Map<IEnumerable<TestModel>>(tests);
         }
 
@@ -92,6 +93,14 @@ namespace AIIL.Services.Api.Controllers
         {
             var test = await _testRepository.GetTestAsync(id);
             return _mapper.Map<TestModel>(test);
+        }
+
+        [HttpPost("{userId}/result")]
+        public async Task<IActionResult> GetResultTest([FromRoute]Guid  userId, [FromBody] ResultPayloadDto request)
+        {
+          
+            var test = await _testRepository.GetResultTest( userId, request.SkillResultIds);
+            return Ok(test);
         }
 
 
@@ -381,7 +390,7 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-        [HttpDelete("questionsBank/{id}")]
+        [HttpDelete("questionsBank/{id}/delete")]
         public async Task<IActionResult> DeleteQuestionAsync(Guid id)
         {
             // Check if the question exists
@@ -403,7 +412,7 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-        [HttpPut("questionsBank/{id}")]
+        [HttpPut("questionsBank/{id}/update")]
         public async Task<IActionResult> UpdateQuestionAsync([FromRoute] Guid id, [FromBody] QuestionResponse updatedQuestion)
         {
             if (updatedQuestion == null)

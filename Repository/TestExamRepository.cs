@@ -422,6 +422,15 @@ namespace Repository
                 .FirstOrDefaultAsync(test => test.Id == id);
         }
 
+
+        public async Task<List<TestResult>> GetResultTest(Guid userId, List<Guid> ids)
+        {
+            return await _context.TestResult
+                .Where(test => ids.Contains(test.Id) && test.UserId == userId)
+                .ToListAsync();
+        }
+
+
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {
             return await _context.TestExams
