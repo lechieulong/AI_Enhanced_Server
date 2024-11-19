@@ -132,15 +132,37 @@ namespace Repository
                                             if (questionDto == null)
                                                 continue;
 
-                                            var question = new Question
-                                            {
-                                                Id = Guid.NewGuid(),
-                                                UserId = userId,
-                                                QuestionName = questionDto.QuestionName,
-                                                QuestionType = questionDto.QuestionType,
-                                                Answers = new List<Answer>()
-                                            };
+                                            // Define the question variable
+                                            Question question;
 
+                                            // If QuestionId exists, use the existing question from the database
+                                            if (questionDto.QuestionId != Guid.Empty)
+                                            {
+                                                // Fetch the existing question from the database using the provided QuestionId
+                                                question = _context.Questions
+                                                    .FirstOrDefault(q => q.Id == questionDto.QuestionId); // Replace _context with your actual context
+
+                                                // If the question does not exist, log and skip adding this question
+                                                if (question == null)
+                                                {
+                                                    // Log or handle the case where the QuestionId does not exist in the database
+                                                    continue; // Skip this question
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // If there's no QuestionId, create a new question as needed
+                                                question = new Question
+                                                {
+                                                    Id = Guid.NewGuid(),
+                                                    UserId = userId,
+                                                    QuestionName = questionDto.QuestionName,
+                                                    QuestionType = questionDto.QuestionType,
+                                                    Answers = new List<Answer>()
+                                                };
+                                            }
+
+                                            // Now, handle the special case where we need to generate an answer based on the question name
                                             if (
                                                 (skill.Type == 0 && (section.SectionType == 8 || section.SectionType == 9)) ||
                                                 (skill.Type == 1 && (section.SectionType == 2 || section.SectionType == 7))
@@ -163,6 +185,7 @@ namespace Repository
                                                     question.Answers.Add(generatedAnswer);
                                                 }
                                             }
+                                            // If questionDto has answers, add them to the question
                                             else if (questionDto.Answers != null && questionDto.Answers.Any())
                                             {
                                                 foreach (var answerDto in questionDto.Answers)
@@ -181,6 +204,7 @@ namespace Repository
                                                 }
                                             }
 
+                                            // Create the SectionQuestion and associate it with the existing or new question
                                             var sectionQuestion = new SectionQuestion
                                             {
                                                 Id = Guid.NewGuid(),
@@ -188,6 +212,7 @@ namespace Repository
                                                 Question = question
                                             };
 
+                                            // Add the SectionQuestion to the section's collection
                                             section.SectionQuestions.Add(sectionQuestion);
                                         }
                                     }
@@ -284,13 +309,52 @@ namespace Repository
             return model;
         }
 
-        public async Task<List<Question>> GetAllQuestionsAsync(Guid userId)
+        public async Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize)
         {
+            // Calculate the skip count based on page and pageSize
+            int skip = (page - 1) * pageSize;
+
             return await _context.Questions
-                                 .Where(q => q.UserId == userId)
-                                 .Include(q => q.Answers) 
+                                 .Where(q => q.UserId == userId && q.QuestionType == sectionType)
+                                 .Include(q => q.Answers)
+                                 .Skip(skip)  // Skip the previous pages' items
+                                 .Take(pageSize)  // Take the next 'pageSize' items
                                  .ToListAsync();
         }
+
+
+        public async Task<List<Question>> GetQuestionsAsync(Guid userId,int page, int pageSize)
+        {
+            // Calculate the skip count based on page and pageSize
+            int skip = (page - 1) * pageSize;
+
+            return await _context.Questions
+                                 .Where(q => q.UserId == userId )
+                                 .Include(q => q.Answers)
+                                 .Skip(skip)  // Skip the previous pages' items
+                                 .Take(pageSize)  // Take the next 'pageSize' items
+                                 .ToListAsync();
+        }
+
+        public async Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            var testIds = await _context.TestExams
+                 .Where(test => test.UserID == userId)
+                 .Select(test => test.Id)
+                 .ToListAsync();
+
+
+                var results = await _context.TestResult
+               .Where(test => testIds.Contains(test.TestId))
+               .OrderByDescending(test => test.TestDate) // Order by most recent test date
+               .Skip((page - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
+            return results;
+        }
+
 
         public async Task AddQuestionsAsync(List<Question> questions)
         {
@@ -340,7 +404,7 @@ namespace Repository
                 var newQuestion = new Question
                 {
                     Id = Guid.NewGuid(),
-                    QuestionName = question.QuestionName,
+                    QuestionName = question.QuestionName == null ? "": question.QuestionName ,
                     QuestionType = question.QuestionType,
                     Skill = question.Skill,
                     PartNumber = question.PartNumber,
@@ -421,6 +485,15 @@ namespace Repository
             return await _context.TestExams
                 .FirstOrDefaultAsync(test => test.Id == id);
         }
+
+
+        public async Task<List<TestResult>> GetResultTest(Guid userId, List<Guid> ids)
+        {
+            return await _context.TestResult
+                .Where(test => ids.Contains(test.Id) && test.UserId == userId)
+                .ToListAsync();
+        }
+
 
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {

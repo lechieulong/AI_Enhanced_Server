@@ -18,6 +18,7 @@ namespace IRepository
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<TestExam> GetTestAsync(Guid id);
+        Task<List<TestResult>> GetResultTest( Guid userId, List<Guid> ids);
         Task<TestExam> GetTestBySecionCourseId(Guid id);
 
         Task<List<Skill>> GetSkills(Guid testId);
@@ -26,7 +27,9 @@ namespace IRepository
 
         Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
-        Task<List<Question>> GetAllQuestionsAsync(Guid userId);
+        Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize);
+        Task<List<Question>> GetQuestionsAsync(Guid userId,  int page, int pageSize);
+        Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize);
         Task AddQuestionsAsync(List<Question> questionModels);
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added

@@ -42,7 +42,7 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}")]
+        [Route("getbyid/{id:int}")]
         public async Task<ResponseDto> Get(Guid id)
         {
             try
@@ -139,7 +139,7 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
         [HttpGet]
-        [Route("{userName}")]
+        [Route("getbyusername/{userName}")]
         public async Task<ResponseDto> GetScheduleByTeacherName(string userName)
         {
             try

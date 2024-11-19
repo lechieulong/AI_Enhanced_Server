@@ -15,5 +15,8 @@ namespace Entity.Test
         public Decimal Score { get; set; }
         public int NumberOfCorrect { get; set; } 
         public int TotalQuestion { get; set; }
+        public DateTime TestDate { get; set; }
+        public int TimeMinutesTaken { get; set; }   
+        public int SecondMinutesTaken { get; set; }
     }
 }
