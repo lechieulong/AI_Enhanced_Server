@@ -13,6 +13,7 @@ namespace Model
         public int Days { get; set; }
         public List<string> Categories { get; set; } = new List<string>(); // Allow multiple categories
         public double Price { get; set; }
+        public int EnrollmentCount { get; set; }
 
     }
 }

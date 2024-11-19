@@ -24,5 +24,6 @@ namespace Model.Course
         public string Username { get; set; }
         public string TeacherName { get; set; }
         public bool IsEnabled { get; set; } = true;
+        public int EnrollmentCount { get; set; }
     }
 }

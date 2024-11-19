@@ -60,13 +60,23 @@ namespace Repository
 
         public async Task DeleteAsync(Guid id)
         {
-            var course = await _context.Courses.FindAsync(id);
-            if (course != null)
+            var course = await _context.Courses
+                .Include(c => c.Classes) 
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
             {
-                _context.Courses.Remove(course);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"Course with ID {id} not found.");
             }
+
+
+            _context.Classes.RemoveRange(course.Classes);
+
+            _context.Courses.Remove(course);
+
+            await _context.SaveChangesAsync();
         }
+
 
         public async Task<List<Course>> GetAllEnabledCoursesAsync()
         {
