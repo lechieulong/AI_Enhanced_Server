@@ -43,6 +43,18 @@ namespace Repository
                 .CountAsync(); // Count all questions
         }
 
+
+        public async Task<int> GetAttemptCountByTestAndUserAsync(Guid userId, Guid testId)
+        {
+            // Count how many attempts the user has made for this test
+            var attemptCount = await _context.TestResult
+                .Where(tr => tr.UserId == userId && tr.TestId == testId)
+                .CountAsync();
+
+            return attemptCount;
+        }
+
+
         public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
             return await  _context.Answers
@@ -289,6 +301,14 @@ namespace Repository
                 UserID = userId,
                 TestCreateBy = role,
             };
+            if(model.ClassId !=  Guid.Empty)
+            {
+                newTest.ClassId = model.ClassId.Value;
+            }
+            if (model.Id != Guid.Empty)
+            {
+                newTest.LessonId = model.LessonId.Value;
+            }
             _context.TestExams.Add(newTest);
 
             foreach (var classId in model.ClassIds)
@@ -460,6 +480,12 @@ namespace Repository
         }
 
 
+        public async Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId, Guid userId)
+        {
+            return await _context.UserAnswers
+                .Where(a => a.TestId == testId && a.UserId == userId).ToListAsync();    
+        }
+
         public async Task<Skill> GetSkillByIdAsync(Guid skillId)
         {
             return await _context.Skills
@@ -498,7 +524,7 @@ namespace Repository
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {
             return await _context.TestExams
-                .FirstOrDefaultAsync(test => test.SectionCourseId == id);
+                .FirstOrDefaultAsync(test => test.LessonId == id);
         }
 
         public async Task<Question> GetQuestionByIdAsync(Guid id)

@@ -14,5 +14,7 @@ namespace Entity.Test
         public Guid QuestionId { get; set; } // Foreign Key to Question
         public Guid? AnswerId { get; set; } // Foreign Key to Answer
         public string? AnswerText { get; set; } // The user's provided answer
+        public int AttemptNumber { get; set; } 
+
     }
 }
