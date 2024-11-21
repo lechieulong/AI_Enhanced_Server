@@ -17,6 +17,10 @@ using Repository.Live;
 using Service;
 using Repositories;
 using OfficeOpenXml;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,33 +117,71 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
+//builder.Services.AddSwaggerGen(options =>
+//{
+//    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+//    {
+//        Title = "AI-Enhanced IELTS Prep API",
+//        Version = "v1",
+//        Description = "API for AI-Enhanced IELTS Prep application"
+//    });
+
+//    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//    {
+//        Name = "Authorization",
+//        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+//        Scheme = "Bearer",
+//        BearerFormat = "JWT",
+//        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+//        Description = "Enter your token"
+//    });
+
+//    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+//    {
+//        {
+//            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//            {
+//                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+//                {
+//                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+//                    Id = "Bearer"
+//                }
+//            },
+//            new string[] {}
+//        }
+//    });
+//});
+
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "AI-Enhanced IELTS Prep API",
         Version = "v1",
         Description = "API for AI-Enhanced IELTS Prep application"
     });
 
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    // Cấu hình Security Definition cho Bearer Token
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter your token"
+        Name = "Authorization",                            // Tiêu đề cho header
+        Type = SecuritySchemeType.Http,                   // Loại xác thực
+        Scheme = "bearer",                                // Sử dụng Bearer Token
+        BearerFormat = "JWT",                             // Định dạng của token
+        In = ParameterLocation.Header,                   // Bearer Token sẽ được gửi qua tiêu đề HTTP
+        Description = "Enter 'Bearer' [space] and then your token in the text input below.\nExample: 'Bearer abc123'"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    // Thiết lập Security Requirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
@@ -147,6 +189,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
 
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
@@ -185,3 +228,4 @@ void ApplyMigration()
         DatabaseSeeder.SeedSpecializationsAndUserAsync(scope.ServiceProvider).GetAwaiter().GetResult();
     }
 }
+var jwtSettings = builder.Configuration.GetSection("ApiSettings:JwtOptions");

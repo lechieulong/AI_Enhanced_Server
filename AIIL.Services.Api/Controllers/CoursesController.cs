@@ -220,7 +220,7 @@ namespace Auth.Controllers
             return courses == null || !courses.Any() ? NotFound("No disabled courses found.") : Ok(courses);
         }
 
-        [HttpGet("{id:guid}/enabled")]
+        [HttpGet("{id:guid}/status")]
         public async Task<IActionResult> IsCourseEnabled(Guid id)
         {
             var course = await _repository.GetByIdAsync(id);
@@ -232,7 +232,7 @@ namespace Auth.Controllers
             return Ok(new { course.Id, course.IsEnabled });
         }
 
-        [HttpPut("{courseId:guid}/enabled")]
+        [HttpPut("{courseId:guid}/update-status")]
         public async Task<IActionResult> UpdateCourseEnabledStatus(Guid courseId, [FromBody] bool isEnabled)
         {
             var course = await _repository.GetByIdAsync(courseId);
@@ -244,6 +244,7 @@ namespace Auth.Controllers
             await _repository.UpdateCourseEnabledStatusAsync(courseId, isEnabled);
             return Ok(new { courseId, IsEnabled = isEnabled });
         }
+
 
         [HttpGet("courseLessonContent/{courseLessonContentId}/courseId")]
         public async Task<IActionResult> GetCourseIdByLessonContentId(Guid courseLessonContentId)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Entity.CourseFolder;
@@ -18,25 +19,21 @@ namespace YourNamespace.Controllers
             _repository = repository;
         }
 
-        // API để thêm đánh giá khóa học
         [HttpPost("{courseId}/rate")]
         public async Task<IActionResult> RateCourse(Guid courseId, [FromBody] CourseRatingDto ratingDto)
         {
-            // Kiểm tra người dùng đã đăng ký khóa học chưa
             bool isEnrolled = await _repository.UserHasEnrolledAsync(courseId, ratingDto.UserId);
             if (!isEnrolled)
             {
                 return BadRequest("User must be enrolled in the course to rate it.");
             }
 
-            // Kiểm tra người dùng đã đánh giá khóa học này chưa
             bool hasRated = await _repository.UserHasRatedCourseAsync(courseId, ratingDto.UserId);
             if (hasRated)
             {
                 return BadRequest("User has already rated this course.");
             }
 
-            // Tạo và lưu đánh giá mới
             var rating = new CourseRating
             {
                 CourseId = courseId,
@@ -49,11 +46,17 @@ namespace YourNamespace.Controllers
             return Ok("Rating added successfully.");
         }
 
-        // API để lấy danh sách đánh giá của khóa học
         [HttpGet("{courseId}/ratings")]
-        public async Task<IActionResult> GetCourseRatings(Guid courseId)
+        public async Task<IActionResult> GetCourseRatings(Guid courseId, [FromQuery] string userId)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return BadRequest("UserId is required.");
+            }
+
             var ratings = await _repository.GetCourseRatingsAsync(courseId);
+            ratings = ratings.Where(r => r.UserId.ToString() == userId).ToList();
+
             var result = ratings.Select(r => new
             {
                 r.UserId,
@@ -61,6 +64,7 @@ namespace YourNamespace.Controllers
                 r.Review,
                 r.RatedAt
             });
+
             return Ok(result);
         }
     }

@@ -185,40 +185,41 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-        [HttpGet("get-requests")]
-        [Authorize(Roles = "ADMIN")]
-        public async Task<IActionResult> GetAllTeacherRequests(RequestStatusEnum status, int page, int pageSize)
-        {
-            if (page <= 0 || pageSize <= 0)
-            {
-                return BadRequest("Page and page size must be greater than zero.");
-            }
-            try
-            {
-                var (requests, totalCount) = await _teacherRequestRepository.GetTeacherRequestsAsync(page, pageSize, status);
+        //[HttpGet("get-requests")]
+        //[Authorize(Roles = "ADMIN")]
+        //public async Task<IActionResult> GetAllTeacherRequests(RequestStatusEnum status, int page, int pageSize)
+        //{
+        //    if (page <= 0 || pageSize <= 0)
+        //    {
+        //        return BadRequest("Page and page size must be greater than zero.");
+        //    }
+        //    try
+        //    {
+        //        var (requests, totalCount) = await _teacherRequestRepository.GetTeacherRequestsAsync(page, pageSize, status);
 
-                // Đóng gói dữ liệu trả về
-                _response.Result = new
-                {
-                    Page = page,
-                    PageSize = pageSize,
-                    TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize), // Calculate total pages safely
-                    TotalCount = totalCount,
-                    Requests = requests,
-                };
-                _response.IsSuccess = true;
-                _response.Message = "Data retrieved successfully";
+        //        // Đóng gói dữ liệu trả về
+        //        _response.Result = new
+        //        {
+        //            Page = page,
+        //            PageSize = pageSize,
+        //            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize), // Calculate total pages safely
+        //            TotalCount = totalCount,
+        //            Requests = requests,
+        //        };
+        //        _response.IsSuccess = true;
+        //        _response.Message = "Data retrieved successfully";
 
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.Message = $"Internal server error: {ex.Message}";
+        //        return Ok(_response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _response.IsSuccess = false;
+        //        _response.Message = $"Internal server error: {ex.Message}";
 
-                return StatusCode(500, _response);
-            }
-        }
+        //        return StatusCode(500, _response);
+        //    }
+        //}
+
 
         [HttpGet("get-request-by-id/{requestId}")]
         [Authorize]

@@ -98,8 +98,7 @@ namespace AIIL.Services.Api.Controllers
             return Ok(createdClassDto);
         }
 
-
-        [HttpPut("{classId:guid}")]
+        [HttpPut("update/{classId:guid}")]
         public async Task<ResponseDto> Put(Guid classId, [FromBody] ClassDto classDto)
         {
             try
@@ -121,6 +120,7 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
 
         [HttpDelete("{id:Guid}")]
         public async Task<ResponseDto> Delete(Guid id)
