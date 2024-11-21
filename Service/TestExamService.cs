@@ -145,6 +145,9 @@ namespace Service
 
             int attemptNumber = await _testExamRepository.GetAttemptCountByTestAndUserAsync(userId, testId);
 
+            int year = DateTime.Now.Year;
+
+            await _testExamRepository.AddAttemptTestForYear(userId, year);
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;

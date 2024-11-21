@@ -452,6 +452,35 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("testAnalysis/{userId}")]
+        public async Task<IActionResult> GetTestAnalysisAttempt([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetTestAnalysisAttempt(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("attempts/{userId}")]
+        public async Task<IActionResult> GetAttemptTests([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetAttemptTests(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
 
 
