@@ -55,6 +55,37 @@ namespace Repository
         }
 
 
+        public async Task AddAttemptTestForYear(Guid userId, int year)
+        {
+            var testAttempt = await _context.AttempTests
+                .FirstOrDefaultAsync(t => t.UserId == userId && t.Year == year);
+
+            if (testAttempt != null)
+            {
+                testAttempt.TotalAttempt += 1;
+            }
+            else
+            {
+                testAttempt = new AttempTest
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Year = year,
+                    TotalAttempt = 1
+                };
+                await _context.AttempTests.AddAsync(testAttempt); // Add the new record
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<AttempTest>> GetAttemptTests(Guid userId)
+        {
+            return  await _context.AttempTests
+                .Where(t =>  t.UserId == userId).ToListAsync();
+        } 
+
         public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
             return await  _context.Answers
@@ -373,6 +404,21 @@ namespace Repository
                .Take(pageSize)
                .ToListAsync();
             return results;
+        }
+
+        public async Task<List<object>> GetTestAnalysisAttempt(Guid userId)
+        {
+            var results = await _context.TestResult
+                .Where(test => test.UserId == userId)
+                .GroupBy(test => test.TestDate.Date)  // Group by only the date part (ignoring time)
+                .Select(group => new
+                {
+                    TestDate = group.Key,  // Grouped by the date
+                    AttemptNumber = _context.TestResult.Count(),  // Sum of AttemptNumber for each date
+                })
+                .ToListAsync();
+
+            return results.Cast<object>().ToList();  // Return the results as a list of objects
         }
 
 
