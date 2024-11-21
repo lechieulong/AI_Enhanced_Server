@@ -12,6 +12,7 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
+        Task<int> GetAttemptCountByTestAndUserAsync(Guid testId, Guid userId);
         Task SaveTestResultAsync(TestResult testResult);
         Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
         Task<int> GetTotalQuestionBySkillId(Guid skillId);
@@ -24,7 +25,7 @@ namespace IRepository
         Task<List<Skill>> GetSkills(Guid testId);
         Task<Skill> GetSkillByIdAsync(Guid SkillId);
         Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
-
+        Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId,  Guid userId);
         Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
         Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize);

@@ -18,5 +18,7 @@ namespace Entity.Test
         public DateTime TestDate { get; set; }
         public int TimeMinutesTaken { get; set; }   
         public int SecondMinutesTaken { get; set; }
+        public int AttemptNumber { get; set; }
+
     }
 }
