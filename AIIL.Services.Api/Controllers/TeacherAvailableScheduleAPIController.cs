@@ -98,38 +98,111 @@ namespace AIIL.Services.Api.Controllers
             return Ok(_response);
         }
 
-
-        [HttpPut]
-        //[Authorize(Roles = "ADMIN")]
-        public async Task<ResponseDto> Put([FromBody] TeacherAvailableScheduleDto scheduleDto)
+        [HttpPatch]
+        [Authorize(Roles = "TEACHER")]
+        public async Task<IActionResult> Patch([FromBody] UpdateScheduleDto scheduleDto)
         {
             try
             {
-                TeacherAvailableSchedule schedule = _mapper.Map<TeacherAvailableSchedule>(scheduleDto);
-                schedule = await _teacherScheduleRepository.UpdateAsync(schedule);
-                _response.Result = _mapper.Map<TeacherAvailableScheduleDto>(schedule);
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (userId == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "User is not authenticated.";
+                    return Unauthorized(_response); // User not authenticated
+                }
+
+                var schedule = await _teacherScheduleRepository.GetByIdAsync(scheduleDto.Id);
+                if (schedule == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "Schedule not found.";
+                    return NotFound(_response);
+                }
+
+                if(userId != scheduleDto.TeacherId)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "You can not edit this schedule.";
+                    return BadRequest(_response);
+                }
+
+                switch (schedule.Status)
+                {
+                    case 1: // Pending
+                        _response.IsSuccess = false;
+                        _response.Message = "Cannot update schedule. It is currently pending.";
+                        return BadRequest(_response);
+
+                    case 2: // Booked
+                        _response.IsSuccess = false;
+                        _response.Message = "Cannot update schedule. It is already booked.";
+                        return BadRequest(_response);
+                }
+
+                // Check for schedule conflicts
+                var conflictingSchedules = await _teacherScheduleRepository.GetConflictingSchedulesAsync(
+                    scheduleDto.TeacherId, scheduleDto.StartTime, scheduleDto.EndTime, scheduleDto.Id);
+                if (conflictingSchedules.Any())
+                {
+                    var firstConflict = conflictingSchedules.FirstOrDefault();
+
+                    _response.IsSuccess = false;
+                    _response.Message = $"You already have a schedule starting at {firstConflict.StartTime} for {firstConflict.Minutes} minutes.";
+                    return Conflict(_response);
+                }
+
+                TeacherAvailableSchedule scheduleEntity = _mapper.Map<TeacherAvailableSchedule>(scheduleDto);
+                scheduleEntity = await _teacherScheduleRepository.UpdateAsync(scheduleEntity);
+
+                _response.IsSuccess = true;
+                _response.Message = "Schedule updated successfully.";
+                _response.Result = _mapper.Map<UpdateScheduleDto>(scheduleEntity);
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.Message = ex.Message;
+                _response.Message = "An error occurred while updating the schedule. Please try again.";
             }
-            return _response;
+            return Ok(_response);
         }
 
         [HttpDelete]
-        [Route("{id:int}")]
-        //[Authorize(Roles = "ADMIN")]
+        [Route("{id:guid}")]
+        [Authorize(Roles = "TEACHER")]
         public async Task<ResponseDto> Delete(Guid id)
         {
             try
             {
+                var schedule = await _teacherScheduleRepository.GetByIdAsync(id);
+                if (schedule == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "Schedule not found.";
+                    return _response;
+                }
+                switch (schedule.Status)
+                {
+                    case 1: // Pending
+                        _response.IsSuccess = false;
+                        _response.Message = "Cannot delete schedule. It is currently pending.";
+                        return _response;
+
+                    case 2: // Booked
+                        _response.IsSuccess = false;
+                        _response.Message = "Cannot delete schedule. It is already booked.";
+                        return _response;
+                }
                 bool isDeleted = await _teacherScheduleRepository.DeleteAsync(id);
                 if (!isDeleted)
                 {
                     _response.IsSuccess = false;
-                    _response.Message = "schedule not found";
+                    _response.Message = "Failed to delete schedule.";
+                    return _response;
                 }
+                _response.IsSuccess = true;
+                _response.Message = "Schedule deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -138,6 +211,7 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
         [HttpGet]
         [Route("getbyusername/{userName}")]
         public async Task<ResponseDto> GetScheduleByTeacherName(string userName)
