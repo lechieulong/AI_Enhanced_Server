@@ -7,7 +7,8 @@ using Model.Test;
 using System.Security.Claims;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using Newtonsoft.Json; // For .xlsx files
+using Newtonsoft.Json;
+using Service; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -55,8 +56,14 @@ namespace AIIL.Services.Api.Controllers
         }
 
 
+        [HttpPost("{testId}/submitTest/{userId}")]
+        public async Task<IActionResult> CalculateScore([FromRoute] Guid testId, [FromRoute] Guid userId, [FromBody] SubmitTestDto model)
+        {
+            var result = await _testExamService.CalculateScore(testId, userId, model);
+            return Ok(result);
+        }
 
-       
+
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {
@@ -77,7 +84,7 @@ namespace AIIL.Services.Api.Controllers
         public async Task<IEnumerable<TestModel>> GetAllTestsAsync([FromRoute] Guid userId)
         {
 
-            var tests = await _testRepository.GetAllTestsAsync(userId); 
+            var tests = await _testRepository.GetAllTestsAsync(userId);
             return _mapper.Map<IEnumerable<TestModel>>(tests);
         }
 
@@ -86,6 +93,14 @@ namespace AIIL.Services.Api.Controllers
         {
             var test = await _testRepository.GetTestAsync(id);
             return _mapper.Map<TestModel>(test);
+        }
+
+        [HttpPost("{userId}/result")]
+        public async Task<IActionResult> GetResultTest([FromRoute]Guid  userId, [FromBody] ResultPayloadDto request)
+        {
+          
+            var test = await _testRepository.GetResultTest( userId, request.SkillResultIds);
+            return Ok(test);
         }
 
 
@@ -112,7 +127,6 @@ namespace AIIL.Services.Api.Controllers
                 return NotFound("Skill not found");
             }
 
-            // Group the response data by skill type
             var responseData = new Dictionary<string, object>();
 
             string skillTypeKey = skill.Type switch
@@ -185,7 +199,6 @@ namespace AIIL.Services.Api.Controllers
                     _ => "unknown"
                 };
 
-                // Add skill data to the response dictionary under its skill type
                 responseData[skillTypeKey] = new
                 {
                     id = skill.Id,
@@ -198,7 +211,6 @@ namespace AIIL.Services.Api.Controllers
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        questionName = $"Part {part.PartNumber}",
                         sections = part.Sections.Select(section => new
                         {
                             id = section.Id,
@@ -224,6 +236,14 @@ namespace AIIL.Services.Api.Controllers
             return Ok(responseData);
         }
 
+
+        [HttpPost("testExplain")]
+        public async Task<IActionResult> GetExplainTest(TestExplainRequestDto model) {
+            if (model.TestId == Guid.Empty) return BadRequest("TestId is empty");
+
+            var result = await _testExamService.GetExplainByTestId(model);
+            return Ok(result);
+        }
 
         [HttpGet("{id}/parts")]
         public async Task<List<Part>> GetParts([FromRoute] Guid id)
@@ -260,10 +280,19 @@ namespace AIIL.Services.Api.Controllers
                     IWorkbook workbook = new XSSFWorkbook(stream);
                     ISheet worksheet = workbook.GetSheetAt(0); // Get the first worksheet
 
+                    // Debugging log for row detection
+                    Console.WriteLine($"Total rows in worksheet (LastRowNum): {worksheet.LastRowNum}");
+
                     for (int row = 1; row <= worksheet.LastRowNum; row++) // Start from the second row
                     {
                         var rowData = worksheet.GetRow(row);
-                        if (rowData == null) continue; // Skip empty rows
+
+                        // Check if the row is null or all cells are empty
+                        if (rowData == null || rowData.Cells.All(cell => cell == null || string.IsNullOrWhiteSpace(cell.ToString())))
+                        {
+                            Console.WriteLine($"Skipping empty row: {row}");
+                            continue;
+                        }
 
                         var question = new Question
                         {
@@ -278,15 +307,48 @@ namespace AIIL.Services.Api.Controllers
                         if (!string.IsNullOrWhiteSpace(answerCell))
                         {
                             // Detect if the answer is JSON or plain text
-                            if (answerCell.TrimStart().StartsWith("{"))
+                            if (answerCell.TrimStart().StartsWith("[") && answerCell.TrimEnd().EndsWith("]"))
                             {
-                                // Attempt to parse JSON format
+                                // Attempt to parse JSON array format
+                                try
+                                {
+                                    var answers = JsonConvert.DeserializeObject<List<Answer>>(answerCell);
+                                    if (answers != null && answers.Any())
+                                    {
+                                        foreach (var answer in answers)
+                                        {
+                                            // Validate individual answer
+                                            if (!string.IsNullOrWhiteSpace(answer.AnswerText))
+                                            {
+                                                question.Answers.Add(new Answer
+                                                {
+                                                    Id = Guid.NewGuid(),
+                                                    AnswerText = answer.AnswerText,
+                                                    TypeCorrect = answer.TypeCorrect
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (JsonException jsonEx)
+                                {
+                                    return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+                                }
+                            }
+                            else if (answerCell.TrimStart().StartsWith("{"))
+                            {
+                                // Attempt to parse single JSON object format
                                 try
                                 {
                                     var answerObj = JsonConvert.DeserializeObject<Answer>(answerCell);
-                                    if (answerObj != null)
+                                    if (answerObj != null && !string.IsNullOrWhiteSpace(answerObj.AnswerText))
                                     {
-                                        question.Answers.Add(answerObj);
+                                        question.Answers.Add(new Answer
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            AnswerText = answerObj.AnswerText,
+                                            TypeCorrect = answerObj.TypeCorrect
+                                        });
                                     }
                                 }
                                 catch (JsonException jsonEx)
@@ -299,11 +361,13 @@ namespace AIIL.Services.Api.Controllers
                                 // Plain text answer, default TypeCorrect to 0
                                 question.Answers.Add(new Answer
                                 {
+                                    Id = Guid.NewGuid(),
                                     AnswerText = answerCell,
                                     TypeCorrect = 0 // Default value for plain text answer
                                 });
                             }
                         }
+
 
                         questions.Add(question);
                     }
@@ -320,12 +384,17 @@ namespace AIIL.Services.Api.Controllers
         }
 
 
-        [HttpGet("questionsBank/{userId}")]
-        public async Task<IActionResult> GetQuestionsAsync([FromRoute] Guid userId)
+
+        [HttpGet("{sectionType}/questionsBank/{userId}")]
+        public async Task<IActionResult> GetQuestionsAsync(
+             [FromRoute] Guid userId,
+             [FromRoute] int sectionType,
+             [FromQuery] int page ,  // Default page is 1
+             [FromQuery] int pageSize) // Default pageSize is 10
         {
             try
             {
-                var questions = await _testRepository.GetAllQuestionsAsync(userId);
+                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, sectionType, page, pageSize);
 
                 if (questions == null || !questions.Any())
                 {
@@ -339,6 +408,82 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+
+        [HttpGet("questionsBank/{userId}")]
+        public async Task<IActionResult> GetQuestionsAsync(
+             [FromRoute] Guid userId,
+             [FromQuery] int page,  // Default page is 1
+             [FromQuery] int pageSize) // Default pageSize is 10
+        {
+            try
+            {
+                var questions = await _testRepository.GetQuestionsAsync(userId,  page, pageSize);
+
+                if (questions == null || !questions.Any())
+                {
+                    return NotFound("No questions found for the specified user.");
+                }
+
+                return Ok(_mapper.Map<List<QuestionResponse>>(questions));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("testSubmitted/{userId}")]
+        public async Task<IActionResult> GetTestSubmitted(
+          [FromRoute] Guid userId,
+          [FromQuery] int page,  // Default page is 1
+          [FromQuery] int pageSize) // Default pageSize is 10
+        {
+            try
+            {
+                var tests = await _testRepository.GetTestSubmittedAsync(userId, page, pageSize);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("testAnalysis/{userId}")]
+        public async Task<IActionResult> GetTestAnalysisAttempt([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetTestAnalysisAttempt(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("attempts/{userId}")]
+        public async Task<IActionResult> GetAttemptTests([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetAttemptTests(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
         [HttpPost("questionsBank")]
         public async Task<IActionResult> CreateQuestionsAsync([FromBody] List<QuestionDto> questionModels)
         {
@@ -375,7 +520,7 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-        [HttpDelete("questionsBank/{id}")]
+        [HttpDelete("questionsBank/{id}/delete")]
         public async Task<IActionResult> DeleteQuestionAsync(Guid id)
         {
             // Check if the question exists
@@ -397,7 +542,7 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-        [HttpPut("questionsBank/{id}")]
+        [HttpPut("questionsBank/{id}/update")]
         public async Task<IActionResult> UpdateQuestionAsync([FromRoute] Guid id, [FromBody] QuestionResponse updatedQuestion)
         {
             if (updatedQuestion == null)

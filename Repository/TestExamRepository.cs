@@ -20,6 +20,78 @@ namespace Repository
             _context = context;
             _mapper = mapper;
         }
+
+        public async Task SaveUserAnswerAsync(List<UserAnswers> userAnswers)
+        {
+            await _context.UserAnswers.AddRangeAsync(userAnswers);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveTestResultAsync(TestResult testResult)
+        {
+            await _context.TestResult.AddAsync(testResult);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetTotalQuestionBySkillId(Guid skillId)
+        {
+            return await _context.Skills
+                .Where(skill => skill.Id == skillId)
+                .SelectMany(skill => skill.Parts) // Get all parts of the skill
+                .SelectMany(part => part.Sections) // Get all sections of each part
+                .SelectMany(section => section.SectionQuestions) // Get all section questions
+                .CountAsync(); // Count all questions
+        }
+
+
+        public async Task<int> GetAttemptCountByTestAndUserAsync(Guid userId, Guid testId)
+        {
+            // Count how many attempts the user has made for this test
+            var attemptCount = await _context.TestResult
+                .Where(tr => tr.UserId == userId && tr.TestId == testId)
+                .CountAsync();
+
+            return attemptCount;
+        }
+
+
+        public async Task AddAttemptTestForYear(Guid userId, int year)
+        {
+            var testAttempt = await _context.AttempTests
+                .FirstOrDefaultAsync(t => t.UserId == userId && t.Year == year);
+
+            if (testAttempt != null)
+            {
+                testAttempt.TotalAttempt += 1;
+            }
+            else
+            {
+                testAttempt = new AttempTest
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Year = year,
+                    TotalAttempt = 1
+                };
+                await _context.AttempTests.AddAsync(testAttempt); // Add the new record
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<AttempTest>> GetAttemptTests(Guid userId)
+        {
+            return  await _context.AttempTests
+                .Where(t =>  t.UserId == userId).ToListAsync();
+        } 
+
+        public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
+        {
+            return await  _context.Answers
+                    .Where(answer => answer.QuestionId == questionId).ToListAsync();
+        }
+
         public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
         {
             if (model == null || !model.Any())
@@ -103,15 +175,37 @@ namespace Repository
                                             if (questionDto == null)
                                                 continue;
 
-                                            var question = new Question
-                                            {
-                                                Id = Guid.NewGuid(),
-                                                UserId = userId,
-                                                QuestionName = questionDto.QuestionName,
-                                                QuestionType = questionDto.QuestionType,
-                                                Answers = new List<Answer>()
-                                            };
+                                            // Define the question variable
+                                            Question question;
 
+                                            // If QuestionId exists, use the existing question from the database
+                                            if (questionDto.QuestionId != Guid.Empty)
+                                            {
+                                                // Fetch the existing question from the database using the provided QuestionId
+                                                question = _context.Questions
+                                                    .FirstOrDefault(q => q.Id == questionDto.QuestionId); // Replace _context with your actual context
+
+                                                // If the question does not exist, log and skip adding this question
+                                                if (question == null)
+                                                {
+                                                    // Log or handle the case where the QuestionId does not exist in the database
+                                                    continue; // Skip this question
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // If there's no QuestionId, create a new question as needed
+                                                question = new Question
+                                                {
+                                                    Id = Guid.NewGuid(),
+                                                    UserId = userId,
+                                                    QuestionName = questionDto.QuestionName,
+                                                    QuestionType = questionDto.QuestionType,
+                                                    Answers = new List<Answer>()
+                                                };
+                                            }
+
+                                            // Now, handle the special case where we need to generate an answer based on the question name
                                             if (
                                                 (skill.Type == 0 && (section.SectionType == 8 || section.SectionType == 9)) ||
                                                 (skill.Type == 1 && (section.SectionType == 2 || section.SectionType == 7))
@@ -134,6 +228,7 @@ namespace Repository
                                                     question.Answers.Add(generatedAnswer);
                                                 }
                                             }
+                                            // If questionDto has answers, add them to the question
                                             else if (questionDto.Answers != null && questionDto.Answers.Any())
                                             {
                                                 foreach (var answerDto in questionDto.Answers)
@@ -152,6 +247,7 @@ namespace Repository
                                                 }
                                             }
 
+                                            // Create the SectionQuestion and associate it with the existing or new question
                                             var sectionQuestion = new SectionQuestion
                                             {
                                                 Id = Guid.NewGuid(),
@@ -159,6 +255,7 @@ namespace Repository
                                                 Question = question
                                             };
 
+                                            // Add the SectionQuestion to the section's collection
                                             section.SectionQuestions.Add(sectionQuestion);
                                         }
                                     }
@@ -235,6 +332,14 @@ namespace Repository
                 UserID = userId,
                 TestCreateBy = role,
             };
+            if(model.ClassId !=  Guid.Empty)
+            {
+                newTest.ClassId = model.ClassId.Value;
+            }
+            if (model.Id != Guid.Empty)
+            {
+                newTest.LessonId = model.LessonId.Value;
+            }
             _context.TestExams.Add(newTest);
 
             foreach (var classId in model.ClassIds)
@@ -255,13 +360,67 @@ namespace Repository
             return model;
         }
 
-        public async Task<List<Question>> GetAllQuestionsAsync(Guid userId)
+        public async Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize)
         {
+            // Calculate the skip count based on page and pageSize
+            int skip = (page - 1) * pageSize;
+
             return await _context.Questions
-                                 .Where(q => q.UserId == userId)
-                                 .Include(q => q.Answers) 
+                                 .Where(q => q.UserId == userId && q.QuestionType == sectionType)
+                                 .Include(q => q.Answers)
+                                 .Skip(skip)  // Skip the previous pages' items
+                                 .Take(pageSize)  // Take the next 'pageSize' items
                                  .ToListAsync();
         }
+
+
+        public async Task<List<Question>> GetQuestionsAsync(Guid userId,int page, int pageSize)
+        {
+            // Calculate the skip count based on page and pageSize
+            int skip = (page - 1) * pageSize;
+
+            return await _context.Questions
+                                 .Where(q => q.UserId == userId )
+                                 .Include(q => q.Answers)
+                                 .Skip(skip)  // Skip the previous pages' items
+                                 .Take(pageSize)  // Take the next 'pageSize' items
+                                 .ToListAsync();
+        }
+
+        public async Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            var testIds = await _context.TestExams
+                 .Where(test => test.UserID == userId)
+                 .Select(test => test.Id)
+                 .ToListAsync();
+
+
+                var results = await _context.TestResult
+               .Where(test => testIds.Contains(test.TestId))
+               .OrderByDescending(test => test.TestDate) // Order by most recent test date
+               .Skip((page - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
+            return results;
+        }
+
+        public async Task<List<object>> GetTestAnalysisAttempt(Guid userId)
+        {
+            var results = await _context.TestResult
+                .Where(test => test.UserId == userId)
+                .GroupBy(test => test.TestDate.Date)  // Group by only the date part (ignoring time)
+                .Select(group => new
+                {
+                    TestDate = group.Key,  // Grouped by the date
+                    AttemptNumber = _context.TestResult.Count(),  // Sum of AttemptNumber for each date
+                })
+                .ToListAsync();
+
+            return results.Cast<object>().ToList();  // Return the results as a list of objects
+        }
+
 
         public async Task AddQuestionsAsync(List<Question> questions)
         {
@@ -311,7 +470,7 @@ namespace Repository
                 var newQuestion = new Question
                 {
                     Id = Guid.NewGuid(),
-                    QuestionName = question.QuestionName,
+                    QuestionName = question.QuestionName == null ? "": question.QuestionName ,
                     QuestionType = question.QuestionType,
                     Skill = question.Skill,
                     PartNumber = question.PartNumber,
@@ -367,6 +526,12 @@ namespace Repository
         }
 
 
+        public async Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId, Guid userId)
+        {
+            return await _context.UserAnswers
+                .Where(a => a.TestId == testId && a.UserId == userId).ToListAsync();    
+        }
+
         public async Task<Skill> GetSkillByIdAsync(Guid skillId)
         {
             return await _context.Skills
@@ -393,10 +558,19 @@ namespace Repository
                 .FirstOrDefaultAsync(test => test.Id == id);
         }
 
+
+        public async Task<List<TestResult>> GetResultTest(Guid userId, List<Guid> ids)
+        {
+            return await _context.TestResult
+                .Where(test => ids.Contains(test.Id) && test.UserId == userId)
+                .ToListAsync();
+        }
+
+
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {
             return await _context.TestExams
-                .FirstOrDefaultAsync(test => test.SectionCourseId == id);
+                .FirstOrDefaultAsync(test => test.LessonId == id);
         }
 
         public async Task<Question> GetQuestionByIdAsync(Guid id)

@@ -15,12 +15,12 @@ namespace Entity.Migrations
                 name: "FK_Courses_AspNetUsers_UserId",
                 table: "Courses");
 
-            migrationBuilder.AddColumn<int>(
-                name: "Order",
-                table: "CourseTimelines",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            //migrationBuilder.AddColumn<int>(
+            //    name: "Order",
+            //    table: "CourseTimelines",
+            //    type: "int",
+            //    nullable: false,
+            //    defaultValue: 0);
 
             migrationBuilder.AlterColumn<string>(
                 name: "VideoUrl",

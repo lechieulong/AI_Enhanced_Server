@@ -41,10 +41,10 @@ namespace Auth.Controllers
         {
             var courses = await _repository.GetAllAsync();
 
-            if (courses == null || !courses.Any())
-            {
-                return NotFound();
-            }
+            //if (courses == null || !courses.Any())
+            //{
+            //    return NotFound();
+            //}
 
             var coursesDto = _mapper.Map<List<GetCourseListDto>>(courses);
 
