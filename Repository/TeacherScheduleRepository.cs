@@ -37,19 +37,7 @@ namespace Repository
             // Create the schedule
             await _db.TeacherAvailableSchedules.AddAsync(newSchedule);
             await _db.SaveChangesAsync();
-            //// Automatically create an Event based on the new TeacherAvailableSchedule
-            //var newEvent = new Event
-            //{
-            //    Title = $"Available Coaching Session with {newSchedule.TeacherId}",
-            //    Description = $"Coaching session for {newSchedule.Minutes} minutes",
-            //    Start = newSchedule.StartTime,
-            //    End = newSchedule.StartTime.AddMinutes(newSchedule.Minutes),
-            //    Link = newSchedule.Link,
-            //    UserId = newSchedule.TeacherId, // Assuming the Teacher is the "User" who creates this event
-            //    User = newSchedule.Teacher // Optionally set the Teacher entity if needed
-            //};
-            //await _db.Events.AddAsync(newEvent);
-            //await _db.SaveChangesAsync();
+            
             return newSchedule;
         }
 
@@ -98,9 +86,32 @@ namespace Repository
 
         public async Task<TeacherAvailableSchedule> UpdateAsync(TeacherAvailableSchedule updatedSchedule)
         {
-            _db.TeacherAvailableSchedules.Update(updatedSchedule);
+            if (updatedSchedule.StartTime < DateTime.Now)
+            {
+                throw new ArgumentException("Start time cannot be in the past.");
+            }
+            if (updatedSchedule.Minutes <= 0)
+            {
+                throw new ArgumentException("Duration should be greater than zero.");
+            }
+            if (updatedSchedule.Price <= 0)
+            {
+                throw new ArgumentException("Price must be a positive value.");
+            }
+            var existingSchedule = await _db.TeacherAvailableSchedules
+                                            .FirstOrDefaultAsync(s => s.Id == updatedSchedule.Id);
+            if (existingSchedule == null)
+            {
+                throw new KeyNotFoundException("The schedule to update was not found.");
+            }
+            existingSchedule.StartTime = updatedSchedule.StartTime;
+            existingSchedule.Minutes = updatedSchedule.Minutes;
+            existingSchedule.Price = updatedSchedule.Price;
+            existingSchedule.Link = updatedSchedule.Link;
+            // Save changes
             await _db.SaveChangesAsync();
-            return updatedSchedule;
+
+            return existingSchedule; // Return the updated schedule
         }
 
         public async Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime)
@@ -110,6 +121,16 @@ namespace Repository
                                   ((schedule.StartTime.AddMinutes(schedule.Minutes) > startTime) && (schedule.StartTime < endTime)))
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime, Guid currentScheduleId)
+        {
+            return await _db.TeacherAvailableSchedules
+                .Where(schedule => schedule.TeacherId == teacherId &&
+                                  schedule.Id != currentScheduleId && // Exclude the current schedule being updated
+                                  ((schedule.StartTime.AddMinutes(schedule.Minutes) > startTime) && (schedule.StartTime < endTime)))
+                .ToListAsync();
+        }
+
 
         public async Task<IEnumerable<TeacherAvailableSchedule>> GetAllPendingAsync()
         {
