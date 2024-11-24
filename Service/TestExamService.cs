@@ -261,6 +261,8 @@ namespace Service
                             return CompareMutipleAnswerSets(correctAnswers, usewrAnswers);
                         else if (sectionType == 1)
                             return true;
+                        else if (sectionType == 6)
+                            return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
                         else
                             return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                     default:
