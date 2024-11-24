@@ -54,6 +54,16 @@ namespace Repository
             return attemptCount;
         }
 
+        public async Task UpdateExplainQuestionAsync(Guid questionId, string explain)
+        {
+            var question = await _context.Questions.FindAsync(questionId);
+            if(question == null)
+            {
+                return;
+            }
+            question.Explain = explain;
+            await _context.SaveChangesAsync();
+        }
 
         public async Task AddAttemptTestForYear(Guid userId, int year)
         {
@@ -82,13 +92,13 @@ namespace Repository
 
         public async Task<List<AttempTest>> GetAttemptTests(Guid userId)
         {
-            return  await _context.AttempTests
-                .Where(t =>  t.UserId == userId).ToListAsync();
-        } 
+            return await _context.AttempTests
+                .Where(t => t.UserId == userId).ToListAsync();
+        }
 
         public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
-            return await  _context.Answers
+            return await _context.Answers
                     .Where(answer => answer.QuestionId == questionId).ToListAsync();
         }
 
@@ -129,9 +139,9 @@ namespace Repository
                             {
                                 Id = Guid.NewGuid(),
                                 PartNumber = partIndex,
-                                ContentText = partDto.ContentText,
-                                Audio = partDto.Audio,
-                                Image = partDto.Image,
+                                ContentText = partDto.ContentText ?? "",
+                                Audio = partDto.Audio ?? "",
+                                Image = partDto.Image ?? "",
                                 Skill = skill,
                                 Sections = new List<Section>()
                             };
@@ -199,55 +209,53 @@ namespace Repository
                                                 {
                                                     Id = Guid.NewGuid(),
                                                     UserId = userId,
-                                                    QuestionName = questionDto.QuestionName,
+                                                    QuestionName = questionDto.QuestionName ?? "",
+                                                    Explain = questionDto.Explain ?? "",
                                                     QuestionType = questionDto.QuestionType,
                                                     Answers = new List<Answer>()
                                                 };
-                                            }
 
-                                            // Now, handle the special case where we need to generate an answer based on the question name
-                                            if (
-                                                (skill.Type == 0 && (section.SectionType == 8 || section.SectionType == 9)) ||
-                                                (skill.Type == 1 && (section.SectionType == 2 || section.SectionType == 7))
-                                            )
-                                            {
-                                                var answerMatch = System.Text.RegularExpressions.Regex.Match(questionDto.QuestionName, @"\[(.*?)\]");
-                                                if (answerMatch.Success)
+                                                if ((skill.Type == 0 &&
+                                           (section.SectionType == 8 || section.SectionType == 9)) || (skill.Type == 1 && (section.SectionType == 2 || section.SectionType == 7))
+                                           )
                                                 {
-                                                    question.QuestionName = System.Text.RegularExpressions.Regex.Replace(questionDto.QuestionName, @"\[(.*?)\]", "[]").Trim();
-
-                                                    var answerText = answerMatch.Groups[1].Value.Trim();
-
-                                                    var generatedAnswer = new Answer
+                                                    var answerMatch = System.Text.RegularExpressions.Regex.Match(questionDto.QuestionName, @"\[(.*?)\]");
+                                                    if (answerMatch.Success)
                                                     {
-                                                        Id = Guid.NewGuid(),
-                                                        AnswerText = answerText,
-                                                        TypeCorrect = 1
-                                                    };
+                                                        question.QuestionName = System.Text.RegularExpressions.Regex.Replace(questionDto.QuestionName, @"\[(.*?)\]", "[]").Trim();
 
-                                                    question.Answers.Add(generatedAnswer);
+                                                        var answerText = answerMatch.Groups[1].Value.Trim();
+
+                                                        var generatedAnswer = new Answer
+                                                        {
+                                                            Id = Guid.NewGuid(),
+                                                            AnswerText = answerText,
+                                                            TypeCorrect = 1
+                                                        };
+
+                                                        question.Answers.Add(generatedAnswer);
+                                                    }
                                                 }
-                                            }
-                                            // If questionDto has answers, add them to the question
-                                            else if (questionDto.Answers != null && questionDto.Answers.Any())
-                                            {
-                                                foreach (var answerDto in questionDto.Answers)
+                                                else if (questionDto.Answers != null && questionDto.Answers.Any())
                                                 {
-                                                    if (answerDto == null)
-                                                        continue;
-
-                                                    var newAnswer = new Answer
+                                                    foreach (var answerDto in questionDto.Answers)
                                                     {
-                                                        Id = Guid.NewGuid(),
-                                                        AnswerText = answerDto.AnswerText,
-                                                        TypeCorrect = (int)answerDto.IsCorrect
-                                                    };
+                                                        if (answerDto == null)
+                                                            continue;
 
-                                                    question.Answers.Add(newAnswer);
+                                                        var newAnswer = new Answer
+                                                        {
+                                                            Id = Guid.NewGuid(),
+                                                            AnswerText = answerDto.AnswerText,
+                                                            TypeCorrect = (int)answerDto.IsCorrect
+                                                        };
+
+                                                        question.Answers.Add(newAnswer);
+                                                    }
                                                 }
+
                                             }
 
-                                            // Create the SectionQuestion and associate it with the existing or new question
                                             var sectionQuestion = new SectionQuestion
                                             {
                                                 Id = Guid.NewGuid(),
@@ -305,7 +313,7 @@ namespace Repository
                         Id = Guid.NewGuid(),
                         UserId = userId,
                         QuestionName = questionText,
-                        QuestionType = 1,  
+                        QuestionType = 1,
                         Answers = new List<Answer>
                 {
                     new Answer { Id = Guid.NewGuid(), AnswerText = answerText, TypeCorrect = 1 }
@@ -332,11 +340,11 @@ namespace Repository
                 UserID = userId,
                 TestCreateBy = role,
             };
-            if(model.ClassId !=  Guid.Empty)
+            if (model.ClassId != Guid.Empty && model.ClassId != null)
             {
                 newTest.ClassId = model.ClassId.Value;
             }
-            if (model.Id != Guid.Empty)
+            if (model.Id != Guid.Empty && model.ClassId != null)
             {
                 newTest.LessonId = model.LessonId.Value;
             }
@@ -346,12 +354,12 @@ namespace Repository
             {
                 var classRelation = new ClassRelationShip
                 {
-                    Id = Guid.NewGuid(), 
-                    TestId = newTest.Id, 
-                    ClassId = classId   
+                    Id = Guid.NewGuid(),
+                    TestId = newTest.Id,
+                    ClassId = classId
                 };
 
-                _context.ClassRelationShip.Add(classRelation); 
+                _context.ClassRelationShip.Add(classRelation);
             }
 
             await _context.SaveChangesAsync();
@@ -374,13 +382,13 @@ namespace Repository
         }
 
 
-        public async Task<List<Question>> GetQuestionsAsync(Guid userId,int page, int pageSize)
+        public async Task<List<Question>> GetQuestionsAsync(Guid userId, int page, int pageSize)
         {
             // Calculate the skip count based on page and pageSize
             int skip = (page - 1) * pageSize;
 
             return await _context.Questions
-                                 .Where(q => q.UserId == userId )
+                                 .Where(q => q.UserId == userId)
                                  .Include(q => q.Answers)
                                  .Skip(skip)  // Skip the previous pages' items
                                  .Take(pageSize)  // Take the next 'pageSize' items
@@ -397,28 +405,43 @@ namespace Repository
                  .ToListAsync();
 
 
-                var results = await _context.TestResult
-               .Where(test => testIds.Contains(test.TestId))
-               .OrderByDescending(test => test.TestDate) // Order by most recent test date
-               .Skip((page - 1) * pageSize)
-               .Take(pageSize)
-               .ToListAsync();
+            var results = await _context.TestResult
+           .Where(test => testIds.Contains(test.TestId))
+           .OrderByDescending(test => test.TestDate) // Order by most recent test date
+           .Skip((page - 1) * pageSize)
+           .Take(pageSize)
+           .ToListAsync();
             return results;
         }
 
-        public async Task<List<object>> GetTestAnalysisAttempt(Guid userId)
+        public async Task<object> GetTestAnalysisAttempt(Guid userId)
         {
             var results = await _context.TestResult
                 .Where(test => test.UserId == userId)
-                .GroupBy(test => test.TestDate.Date)  // Group by only the date part (ignoring time)
+                .GroupBy(test => test.TestDate.Date) // Group by date, ignoring time
                 .Select(group => new
                 {
-                    TestDate = group.Key,  // Grouped by the date
-                    AttemptNumber = _context.TestResult.Count(),  // Sum of AttemptNumber for each date
+                    TestDate = group.Key, // Grouped by the date
+                    AttemptNumber = group.Count() // Count the number of tests in the group
                 })
                 .ToListAsync();
 
-            return results.Cast<object>().ToList();  // Return the results as a list of objects
+            var skillRada = await _context.TestResult
+                .Where(test => test.UserId == userId) // Filter by UserId
+                .GroupBy(test => test.SkillType)      // Group by SkillType
+                .Select(group => new
+                {
+                    SkillType = group.Key, // The SkillType (integer)
+                    Count = group.Count(), // Count the number of tests in the group
+                    AverageScore = group.Average(t => t.Score) // Average score of tests in the group
+                })
+                .ToListAsync();
+
+            return new
+            {
+                DateAnalysis = results,
+                SkillAnalysis = skillRada
+            };
         }
 
 
@@ -470,7 +493,7 @@ namespace Repository
                 var newQuestion = new Question
                 {
                     Id = Guid.NewGuid(),
-                    QuestionName = question.QuestionName == null ? "": question.QuestionName ,
+                    QuestionName = question.QuestionName == null ? "" : question.QuestionName,
                     QuestionType = question.QuestionType,
                     Skill = question.Skill,
                     PartNumber = question.PartNumber,
@@ -508,7 +531,7 @@ namespace Repository
         public async Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId)
         {
             return await _context.TestExams
-                .Where(test => test.UserID == userId) 
+                .Where(test => test.UserID == userId)
                 .ToListAsync();
         }
 
@@ -529,7 +552,7 @@ namespace Repository
         public async Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId, Guid userId)
         {
             return await _context.UserAnswers
-                .Where(a => a.TestId == testId && a.UserId == userId).ToListAsync();    
+                .Where(a => a.TestId == testId && a.UserId == userId).ToListAsync();
         }
 
         public async Task<Skill> GetSkillByIdAsync(Guid skillId)

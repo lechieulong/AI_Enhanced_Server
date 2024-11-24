@@ -13,6 +13,7 @@ namespace Entity.Test
         public int QuestionType { get; set; } = 0;
         public int? Skill {  get; set; }
         public int? PartNumber { get; set; }
+        public string Explain { get; set; }
         public Guid UserId { get; set; }
         public ICollection<SectionQuestion> SectionQuestions { get; set; } 
         public ICollection<Answer> Answers { get; set; }

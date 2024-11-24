@@ -151,6 +151,10 @@ namespace Service
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
+                if(questionDetail.Skill == 2)
+                {
+                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
+                }
 
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
@@ -178,13 +182,37 @@ namespace Service
 
             await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
+            decimal skillScore = 0;
+
+            if (model.UserAnswers.Values.First().Skill == 2)
+            {
+                var overallScore = model.UserAnswers.Values.First().OverallScore;
+                if (!string.IsNullOrEmpty(overallScore) && Decimal.TryParse(overallScore, out var parsedScore))
+                {
+                    skillScore = parsedScore;
+                }
+                else
+                {
+                    skillScore = 0;
+                }
+            }
+            else if (model.UserAnswers.Values.First().Skill == 3)
+            {
+                skillScore = model.UserAnswers.Values
+                                .Where(s => !string.IsNullOrEmpty(s.OverallScore) && Decimal.TryParse(s.OverallScore, out var _))
+                                .Sum(s => Decimal.Parse(s.OverallScore));
+            }
+            var writingSpeakingCondition = model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3;
+
+
+
             var testResult = new TestResult
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 TestId = testId,
                 SkillType = model.UserAnswers.Values.First().Skill,
-                Score = ScaleScore(totalScore, totalQuestion),
+                Score = !writingSpeakingCondition ? ScaleScore(totalScore, totalQuestion) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
                 TotalQuestion = totalQuestion,
                 TestDate = DateTime.UtcNow,
