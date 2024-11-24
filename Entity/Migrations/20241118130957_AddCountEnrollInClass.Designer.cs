@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241118130957_AddCountEnrollInClass")]
+    partial class AddCountEnrollInClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,37 +38,6 @@ namespace Entity.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("UserEvents", (string)null);
-                });
-
-            modelBuilder.Entity("CoursePart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ContentUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CourseSkillId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseSkillId");
-
-                    b.ToTable("CourseParts");
                 });
 
             modelBuilder.Entity("Entity.ApplicationUser", b =>
@@ -240,9 +212,6 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AverageRating")
-                        .HasColumnType("float");
-
                     b.Property<string>("Categories")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -275,9 +244,6 @@ namespace Entity.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
-
-                    b.Property<int>("RatingCount")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -340,6 +306,37 @@ namespace Entity.Migrations
                     b.HasIndex("CourseLessonId");
 
                     b.ToTable("CourseLessonContents");
+                });
+
+            modelBuilder.Entity("Entity.CourseFolder.CoursePart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CourseSkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseSkillId");
+
+                    b.ToTable("CourseParts");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseRating", b =>
@@ -805,26 +802,6 @@ namespace Entity.Migrations
                     b.ToTable("Answers");
                 });
 
-            modelBuilder.Entity("Entity.Test.AttempTest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TotalAttempt")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AttempTests");
-                });
-
             modelBuilder.Entity("Entity.Test.Part", b =>
                 {
                     b.Property<Guid>("Id")
@@ -858,10 +835,6 @@ namespace Entity.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Explain")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PartNumber")
                         .HasColumnType("int");
@@ -962,16 +935,13 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LessonId")
+                    b.Property<Guid>("SectionCourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartTime")
@@ -1001,29 +971,17 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AttemptNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("NumberOfCorrect")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Score")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SecondMinutesTaken")
-                        .HasColumnType("int");
-
                     b.Property<int>("SkillType")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TestDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("TestId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TimeMinutesTaken")
-                        .HasColumnType("int");
 
                     b.Property<int>("TotalQuestion")
                         .HasColumnType("int");
@@ -1047,9 +1005,6 @@ namespace Entity.Migrations
 
                     b.Property<string>("AnswerText")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("AttemptNumber")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
@@ -1270,42 +1225,6 @@ namespace Entity.Migrations
                     b.ToTable("UserEducationSpecializations", (string)null);
                 });
 
-            modelBuilder.Entity("TestExam", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SectionCourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TestCreateBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TestName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TestExams");
-                });
-
             modelBuilder.Entity("ApplicationUserEvent", b =>
                 {
                     b.HasOne("Entity.Event", null)
@@ -1319,17 +1238,6 @@ namespace Entity.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CoursePart", b =>
-                {
-                    b.HasOne("Entity.CourseFolder.CourseSkill", "Skill")
-                        .WithMany("CourseParts")
-                        .HasForeignKey("CourseSkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("Entity.BookedTeacherSession", b =>
@@ -1375,7 +1283,7 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.CourseFolder.CourseLesson", b =>
                 {
-                    b.HasOne("CoursePart", "CoursePart")
+                    b.HasOne("Entity.CourseFolder.CoursePart", "CoursePart")
                         .WithMany("CourseLessons")
                         .HasForeignKey("CoursePartId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1393,6 +1301,17 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.Navigation("CourseLesson");
+                });
+
+            modelBuilder.Entity("Entity.CourseFolder.CoursePart", b =>
+                {
+                    b.HasOne("Entity.CourseFolder.CourseSkill", "Skill")
+                        .WithMany("CourseParts")
+                        .HasForeignKey("CourseSkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseRating", b =>
@@ -1622,7 +1541,7 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Test.Skill", b =>
                 {
-                    b.HasOne("TestExam", null)
+                    b.HasOne("Entity.Test.TestExam", null)
                         .WithMany("SkillTests")
                         .HasForeignKey("TestExamId");
                 });
@@ -1715,11 +1634,6 @@ namespace Entity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CoursePart", b =>
-                {
-                    b.Navigation("CourseLessons");
-                });
-
             modelBuilder.Entity("Entity.ApplicationUser", b =>
                 {
                     b.Navigation("AccountBalances");
@@ -1764,6 +1678,11 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.CourseFolder.CourseLesson", b =>
                 {
                     b.Navigation("Contents");
+                });
+
+            modelBuilder.Entity("Entity.CourseFolder.CoursePart", b =>
+                {
+                    b.Navigation("CourseLessons");
                 });
 
             modelBuilder.Entity("Entity.CourseFolder.CourseSkill", b =>
@@ -1820,7 +1739,7 @@ namespace Entity.Migrations
                     b.Navigation("Parts");
                 });
 
-            modelBuilder.Entity("TestExam", b =>
+            modelBuilder.Entity("Entity.Test.TestExam", b =>
                 {
                     b.Navigation("SkillTests");
                 });

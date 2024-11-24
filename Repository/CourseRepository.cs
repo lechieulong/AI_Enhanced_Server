@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Entity;
 using Entity.Data;
-using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Entity.CourseFolder;
+using IRepository;
+
 namespace Repository
 {
     public class CourseRepository : ICourseRepository
@@ -29,7 +30,7 @@ namespace Repository
         public async Task<Course> GetByIdAsync(Guid id)
         {
             return await _context.Courses
-                .Include(c => c.User) // Include the related User entity
+                .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
@@ -48,10 +49,7 @@ namespace Repository
                 existingCourse.Content = course.Content;
                 existingCourse.Hours = course.Hours;
                 existingCourse.Days = course.Days;
-
-                // Update categories
                 existingCourse.Categories = course.Categories;
-
                 existingCourse.Price = course.Price;
                 existingCourse.IsEnabled = course.IsEnabled;
                 await _context.SaveChangesAsync();
@@ -60,12 +58,16 @@ namespace Repository
 
         public async Task DeleteAsync(Guid id)
         {
-            var course = await _context.Courses.FindAsync(id);
-            if (course != null)
-            {
-                _context.Courses.Remove(course);
-                await _context.SaveChangesAsync();
-            }
+            var course = await _context.Courses
+                .Include(c => c.Classes)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
+                throw new KeyNotFoundException($"Course with ID {id} not found.");
+
+            _context.Classes.RemoveRange(course.Classes);
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Course>> GetAllEnabledCoursesAsync()
@@ -101,6 +103,7 @@ namespace Repository
                 await _context.SaveChangesAsync();
             }
         }
+
         public async Task<Guid?> GetCourseIdByLessonContentIdAsync(Guid courseLessonContentId)
         {
             var courseId = await (from clc in _context.CourseLessonContents
@@ -123,16 +126,58 @@ namespace Repository
                     .Where(c => c.Id == courseId)
                     .FirstOrDefaultAsync();
 
-                if (course == null)
-                {
-                    return false;
-                }
-
-                return course.UserId == userId;
+                return course?.UserId == userId;
             }
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        public async Task UpdateCourseRatingAsync(Guid courseId)
+        {
+            var course = await _context.Courses
+                .Include(c => c.CourseRatings)
+                .FirstOrDefaultAsync(c => c.Id == courseId);
+
+            if (course != null)
+            {
+                var ratings = course.CourseRatings;
+                if (ratings.Any())
+                {
+                    course.AverageRating = Math.Round(ratings.Average(r => r.RatingValue), 2);
+                    course.RatingCount = ratings.Count;
+                }
+                else
+                {
+                    course.AverageRating = 0;
+                    course.RatingCount = 0;
+                }
+
+                _context.Courses.Update(course);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddRatingAsync(CourseRating rating)
+        {
+            _context.CourseRatings.Add(rating);
+            await _context.SaveChangesAsync();
+
+            // Cập nhật trung bình cộng rating trong bảng Course
+            var course = await _context.Courses.FindAsync(rating.CourseId);
+
+            if (course != null)
+            {
+                var ratings = await _context.CourseRatings
+                    .Where(r => r.CourseId == rating.CourseId)
+                    .ToListAsync();
+
+                course.AverageRating = Math.Round(ratings.Average(r => r.RatingValue), 2);
+                course.RatingCount = ratings.Count;
+
+                _context.Courses.Update(course);
+                await _context.SaveChangesAsync();
             }
         }
 

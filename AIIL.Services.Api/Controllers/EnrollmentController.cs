@@ -15,16 +15,13 @@ namespace API.Controllers
     public class EnrollmentController : ControllerBase
     {
         private readonly IEnrollmentRepository _enrollmentRepository;
-        private readonly AppDbContext _db; // DbContext để truy cập cơ sở dữ liệu
-
-        // Thêm AppDbContext vào constructor
+        private readonly AppDbContext _db; 
         public EnrollmentController(IEnrollmentRepository enrollmentRepository, AppDbContext db)
         {
             _enrollmentRepository = enrollmentRepository;
-            _db = db; // Khởi tạo DbContext
+            _db = db; 
         }
 
-        // POST: api/Enrollment
         [HttpPost]
         public async Task<ActionResult<Enrollment>> EnrollUser([FromBody] EnrollmentDto enrollmentRequest)
         {
@@ -33,7 +30,6 @@ namespace API.Controllers
                 return BadRequest("Invalid user or course data.");
             }
 
-            // Kiểm tra CourseId và UserId có giá trị hợp lệ không
             if (enrollmentRequest.CourseId == Guid.Empty || string.IsNullOrEmpty(enrollmentRequest.UserId))
             {
                 return BadRequest("CourseId and UserId must be valid.");
@@ -41,6 +37,7 @@ namespace API.Controllers
 
             try
             {
+
                 var existingEnrollment = await _db.Enrollments
                     .AnyAsync(e => e.CourseId == enrollmentRequest.CourseId && e.UserId == enrollmentRequest.UserId);
 
@@ -49,27 +46,39 @@ namespace API.Controllers
                     return BadRequest("Người dùng đã ghi danh vào khóa học này.");
                 }
 
-                // Tạo một đối tượng Enrollment mới với Id tự động
                 var newEnrollment = new Enrollment
                 {
-                    Id = Guid.NewGuid(), // Tạo GUID mới
+                    Id = Guid.NewGuid(),
                     CourseId = enrollmentRequest.CourseId,
                     UserId = enrollmentRequest.UserId,
                     ClassId = enrollmentRequest.ClassId,
-                    // Nếu có các trường khác mà bạn muốn khởi tạo, hãy thêm vào đây
                 };
 
-                // Ghi danh người dùng vào khóa học
                 _db.Enrollments.Add(newEnrollment);
-                await _db.SaveChangesAsync(); // Lưu vào cơ sở dữ liệu
 
-                return Ok(newEnrollment); // Trả về đối tượng Enrollment đã được ghi danh
+                var course = await _db.Courses.FindAsync(enrollmentRequest.CourseId);
+                if (course == null)
+                {
+                    return NotFound("Khóa học không tồn tại.");
+                }
+                course.EnrollmentCount++;
+                var classEntity = await _db.Classes.FindAsync(enrollmentRequest.ClassId);
+                if (classEntity == null)
+                {
+                    return NotFound("Lớp học không tồn tại.");
+                }
+                classEntity.EnrollmentCount++;
+                await _db.SaveChangesAsync();
+
+                return Ok(newEnrollment);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+
 
         // GET: api/Enrollment/Course/{courseId}
         [HttpGet("Course/{courseId}")]
@@ -101,16 +110,11 @@ namespace API.Controllers
         [HttpGet("check")]
         public async Task<IActionResult> CheckEnrollment(Guid courseId, string userId)
         {
-            // Kiểm tra xem user đã đăng ký khóa học với courseId và userId chưa
             var enrollment = await _enrollmentRepository.GetEnrollment(courseId, userId);
 
-            // Trả về kết quả check (true/false) và classId nếu có
-            return Ok(new
-            {
-                isEnrolled = enrollment != null,
-                classId = enrollment?.ClassId // Trả về classId nếu enrollment tồn tại, nếu không trả về null
-            });
+            return Ok(enrollment != null);
         }
+
 
     }
 }

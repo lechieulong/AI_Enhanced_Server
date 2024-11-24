@@ -20,7 +20,7 @@ namespace Repositories
 
         public async Task<Enrollment> EnrollUserInCourse(Enrollment enrollment)
         {
-            _context.Enrollments.Add(enrollment); // Không cần thay đổi gì ở đây
+            _context.Enrollments.Add(enrollment);
             await _context.SaveChangesAsync();
             return enrollment;
         }

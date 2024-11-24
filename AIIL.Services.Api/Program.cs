@@ -17,6 +17,10 @@ using Repository.Live;
 using Service;
 using Repositories;
 using OfficeOpenXml;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,9 +87,14 @@ builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config.GetConnectionString("AzureBlobStorage");
-    return new BlobStorageService(connectionString);
+    var azureBlobStorage = config.GetConnectionString("AzureBlobStorage");
+    var azureBlobStorageCourse = config.GetConnectionString("AzureBlobStorageCourse");
+
+    // Truyền cả hai Connection String vào Service
+    return new BlobStorageService(azureBlobStorage, azureBlobStorageCourse);
 });
+
+
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
@@ -113,6 +122,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -147,6 +157,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
 
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
@@ -185,3 +196,4 @@ void ApplyMigration()
         DatabaseSeeder.SeedSpecializationsAndUserAsync(scope.ServiceProvider).GetAwaiter().GetResult();
     }
 }
+var jwtSettings = builder.Configuration.GetSection("ApiSettings:JwtOptions");

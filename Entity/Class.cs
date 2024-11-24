@@ -31,5 +31,6 @@ namespace Entity
         public bool IsEnabled { get; set; } = true;
 
         public ICollection<Enrollment>? Enrollments { get; set; }
+        public int EnrollmentCount { get; set; } = 0; 
     }
 }

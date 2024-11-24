@@ -11,6 +11,7 @@ namespace Model
         public string UserId { get; set; }
         public int RatingValue { get; set; }
         public string Review { get; set; }
+        public DateTime RatedAt { get; set; }
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Entity.CourseFolder;
@@ -18,50 +19,52 @@ namespace YourNamespace.Controllers
             _repository = repository;
         }
 
-        // API để thêm đánh giá khóa học
         [HttpPost("{courseId}/rate")]
         public async Task<IActionResult> RateCourse(Guid courseId, [FromBody] CourseRatingDto ratingDto)
         {
-            // Kiểm tra người dùng đã đăng ký khóa học chưa
+            if (ratingDto.RatingValue < 1 || ratingDto.RatingValue > 5)
+                return BadRequest("Rating must be between 1 and 5.");
+
             bool isEnrolled = await _repository.UserHasEnrolledAsync(courseId, ratingDto.UserId);
             if (!isEnrolled)
-            {
                 return BadRequest("User must be enrolled in the course to rate it.");
-            }
 
-            // Kiểm tra người dùng đã đánh giá khóa học này chưa
             bool hasRated = await _repository.UserHasRatedCourseAsync(courseId, ratingDto.UserId);
             if (hasRated)
-            {
                 return BadRequest("User has already rated this course.");
-            }
 
-            // Tạo và lưu đánh giá mới
             var rating = new CourseRating
             {
                 CourseId = courseId,
                 UserId = ratingDto.UserId,
                 RatingValue = ratingDto.RatingValue,
-                Review = ratingDto.Review
+                Review = ratingDto.Review,
+                RatedAt = DateTime.Now
             };
 
             await _repository.AddRatingAsync(rating);
-            return Ok("Rating added successfully.");
+            return Ok(new { Message = "Rating added successfully." });
         }
 
-        // API để lấy danh sách đánh giá của khóa học
         [HttpGet("{courseId}/ratings")]
-        public async Task<IActionResult> GetCourseRatings(Guid courseId)
+        public async Task<IActionResult> GetCourseRatings(Guid courseId, [FromQuery] string userId = null)
         {
             var ratings = await _repository.GetCourseRatingsAsync(courseId);
-            var result = ratings.Select(r => new
+            if (!string.IsNullOrEmpty(userId))
             {
-                r.UserId,
-                r.RatingValue,
-                r.Review,
-                r.RatedAt
+                ratings = ratings.Where(r => r.UserId == userId).ToList();
+            }
+
+            var result = ratings.Select(r => new CourseRatingDto
+            {
+                UserId = r.UserId,
+                RatingValue = r.RatingValue,
+                Review = r.Review,
+                RatedAt = r.RatedAt
             });
+
             return Ok(result);
         }
+
     }
 }

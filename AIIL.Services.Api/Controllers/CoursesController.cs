@@ -179,31 +179,25 @@ namespace Auth.Controllers
             return Ok(coursesDto);
         }
 
-        [HttpGet("check-lecturer/{courseId}")]
-        public async Task<IActionResult> CheckLecturerOfCourse(Guid courseId)
+        [HttpGet("check-lecturer")]
+        public async Task<IActionResult> CheckLecturerOfCourse([FromQuery] Guid courseId, [FromQuery] string userId)
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 _response.Result = false;
-                _response.Message = "User is does not login.";
+                _response.Message = "User ID is missing.";
                 return Ok(_response);
             }
+
             bool isLecturer = await _repository.CheckLecturerOfCourse(userId, courseId);
 
-            if (isLecturer)
-            {
-                _response.Result = true;
-                _response.Message = "User is the lecturer of this course.";
-                return Ok(_response);
-            }
-            else
-            {
-                _response.Result = false;
-                _response.Message = "User is not the lecturer of this course.";
-                return Ok(_response);
-            }
+            _response.Result = isLecturer;
+            _response.Message = isLecturer
+                ? "User is the lecturer of this course."
+                : "User is not the lecturer of this course.";
+            return Ok(_response);
         }
+
 
 
         [HttpGet("enabled")]
@@ -220,7 +214,7 @@ namespace Auth.Controllers
             return courses == null || !courses.Any() ? NotFound("No disabled courses found.") : Ok(courses);
         }
 
-        [HttpGet("{id:guid}/enabled")]
+        [HttpGet("{id:guid}/status")]
         public async Task<IActionResult> IsCourseEnabled(Guid id)
         {
             var course = await _repository.GetByIdAsync(id);
@@ -232,7 +226,7 @@ namespace Auth.Controllers
             return Ok(new { course.Id, course.IsEnabled });
         }
 
-        [HttpPut("{courseId:guid}/enabled")]
+        [HttpPut("{courseId:guid}/update-status")]
         public async Task<IActionResult> UpdateCourseEnabledStatus(Guid courseId, [FromBody] bool isEnabled)
         {
             var course = await _repository.GetByIdAsync(courseId);
@@ -244,6 +238,7 @@ namespace Auth.Controllers
             await _repository.UpdateCourseEnabledStatusAsync(courseId, isEnabled);
             return Ok(new { courseId, IsEnabled = isEnabled });
         }
+
 
         [HttpGet("courseLessonContent/{courseLessonContentId}/courseId")]
         public async Task<IActionResult> GetCourseIdByLessonContentId(Guid courseLessonContentId)
@@ -267,6 +262,22 @@ namespace Auth.Controllers
             }
 
             return Ok(new { Description = courseSkill.Description });
+        }
+        [HttpGet("{courseId:guid}/average-rating")]
+        public async Task<IActionResult> GetAverageRating(Guid courseId)
+        {
+            var course = await _repository.GetByIdAsync(courseId);
+
+            if (course == null)
+            {
+                return NotFound("Course not found.");
+            }
+
+            return Ok(new
+            {
+                AverageRating = course.AverageRating,
+                RatingCount = course.RatingCount
+            });
         }
 
     }

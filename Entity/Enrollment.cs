@@ -16,9 +16,7 @@ namespace Entity
         [ForeignKey("CourseId")]
         [JsonIgnore]
         public Course? Course { get; set; }
-
-        // Thay đổi ClassId thành Nullable Guid
-        public Guid? ClassId { get; set; } // Cho phép null
+        public Guid? ClassId { get; set; } 
 
         [ForeignKey("ClassId")]
         [JsonIgnore]
