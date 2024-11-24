@@ -11,6 +11,5 @@ namespace Model.Course
         public string ContentUrl { get; set; }
         public int Order { get; set; }
         public List<CourseLessonDto> CourseLessons { get; set; }
-        public Guid? TestId { get; set; }
     }
 }
