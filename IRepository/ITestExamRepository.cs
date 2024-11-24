@@ -14,6 +14,7 @@ namespace IRepository
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
         Task<int> GetAttemptCountByTestAndUserAsync(Guid testId, Guid userId);
         Task AddAttemptTestForYear(Guid userId, int year);
+        Task UpdateExplainQuestionAsync(Guid questionId, string explain);
         Task<List<AttempTest>> GetAttemptTests(Guid userId);
         Task SaveTestResultAsync(TestResult testResult);
         Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
@@ -33,7 +34,7 @@ namespace IRepository
         Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize);
         Task<List<Question>> GetQuestionsAsync(Guid userId,  int page, int pageSize);
         Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize);
-        Task<List<Object>> GetTestAnalysisAttempt(Guid userId);
+        Task<object> GetTestAnalysisAttempt(Guid userId);
         Task AddQuestionsAsync(List<Question> questionModels);
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
