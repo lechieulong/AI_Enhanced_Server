@@ -19,6 +19,7 @@ namespace IRepository
         Task<TeacherAvailableSchedule> UpdateAsync(TeacherAvailableSchedule updatedSchedule);
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime);
+        Task<IEnumerable<TeacherAvailableSchedule>> GetConflictingSchedulesAsync(string teacherId, DateTime startTime, DateTime endTime, Guid scheduleId);
     }
 
 }

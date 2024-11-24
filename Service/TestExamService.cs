@@ -5,6 +5,7 @@ using IService;
 using Microsoft.EntityFrameworkCore;
 using Model.Test;
 using Model.Utility;
+using OfficeOpenXml.ConditionalFormatting.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,119 @@ namespace Service
             _testExamRepository = testExamRepository;
         }
 
+        public async Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model)
+        {
+            var result = new Dictionary<string, object>();
+
+            List<Skill> sortedSkills;
+
+            // Determine the skills to process
+            if (model.SkillId != null && model.SkillId != Guid.Empty)
+            {
+                var skill = await _testExamRepository.GetSkillByIdAsync(model.SkillId.Value);
+                if (skill == null) return result;
+                sortedSkills = new List<Skill> { skill };
+            }
+            else
+            {
+                var skills = await _testExamRepository.GetSkillsByTestIdAsync(model.TestId);
+                if (skills == null || !skills.Any()) return result; // No skills found
+                sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
+            }
+
+            // Fetch user answers
+            var userAnswers = await _testExamRepository.GetUserAnswersByTestId(model.TestId, model.UserId);
+
+            // Process skills
+            foreach (var skill in sortedSkills)
+            {
+                string skillTypeKey = skill.Type switch
+                {
+                    0 => "reading",
+                    1 => "listening",
+                    2 => "writing",
+                    3 => "speaking",
+                    _ => "unknown"
+                };
+
+                result[skillTypeKey] = new
+                {
+                    id = skill.Id,
+                    duration = skill.Duration,
+                    type = skill.Type,
+                    parts = skill.Parts.Select(part => new
+                    {
+                        id = part.Id,
+                        partNumber = part.PartNumber,
+                        contentText = part.ContentText,
+                        audio = part.Audio,
+                        image = part.Image,
+                        sections = part.Sections.Select(section => new
+                        {
+                            id = section.Id,
+                            sectionGuide = section.SectionGuide,
+                            sectionType = section.SectionType,
+                            image = section.Image,
+                            questions = section.SectionQuestions.Select(sq =>
+                            {
+                                List<object> filteredUserAnswers;
+                                if (skill.Type == 0 && section.SectionType == 1)
+                                {
+
+                                    var maxAttemptNumber = userAnswers
+                                          .Where(ua => ua.QuestionId == sq.Question.Id)
+                                          .Max(ua => ua.AttemptNumber);
+
+                                    filteredUserAnswers = userAnswers
+                                        .Where(ua => ua.QuestionId == sq.Question.Id && ua.AttemptNumber == maxAttemptNumber)
+                                        .Select(ua => new
+                                        {
+                                            id = ua.Id,
+                                            answerText = ua.AnswerText,
+                                            answerId = ua.AnswerId,
+                                            isCorrect = 0, // Placeholder for correctness logic
+                                            attemptNumber = ua.AttemptNumber
+                                        })
+                                        .ToList<object>();
+                                }
+                                else
+                                {
+                                    filteredUserAnswers = userAnswers
+                                         .Where(ua => ua.QuestionId == sq.Question.Id)
+                                         .GroupBy(ua => ua.QuestionId)
+                                         .Select(g => g.OrderByDescending(ua => ua.AttemptNumber).First())
+                                         .Select(ua => new
+                                         {
+                                             id = ua.Id,
+                                             answerText = ua.AnswerText,
+                                             isCorrect = 0, // Placeholder for correctness logic
+                                             attemptNumber = ua.AttemptNumber
+                                         })
+                                         .ToList<object>();
+                                }
+
+                                return new
+                                {
+                                    id = sq.Question.Id,
+                                    questionName = sq.Question.QuestionName,
+                                    answers = sq.Question.Answers?.Select(ans => new
+                                    {
+                                        id = ans.Id,
+                                        answerText = ans.AnswerText,
+                                        isCorrect = ans.TypeCorrect
+                                    }).ToList(),
+                                    userAnswers = filteredUserAnswers // Mảng userAnswers
+                                };
+                            }).ToList()
+                        }).ToList()
+                    }).ToList()
+                };
+            }
+
+            return result;
+        }
+
+
         public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
             var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
@@ -29,9 +143,18 @@ namespace Service
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
 
+            int attemptNumber = await _testExamRepository.GetAttemptCountByTestAndUserAsync(userId, testId);
+
+            int year = DateTime.Now.Year;
+
+            await _testExamRepository.AddAttemptTestForYear(userId, year);
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
+                if(questionDetail.Skill == 2)
+                {
+                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
+                }
 
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
@@ -49,6 +172,7 @@ namespace Service
                         TestId = testId,
                         AnswerText = answer.AnswerText,
                         AnswerId = answer.AnswerId.HasValue ? answer.AnswerId.Value : (Guid?)null,
+                        AttemptNumber = attemptNumber
                     };
                     userAnswers.Add(userAnswer);
 
@@ -58,18 +182,43 @@ namespace Service
 
             await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
+            decimal skillScore = 0;
+
+            if (model.UserAnswers.Values.First().Skill == 2)
+            {
+                var overallScore = model.UserAnswers.Values.First().OverallScore;
+                if (!string.IsNullOrEmpty(overallScore) && Decimal.TryParse(overallScore, out var parsedScore))
+                {
+                    skillScore = parsedScore;
+                }
+                else
+                {
+                    skillScore = 0;
+                }
+            }
+            else if (model.UserAnswers.Values.First().Skill == 3)
+            {
+                skillScore = model.UserAnswers.Values
+                                .Where(s => !string.IsNullOrEmpty(s.OverallScore) && Decimal.TryParse(s.OverallScore, out var _))
+                                .Sum(s => Decimal.Parse(s.OverallScore));
+            }
+            var writingSpeakingCondition = model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3;
+
+
+
             var testResult = new TestResult
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 TestId = testId,
                 SkillType = model.UserAnswers.Values.First().Skill,
-                Score = ScaleScore(totalScore, totalQuestion),
+                Score = !writingSpeakingCondition ? ScaleScore(totalScore, totalQuestion) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
                 TotalQuestion = totalQuestion,
                 TestDate = DateTime.UtcNow,
                 TimeMinutesTaken = model.TimeMinutesTaken,
                 SecondMinutesTaken = model.TimeSecondsTaken,
+                AttemptNumber = attemptNumber
             };
 
             // Save test result using repository

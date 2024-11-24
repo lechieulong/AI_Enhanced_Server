@@ -33,6 +33,8 @@ namespace Entity.Data
         public DbSet<SectionQuestion> SectionQuestion { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
+        public DbSet<AttempTest> AttempTests { get; set; }
+
         //End Test Exam 
         public DbSet<ClassRelationShip> ClassRelationShip { get; set; }
 

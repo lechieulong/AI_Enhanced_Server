@@ -65,14 +65,17 @@ namespace AIIL.Services.Api.Controllers
 
             string containerName = "course";
             string path;
+            bool useCourseStorage = false; // Biến để quyết định sử dụng courseServiceClient
 
             if (type.Equals("courseLesson", StringComparison.OrdinalIgnoreCase))
             {
                 path = $"/courseLesson/{id}";
+                useCourseStorage = true; // Sử dụng _courseServiceClient
             }
             else if (type.Equals("class", StringComparison.OrdinalIgnoreCase))
             {
                 path = $"/class/{id}";
+                useCourseStorage = true; // Sử dụng _courseServiceClient
             }
             else
             {
@@ -88,7 +91,8 @@ namespace AIIL.Services.Api.Controllers
                         path,
                         stream,
                         file.FileName,
-                        file.ContentType
+                        file.ContentType,
+                        useCourseStorage
                     );
 
                     return Ok(new { FileUrl = fileUrl });

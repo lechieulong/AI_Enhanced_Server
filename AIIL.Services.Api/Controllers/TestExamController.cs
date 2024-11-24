@@ -127,7 +127,6 @@ namespace AIIL.Services.Api.Controllers
                 return NotFound("Skill not found");
             }
 
-            // Group the response data by skill type
             var responseData = new Dictionary<string, object>();
 
             string skillTypeKey = skill.Type switch
@@ -200,7 +199,6 @@ namespace AIIL.Services.Api.Controllers
                     _ => "unknown"
                 };
 
-                // Add skill data to the response dictionary under its skill type
                 responseData[skillTypeKey] = new
                 {
                     id = skill.Id,
@@ -213,7 +211,6 @@ namespace AIIL.Services.Api.Controllers
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        questionName = $"Part {part.PartNumber}",
                         sections = part.Sections.Select(section => new
                         {
                             id = section.Id,
@@ -239,6 +236,14 @@ namespace AIIL.Services.Api.Controllers
             return Ok(responseData);
         }
 
+
+        [HttpPost("testExplain")]
+        public async Task<IActionResult> GetExplainTest(TestExplainRequestDto model) {
+            if (model.TestId == Guid.Empty) return BadRequest("TestId is empty");
+
+            var result = await _testExamService.GetExplainByTestId(model);
+            return Ok(result);
+        }
 
         [HttpGet("{id}/parts")]
         public async Task<List<Part>> GetParts([FromRoute] Guid id)
@@ -447,6 +452,35 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("testAnalysis/{userId}")]
+        public async Task<IActionResult> GetTestAnalysisAttempt([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetTestAnalysisAttempt(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("attempts/{userId}")]
+        public async Task<IActionResult> GetAttemptTests([FromRoute] Guid userId)
+        {
+            try
+            {
+                var tests = await _testRepository.GetAttemptTests(userId);
+
+                return Ok(tests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
 
 

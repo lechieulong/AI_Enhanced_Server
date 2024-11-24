@@ -87,13 +87,13 @@ builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var useCourseStorage = true;
-    var connectionString = useCourseStorage
-        ? config.GetConnectionString("AzureBlobStorageCourse")
-        : config.GetConnectionString("AzureBlobStorage");
+    var azureBlobStorage = config.GetConnectionString("AzureBlobStorage");
+    var azureBlobStorageCourse = config.GetConnectionString("AzureBlobStorageCourse");
 
-    return new BlobStorageService(connectionString);
+    // Truyền cả hai Connection String vào Service
+    return new BlobStorageService(azureBlobStorage, azureBlobStorageCourse);
 });
+
 
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();

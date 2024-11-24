@@ -12,6 +12,10 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
+        Task<int> GetAttemptCountByTestAndUserAsync(Guid testId, Guid userId);
+        Task AddAttemptTestForYear(Guid userId, int year);
+        Task UpdateExplainQuestionAsync(Guid questionId, string explain);
+        Task<List<AttempTest>> GetAttemptTests(Guid userId);
         Task SaveTestResultAsync(TestResult testResult);
         Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
         Task<int> GetTotalQuestionBySkillId(Guid skillId);
@@ -24,12 +28,13 @@ namespace IRepository
         Task<List<Skill>> GetSkills(Guid testId);
         Task<Skill> GetSkillByIdAsync(Guid SkillId);
         Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
-
+        Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId,  Guid userId);
         Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
         Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize);
         Task<List<Question>> GetQuestionsAsync(Guid userId,  int page, int pageSize);
         Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize);
+        Task<object> GetTestAnalysisAttempt(Guid userId);
         Task AddQuestionsAsync(List<Question> questionModels);
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
