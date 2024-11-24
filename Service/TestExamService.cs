@@ -298,9 +298,8 @@ namespace Service
             return Math.Round((rawScore / totalQuestion) * 9, 2);
         }
 
-        public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, string userRoleClaim)
+        public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, int role)
         {
-            int role = userRoleClaim.Equals(SD.Teacher) ? 0 : 1;
             return await _testExamRepository.AddTestAsync(userId, model, role);
         }
 
