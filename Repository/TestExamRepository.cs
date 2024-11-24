@@ -344,7 +344,7 @@ namespace Repository
             {
                 newTest.ClassId = model.ClassId.Value;
             }
-            if (model.Id != Guid.Empty && model.ClassId != null)
+            if (model.LessonId != Guid.Empty && model.LessonId != null)
             {
                 newTest.LessonId = model.LessonId.Value;
             }
