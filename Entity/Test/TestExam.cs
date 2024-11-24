@@ -16,6 +16,4 @@ public class TestExam
     public ICollection<Skill> SkillTests { get; set; } = new List<Skill>();
     public int TestCreateBy { get; set; }
 
-    [ForeignKey("SectionCourseId")]
-    public CoursePart CoursePart { get; set; }
 }

@@ -27,5 +27,4 @@ public class CoursePart
 
     [JsonIgnore]
     public ICollection<CourseLesson> CourseLessons { get; set; } = new List<CourseLesson>();
-    public TestExam TestExam { get; set; }
 }
