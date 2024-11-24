@@ -10,6 +10,6 @@ namespace IRepository
         Task<bool> UserHasEnrolledAsync(Guid courseId, string userId);
         Task<bool> UserHasRatedCourseAsync(Guid courseId, string userId);
         Task AddRatingAsync(CourseRating rating);
-        Task<IEnumerable<CourseRating>> GetCourseRatingsAsync(Guid courseId);
+        Task<List<CourseRating>> GetCourseRatingsAsync(Guid courseId);
     }
 }

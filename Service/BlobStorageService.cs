@@ -21,7 +21,18 @@ public class BlobStorageService : IBlogStorageService
 
         return blobClient.Uri.ToString();
     }
+    public async Task<string> UploadFileCourseAsync(string containerName, string path, Stream fileStream, string fileName, string contentType)
+    {
+        var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
+        string blobPath = $"{path}/{fileName}";
+        var blobClient = blobContainerClient.GetBlobClient(blobPath);
+
+        await blobClient.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
+
+        return blobClient.Uri.ToString();
+    }
     public async Task<string> DownloadTemplate()
     {
         var blobContainerClient = _blobServiceClient.GetBlobContainerClient("template");

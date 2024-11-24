@@ -14,6 +14,6 @@ namespace Model
         public List<string> Categories { get; set; } = new List<string>(); // Allow multiple categories
         public double Price { get; set; }
         public int EnrollmentCount { get; set; }
-
+        public double AverageRating { get; set; }
     }
 }

@@ -87,9 +87,14 @@ builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config.GetConnectionString("AzureBlobStorage");
+    var useCourseStorage = true;
+    var connectionString = useCourseStorage
+        ? config.GetConnectionString("AzureBlobStorageCourse")
+        : config.GetConnectionString("AzureBlobStorage");
+
     return new BlobStorageService(connectionString);
 });
+
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
@@ -118,70 +123,33 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-//builder.Services.AddSwaggerGen(options =>
-//{
-//    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-//    {
-//        Title = "AI-Enhanced IELTS Prep API",
-//        Version = "v1",
-//        Description = "API for AI-Enhanced IELTS Prep application"
-//    });
-
-//    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-//        Description = "Enter your token"
-//    });
-
-//    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-//    {
-//        {
-//            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//            {
-//                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-//                {
-//                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            new string[] {}
-//        }
-//    });
-//});
-
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "AI-Enhanced IELTS Prep API",
         Version = "v1",
         Description = "API for AI-Enhanced IELTS Prep application"
     });
 
-    // Cấu hình Security Definition cho Bearer Token
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        Name = "Authorization",                            // Tiêu đề cho header
-        Type = SecuritySchemeType.Http,                   // Loại xác thực
-        Scheme = "bearer",                                // Sử dụng Bearer Token
-        BearerFormat = "JWT",                             // Định dạng của token
-        In = ParameterLocation.Header,                   // Bearer Token sẽ được gửi qua tiêu đề HTTP
-        Description = "Enter 'Bearer' [space] and then your token in the text input below.\nExample: 'Bearer abc123'"
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter your token"
     });
 
-    // Thiết lập Security Requirement
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
