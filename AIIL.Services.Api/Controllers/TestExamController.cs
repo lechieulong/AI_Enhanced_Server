@@ -56,14 +56,12 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-
         [HttpPost("{testId}/submitTest/{userId}")]
         public async Task<IActionResult> CalculateScore([FromRoute] Guid testId, [FromRoute] Guid userId, [FromBody] SubmitTestDto model)
         {
             var result = await _testExamService.CalculateScore(testId, userId, model);
             return Ok(result);
         }
-
 
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
