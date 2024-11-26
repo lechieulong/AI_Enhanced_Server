@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Entity.CourseFolder;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Entity.CourseFolder;
 
 namespace Entity
 {
@@ -31,6 +31,8 @@ namespace Entity
         public bool IsEnabled { get; set; } = true;
 
         public ICollection<Enrollment>? Enrollments { get; set; }
-        public int EnrollmentCount { get; set; } = 0; 
+        public int EnrollmentCount { get; set; } = 0;
+
+        public ICollection<ClassFile>? ClassFiles { get; set; }
     }
 }

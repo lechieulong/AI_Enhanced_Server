@@ -63,23 +63,31 @@ namespace AIIL.Services.Api.Controllers
             if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(id))
                 return BadRequest("Type and ID are required.");
 
-            string containerName = "course";
+            string containerName;
             string path;
-            bool useCourseStorage = false; // Biến để quyết định sử dụng courseServiceClient
+            bool useCourseStorage = false; 
 
             if (type.Equals("courseLesson", StringComparison.OrdinalIgnoreCase))
             {
-                path = $"/courseLesson/{id}";
-                useCourseStorage = true; // Sử dụng _courseServiceClient
+                containerName = "courselessoncontent";
+                path = $"/{id}";
+                useCourseStorage = true; 
             }
             else if (type.Equals("class", StringComparison.OrdinalIgnoreCase))
             {
-                path = $"/class/{id}";
-                useCourseStorage = true; // Sử dụng _courseServiceClient
+                containerName = "class";
+                path = $"/{id}";
+                useCourseStorage = true;
+            }
+            else if (type.Equals("course", StringComparison.OrdinalIgnoreCase))
+            {
+                containerName = "course";
+                path = $"/{id}";
+                useCourseStorage = true; 
             }
             else
             {
-                return BadRequest("Invalid type. Valid types are 'courseLesson' or 'class'.");
+                return BadRequest("Invalid type. Valid types are 'courseLesson', 'class', or 'course'.");
             }
 
             using (var stream = file.OpenReadStream())
@@ -103,6 +111,7 @@ namespace AIIL.Services.Api.Controllers
                 }
             }
         }
+
 
     }
 }

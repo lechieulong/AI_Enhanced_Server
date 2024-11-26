@@ -19,11 +19,21 @@ namespace Repository
             _context = context;
         }
 
-        public async Task<List<Course>> GetAllAsync()
+        public async Task<int> CountAsync()
+        {
+            return await _context.Courses
+                .Where(course => course.IsEnabled)
+                .CountAsync();
+        }
+
+        public async Task<List<Course>> GetAllAsync(int pageNumber, int pageSize)
         {
             return await _context.Courses
                 .Include(course => course.User)
                 .Where(course => course.IsEnabled)
+                .OrderBy(course => course.Id) 
+                .Skip((pageNumber - 1) * pageSize) 
+                .Take(pageSize)
                 .ToListAsync();
         }
 

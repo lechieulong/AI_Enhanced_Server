@@ -59,6 +59,7 @@ namespace Entity.Data
         public DbSet<CourseLesson> CourseLessons { get; set; }
         public DbSet<CourseLessonContent> CourseLessonContents { get; set; }
         public DbSet<CourseRating> CourseRatings { get; set; }
+        public DbSet<ClassFile> ClassFiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -7,7 +7,9 @@ namespace IRepository
 {
     public interface ICourseRepository
     {
-        Task<List<Course>> GetAllAsync();
+        Task<int> CountAsync();
+        Task<List<Course>> GetAllAsync(int pageNumber, int pageSize);
+
         Task<Course> GetByIdAsync(Guid id);
         Task CreateAsync(Course course);
         Task UpdateAsync(Course course);
