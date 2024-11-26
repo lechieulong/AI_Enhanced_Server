@@ -182,29 +182,15 @@ namespace Service
 
             await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
-            decimal skillScore = 0;
-
-            if (model.UserAnswers.Values.First().Skill == 2)
-            {
-                var overallScore = model.UserAnswers.Values.First().OverallScore;
-                if (!string.IsNullOrEmpty(overallScore) && Decimal.TryParse(overallScore, out var parsedScore))
-                {
-                    skillScore = parsedScore;
-                }
-                else
-                {
-                    skillScore = 0;
-                }
-            }
-            else if (model.UserAnswers.Values.First().Skill == 3)
-            {
-                skillScore = model.UserAnswers.Values
-                                .Where(s => !string.IsNullOrEmpty(s.OverallScore) && Decimal.TryParse(s.OverallScore, out var _))
-                                .Sum(s => Decimal.Parse(s.OverallScore));
-            }
+         
             var writingSpeakingCondition = model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3;
 
 
+            decimal skillScore = 0;
+            if (model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3)
+            {
+                skillScore = await CalculateWritingOrSpeakingScore(model.UserAnswers.Values, model.TotalQuestions);
+            }
 
             var testResult = new TestResult
             {
@@ -221,9 +207,7 @@ namespace Service
                 AttemptNumber = attemptNumber
             };
 
-            // Save test result using repository
             await _testExamRepository.SaveTestResultAsync(testResult);
-
             return testResult;
         }
 
@@ -296,6 +280,64 @@ namespace Service
         {
             if (totalQuestion == 0) return 0; // Prevent division by zero
             return Math.Round((rawScore / totalQuestion) * 9, 2);
+        }
+
+        private async Task<decimal> CalculateWritingOrSpeakingScore(IEnumerable<UserAnswersDto> userAnswers, int totalQuestions)
+        {
+            decimal skillScore = 0;
+
+            if (userAnswers == null || !userAnswers.Any())
+            {
+                return skillScore; 
+            }
+
+            var validScores = userAnswers
+                .Where(s => !string.IsNullOrEmpty(s.OverallScore) && Decimal.TryParse(s.OverallScore, out _))
+                .Select(s => new { s.Skill, Score = Decimal.Parse(s.OverallScore) })
+                .ToList();
+
+            if (!validScores.Any())
+            {
+                return skillScore; 
+            }
+
+            var totalScore = validScores.Sum(v => v.Score);
+            var answeredQuestions = validScores.Count;    
+
+            if (validScores.First().Skill == 2 || validScores.First().Skill == 3)
+            {
+                skillScore = totalScore / totalQuestions; 
+            }
+
+            skillScore =  RoundIELTSScore(skillScore);
+
+            return skillScore;
+        }
+
+        private decimal RoundIELTSScore(decimal score)
+        {
+            if (score < 0.25m)
+                return 0;
+            if (score >= 0.25m && score < 0.5m)
+                return 0.5m;
+            if (score >= 0.5m && score < 0.75m)
+                return 0.5m;
+            if (score >= 0.75m && score < 1.0m)
+                return 1m;
+
+            var integralPart = Math.Floor(score); // Get the integer part of the score
+            var decimalPart = score - integralPart;
+
+            if (decimalPart < 0.25m)
+                return integralPart;
+            if (decimalPart >= 0.25m && decimalPart < 0.5m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.5m && decimalPart < 0.75m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.75m)
+                return integralPart + 1m;
+
+            return score;
         }
 
         public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, int role)
