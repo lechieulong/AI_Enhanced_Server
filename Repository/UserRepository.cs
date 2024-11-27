@@ -31,21 +31,42 @@ namespace Repository
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<IEnumerable<ApplicationUser>> GetTopTeachersAsync(string currentUserId)
+        public async Task<IEnumerable<UserDto>> GetTopTeachersAsync(string currentUserId)
         {
-            var allUsers = await _db.ApplicationUsers.ToListAsync();
+            //var allUsers = await _db.ApplicationUsers.ToListAsync();
 
-            var teacherUsers = new List<ApplicationUser>();
-            foreach (var user in allUsers)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                if (roles.Contains(SD.Teacher) && user.Id != currentUserId && !roles.Contains(SD.Admin))
-                {
-                    teacherUsers.Add(user);
-                }
-            }
+            //var teacherUsers = new List<ApplicationUser>();
+            //foreach (var user in allUsers)
+            //{
+            //    var roles = await _userManager.GetRolesAsync(user);
+            //    if (roles.Contains(SD.Teacher) && user.Id != currentUserId && !roles.Contains(SD.Admin))
+            //    {
+            //        teacherUsers.Add(user);
+            //    }
+            //}
+            var teacherUsers = await (from user in _db.ApplicationUsers
+                                      join userRole in _db.UserRoles on user.Id equals userRole.UserId
+                                      join role in _db.Roles on userRole.RoleId equals role.Id
+                                      where role.Name == SD.Teacher &&
+                                            user.Id != currentUserId &&
+                                            !(from ur in _db.UserRoles
+                                              join r in _db.Roles on ur.RoleId equals r.Id
+                                              where ur.UserId == user.Id && r.Name == SD.Admin
+                                              select ur).Any()
+                                      select new UserDto
+                                      {
+                                          ID = user.Id,
+                                          UserName = user.UserName,
+                                          Name = user.Name,
+                                          Email = user.Email,
+                                          PhoneNumber = user.PhoneNumber,
+                                          ImageURL = user.ImageURL
+                                      })
+              .Take(10)
+              .AsNoTracking()
+              .ToListAsync();
 
-            return teacherUsers.Take(10);
+            return teacherUsers;
         }
 
         public async Task<IEnumerable<TeacherSearchDto>> SearchTeachersAsync(string searchText)
@@ -119,25 +140,23 @@ namespace Repository
         }
         public async Task<(IEnumerable<UserDto> users, int totalCount)> GetUsersAsync(int page, int pageSize)
         {
-            var allUsers = await _db.ApplicationUsers.ToListAsync();
+            var query = from user in _db.ApplicationUsers
+                        join userRole in _db.UserRoles on user.Id equals userRole.UserId
+                        join role in _db.Roles on userRole.RoleId equals role.Id
+                        where !(from ur in _db.UserRoles
+                                join r in _db.Roles on ur.RoleId equals r.Id
+                                where ur.UserId == user.Id && r.Name == SD.Admin
+                                select ur).Any()
+                        select user;
 
-            var nonAdminUsers = new List<ApplicationUser>();
+            var totalCount = await query.Distinct().CountAsync();
 
-            foreach (var user in allUsers)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                if (!roles.Contains(SD.Admin))
-                {
-                    nonAdminUsers.Add(user);
-                }
-            }
-
-            var totalCount = nonAdminUsers.Count;
-
-            var users = nonAdminUsers
-                .OrderBy(u => u.Name) // Sort by Name in alphabetical order
+            var users = await query
+                .Distinct()  // Loại bỏ các bản sao người dùng
+                .OrderBy(u => u.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .AsNoTracking()  // Không theo dõi sự thay đổi của đối tượng, giúp cải thiện hiệu suất
                 .Select(u => new UserDto
                 {
                     ID = u.Id,
@@ -150,7 +169,7 @@ namespace Repository
                     LockoutEnd = u.LockoutEnd,
                     LockoutEnabled = u.LockoutEnabled
                 })
-                .ToList();
+                .ToListAsync();
 
             return (users, totalCount);
         }
