@@ -103,13 +103,190 @@ namespace Repository
                 .Where(t => t.UserId == userId).ToListAsync();
         }
 
+        public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
+        {
+            if (model == null || !model.Any())
+                throw new ArgumentException("Model cannot be null or empty.", nameof(model));
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var skillKeyValue in model)
+                {
+                    var skillDto = skillKeyValue.Value;
+
+
+                    if (skillDto == null)
+                        continue;
+
+                    var skill = new Skill
+                    {
+                        Id = Guid.NewGuid(),
+                        TestId = testId,
+                        Duration = skillDto.Duration,
+                        Type = (int)skillDto.Type,
+                        Parts = new List<Part>()
+                    };
+
+                    if (skillDto.Parts != null && skillDto.Parts.Any())
+                    {
+                        int partIndex = 1;
+
+                        foreach (var partDto in skillDto.Parts)
+                        {
+                            if (partDto == null)
+                                continue;
+
+                            var part = new Part
+                            {
+                                Id = Guid.NewGuid(),
+                                PartNumber = partIndex,
+                                ContentText = partDto.ContentText ?? "",
+                                Audio = partDto.Audio ?? "",
+                                Image = partDto.Image ?? "",
+                                Skill = skill,
+                                Sections = new List<Section>()
+                            };
+
+                            if (partDto.Sections != null && partDto.Sections.Any())
+                            {
+                                foreach (var sectionDto in partDto.Sections)
+                                {
+                                    if (sectionDto == null)
+                                        continue;
+
+                                    var readingCondition = skillDto.Type == SkillTypeEnum.Reading
+                                             && (sectionDto.SectionType == 7
+                                              || sectionDto.SectionType == 8
+                                              || sectionDto.SectionType == 9
+                                              || sectionDto.SectionType == 10
+                                              || sectionDto.SectionType == 11);
+
+                                    var listeningCondition = skillDto.Type == SkillTypeEnum.Listening
+                                           && (sectionDto.SectionType == 1
+                                            || sectionDto.SectionType == 2
+                                            || sectionDto.SectionType == 3
+                                            || sectionDto.SectionType == 7);
+
+
+
+                                    var section = new Section
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        SectionGuide = sectionDto.SectionGuide,
+                                        SectionType = sectionDto.SectionType,
+                                        Image = sectionDto.Image,
+                                        Explain = sectionDto.Explain,
+                                        SectionContext = sectionDto.SectionContext,
+                                        Part = part,
+                                        SectionQuestions = new List<SectionQuestion>()
+                                    };
+
+
+                                    if (sectionDto.Questions != null && sectionDto.Questions.Any())
+                                    {
+                                        foreach (var questionDto in sectionDto.Questions)
+                                        {
+                                            if (questionDto == null)
+                                                continue;
+                                            Question question;
+                                            if (questionDto.IsFromQuestionBank == true)
+                                            {
+                                            
+                                                question = _context.Questions
+                                                          .FirstOrDefault(q => q.Id ==                                                     questionDto.QuestionId);
+                                                if (question == null)
+                                                    continue; 
+                                            }else if (readingCondition || listeningCondition)
+                                            {
+                                                question = new Question
+                                                {
+                                                    Id = questionDto.QuestionId,
+                                                    UserId = userId,
+                                                    QuestionName = questionDto.QuestionName ?? "",
+                                                    Explain = questionDto.Explain ?? "",
+                                                    QuestionType = questionDto.QuestionType,
+                                                    Answers = new List<Answer>()
+                                                };
+                                                question.Answers.Add(new Answer()
+                                                {
+                                                    Id = new Guid(),
+                                                    AnswerText = questionDto.Answer,
+                                                    TypeCorrect = 1,
+                                                });
+
+                                            }
+                                            else
+                                            {
+                                                question = new Question
+                                                {
+                                                    Id = Guid.NewGuid(),
+                                                    UserId = userId,
+                                                    QuestionName = questionDto.QuestionName ?? "",
+                                                    Explain = questionDto.Explain ?? "",
+                                                    QuestionType = questionDto.QuestionType,
+                                                    Answers = new List<Answer>()
+                                                };
+
+                                                if (questionDto.Answers.Any())
+                                                {
+                                                    foreach (var answerDto in questionDto.Answers)
+                                                    {
+                                                        if (answerDto == null)
+                                                            continue;
+
+                                                        var newAnswer = new Answer
+                                                        {
+                                                            Id = Guid.NewGuid(),
+                                                            AnswerText = answerDto.AnswerText,
+                                                            TypeCorrect = (int)answerDto.IsCorrect
+                                                        };
+                                                        question.Answers.Add(newAnswer);
+                                                    }
+                                                }
+                                            }
+
+                                            var sectionQuestion = new SectionQuestion
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                Section = section,
+                                                Question = question
+                                            };
+
+                                            section.SectionQuestions.Add(sectionQuestion);
+                                        }
+                                    }
+
+                                    part.Sections.Add(section);
+                                }
+                            }
+
+                            partIndex++;
+                            skill.Parts.Add(part);
+                        }
+                    }
+
+                    await _context.Skills.AddAsync(skill);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+
         public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
             return await _context.Answers
                     .Where(answer => answer.QuestionId == questionId).ToListAsync();
         }
 
-        public async Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
+        public async Task CreateSkillsV0Async(Guid userId, Guid testId, Dictionary<string, SkillDto> model)
         {
             if (model == null || !model.Any())
                 throw new ArgumentException("Model cannot be null or empty.", nameof(model));
