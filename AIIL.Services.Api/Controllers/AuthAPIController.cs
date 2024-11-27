@@ -136,5 +136,27 @@ namespace AIIL.Services.Api.Controllers
             }
             return BadRequest(result);
         }
+
+        [HttpPost("check-lock")]
+        public async Task<IActionResult> CheckIfUserIsLocked([FromBody] CheckEmailRequestDto model)
+        {
+            var (isLocked, lockoutRemainingTime) = await _authRepository.CheckIfUserIsLocked(model.Email);
+
+            if (isLocked)
+            {
+                var remainingMinutes = lockoutRemainingTime.HasValue ? lockoutRemainingTime.Value.TotalMinutes : 0;
+                var remainingSeconds = lockoutRemainingTime.HasValue ? lockoutRemainingTime.Value.TotalSeconds : 0;
+                _response.Result = true;
+                _response.Message = $"Remaining lockout time: {remainingMinutes:F0} minutes ({remainingSeconds:F0} seconds).";
+            }
+            else
+            {
+                _response.Result = false;
+                _response.Message = "Account is not locked.";
+            }
+
+            return Ok(_response);
+        }
+
     }
 }

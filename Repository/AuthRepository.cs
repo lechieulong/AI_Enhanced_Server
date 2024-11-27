@@ -411,5 +411,23 @@ namespace Repository
                 return result.Errors.FirstOrDefault()?.Description ?? "Password reset failed.";
             }
         }
+
+        public async Task<(bool isLocked, TimeSpan? lockoutEnd)> CheckIfUserIsLocked(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return (false, null);
+            }
+            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+            if (lockoutEndDate.HasValue && lockoutEndDate.Value.UtcDateTime > DateTime.UtcNow)
+            {
+                var lockoutRemainingTime = lockoutEndDate.Value.UtcDateTime - DateTime.UtcNow;
+                return (true, lockoutRemainingTime);
+            }
+
+            return (false, null);
+        }
+
     }
 }
