@@ -2,6 +2,7 @@
 using Common;
 using Entity;
 using Entity.Data;
+using Entity.Test;
 using IRepository;
 using IService;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -72,6 +73,16 @@ namespace Repository
                 await transaction.RollbackAsync();
                 throw new Exception("An error occurred while adding the teacher request and related information.", ex);
             }
+        }
+
+        public async Task<TestExam> GetRandomAdminTestAsync()
+        {
+            var randomTest = await _context.Set<TestExam>()
+                .Where(te => te.TestCreateBy == 1)
+                .OrderBy(te => Guid.NewGuid())
+                .FirstOrDefaultAsync();
+
+            return randomTest;
         }
 
         public async Task<TeacherRequestDto> GetRequestByRequestId(Guid requestId)
