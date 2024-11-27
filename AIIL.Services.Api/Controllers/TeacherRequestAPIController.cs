@@ -100,6 +100,34 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("random-admin-test")]
+        [Authorize]
+        public async Task<IActionResult> GetRandomAdminTest()
+        {
+            try
+            {
+                var testExam = await _teacherRequestRepository.GetRandomAdminTestAsync();
+
+                if (testExam == null)
+                {
+                    _response.Message = "No test exam available.";
+                    return BadRequest(_response);
+                }
+                _response.Result = testExam;
+                _response.IsSuccess = true;
+                _response.Message = "Get text exam successfully";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while fetching the random admin test.",
+                    Error = ex.Message
+                });
+            }
+        }
+
         [HttpPost("update-request")]
         [Authorize]
         public async Task<IActionResult> UpdateTeacherRequest([FromBody] UserEducationDto userEducationDto)
@@ -147,7 +175,6 @@ namespace AIIL.Services.Api.Controllers
                 });
             }
         }
-
 
         [HttpGet("teacher-request")]
         [Authorize]

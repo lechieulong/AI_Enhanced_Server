@@ -132,6 +132,13 @@ namespace Entity.Data
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // Convert back to list
                 );
 
+            modelBuilder.Entity<Gift>()
+                .Property(g => g.Price)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Ticket>()
+                .Property(t => t.Price)
+                .HasColumnType("decimal(18,2)");
         }
 
     }
