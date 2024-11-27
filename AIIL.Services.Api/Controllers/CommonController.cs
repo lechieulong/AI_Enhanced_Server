@@ -54,6 +54,55 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpPost("upload-course-file")]
+        public async Task<IActionResult> UploadFileForCourse([FromQuery] string type, [FromQuery] string id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(id))
+                return BadRequest("Type and ID are required.");
+
+            string containerName = "course";
+            string path;
+            bool useCourseStorage = false; // Biến để quyết định sử dụng courseServiceClient
+
+            if (type.Equals("courseLesson", StringComparison.OrdinalIgnoreCase))
+            {
+                path = $"/courseLesson/{id}";
+                useCourseStorage = true; // Sử dụng _courseServiceClient
+            }
+            else if (type.Equals("class", StringComparison.OrdinalIgnoreCase))
+            {
+                path = $"/class/{id}";
+                useCourseStorage = true; // Sử dụng _courseServiceClient
+            }
+            else
+            {
+                return BadRequest("Invalid type. Valid types are 'courseLesson' or 'class'.");
+            }
+
+            using (var stream = file.OpenReadStream())
+            {
+                try
+                {
+                    var fileUrl = await _blobStorageService.UploadFileCourseAsync(
+                        containerName,
+                        path,
+                        stream,
+                        file.FileName,
+                        file.ContentType,
+                        useCourseStorage
+                    );
+
+                    return Ok(new { FileUrl = fileUrl });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Error uploading file: {ex.Message}");
+                }
+            }
+        }
 
     }
 }

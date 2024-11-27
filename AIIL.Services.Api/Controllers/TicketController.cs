@@ -17,6 +17,7 @@ namespace AIIL.Services.Api.Controllers
         private readonly ITicketRepository _repository;
         private readonly IMapper _Mapper;
 
+
         public TicketController(ITicketRepository repository, IMapper Mapper)
         {
             _repository = repository;
@@ -42,5 +43,6 @@ namespace AIIL.Services.Api.Controllers
             var result = await _repository.addTicketAsync(ticket);
             return Ok(ticketDto);
         }
+
     }
 }

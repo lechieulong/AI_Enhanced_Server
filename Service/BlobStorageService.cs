@@ -4,11 +4,13 @@ using IService;
 
 public class BlobStorageService : IBlogStorageService
 {
-    private readonly BlobServiceClient _blobServiceClient;
+    private readonly BlobServiceClient _blobServiceClient; // Service mặc định
+    private readonly BlobServiceClient _courseServiceClient; // Service cho Course
 
-    public BlobStorageService(string connectionString)
+    public BlobStorageService(string connectionString, string courseConnectionString)
     {
         _blobServiceClient = new BlobServiceClient(connectionString);
+        _courseServiceClient = new BlobServiceClient(courseConnectionString);
     }
 
     public async Task<string> UploadFileAsync(string userId, Stream fileStream, string fileName, string contentType)
@@ -17,6 +19,26 @@ public class BlobStorageService : IBlogStorageService
         await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
         var blobClient = blobContainerClient.GetBlobClient(fileName);
+        await blobClient.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
+
+        return blobClient.Uri.ToString();
+    }
+
+    public async Task<string> UploadFileCourseAsync(
+        string containerName,
+        string path,
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        bool useCourseStorage = false)
+    {
+        var blobServiceClient = useCourseStorage ? _courseServiceClient : _blobServiceClient;
+        var blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);
+        await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+        string blobPath = $"{path}/{fileName}";
+        var blobClient = blobContainerClient.GetBlobClient(blobPath);
+
         await blobClient.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
 
         return blobClient.Uri.ToString();
@@ -34,5 +56,4 @@ public class BlobStorageService : IBlogStorageService
         }
         return blobClient.Uri.ToString();
     }
-
 }

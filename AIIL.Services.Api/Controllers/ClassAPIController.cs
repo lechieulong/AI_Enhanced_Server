@@ -63,48 +63,42 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ClassDto classDto)
         {
             if (classDto == null ||
                 string.IsNullOrWhiteSpace(classDto.ClassName) ||
                 string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
-                classDto.CourseId == Guid.Empty || // Kiểm tra CourseId có hợp lệ không
-                classDto.StartDate == DateTime.MinValue || // Kiểm tra StartDate có hợp lệ không
-                classDto.EndDate == DateTime.MinValue || // Kiểm tra EndDate có hợp lệ không
-                classDto.EndDate <= classDto.StartDate) // Kiểm tra EndDate phải lớn hơn StartDate
+                classDto.CourseId == Guid.Empty ||
+                classDto.StartDate == DateTime.MinValue ||
+                classDto.EndDate == DateTime.MinValue ||
+                classDto.EndDate <= classDto.StartDate)
             {
                 return BadRequest("Invalid class data.");
             }
 
-            // Chuyển đổi từ ClassDto sang Class entity
+            // Chuyển đổi định dạng ngày thành dd/MM/yyyy
+            var formattedStartDate = classDto.StartDate.ToString("dd/MM/yyyy");
+            var formattedEndDate = classDto.EndDate.ToString("dd/MM/yyyy");
+
             var classEntity = new Class
             {
-                Id = Guid.NewGuid(), // Tạo ID mới cho lớp học
+                Id = Guid.NewGuid(),
                 ClassName = classDto.ClassName,
                 ClassDescription = classDto.ClassDescription,
                 CourseId = classDto.CourseId,
-                StartDate = classDto.StartDate,
-                EndDate = classDto.EndDate,
-                IsEnabled = classDto.IsEnabled // Sử dụng IsEnabled từ ClassDto
+                StartDate = DateTime.ParseExact(formattedStartDate, "dd/MM/yyyy", null),
+                EndDate = DateTime.ParseExact(formattedEndDate, "dd/MM/yyyy", null),
+                IsEnabled = classDto.IsEnabled
             };
 
-            // Gọi repository để tạo lớp học
             var createdClass = await _classRepository.CreateAsync(classEntity);
-
-            // Ánh xạ lại classEntity thành ClassDto để trả về
             var createdClassDto = _mapper.Map<ClassDto>(createdClass);
 
-            return Ok(createdClassDto); // Trả về ClassDto của lớp học đã tạo
+            return Ok(createdClassDto);
         }
 
-
-
-
-
-
-        [HttpPut("{classId:guid}")]
+        [HttpPut("update/{classId:guid}")]
         public async Task<ResponseDto> Put(Guid classId, [FromBody] ClassDto classDto)
         {
             try
@@ -126,6 +120,7 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
 
         [HttpDelete("{id:Guid}")]
         public async Task<ResponseDto> Delete(Guid id)
