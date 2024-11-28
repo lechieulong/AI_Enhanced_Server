@@ -858,7 +858,18 @@ namespace Repository
             }
         }
 
+        public async Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId)
+        {
+            return await _context.Set<TestExam>()
+                .FirstOrDefaultAsync(te => te.LessonId == lessonId);
+        }
 
+        public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)
+        {
+            return await _context.TestExams
+                                 .Where(te => te.ClassId == classId)
+                                 .ToListAsync();
+        }
 
     }
 }

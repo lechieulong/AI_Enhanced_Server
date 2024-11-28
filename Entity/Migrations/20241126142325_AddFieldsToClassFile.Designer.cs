@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241126142325_AddFieldsToClassFile")]
+    partial class AddFieldsToClassFile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -921,19 +924,11 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Explain")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PartId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SectionContext")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SectionGuide")
                         .IsRequired()
@@ -960,9 +955,6 @@ namespace Entity.Migrations
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("QuestionOrder")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uniqueidentifier");

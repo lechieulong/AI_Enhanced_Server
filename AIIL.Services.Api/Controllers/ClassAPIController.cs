@@ -3,6 +3,8 @@ using Entity;
 using IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using NPOI.Util;
+using Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +19,13 @@ namespace AIIL.Services.Api.Controllers
         private readonly IClassRepository _classRepository;
         private readonly ResponseDto _response;
         private readonly IMapper _mapper;
-
-        public ClassAPIController(IClassRepository classRepository, IMapper mapper)
+        private readonly ITestExamRepository _testExamRepository;
+        public ClassAPIController(IClassRepository classRepository, IMapper mapper, ITestExamRepository testExamRepository)
         {
             _mapper = mapper;
             _response = new ResponseDto();
             _classRepository = classRepository;
+            _testExamRepository = testExamRepository; 
         }
 
         [HttpGet]
@@ -77,7 +80,6 @@ namespace AIIL.Services.Api.Controllers
                 return BadRequest("Invalid class data.");
             }
 
-            // Chuyển đổi định dạng ngày thành dd/MM/yyyy
             var formattedStartDate = classDto.StartDate.ToString("dd/MM/yyyy");
             var formattedEndDate = classDto.EndDate.ToString("dd/MM/yyyy");
 
@@ -225,6 +227,19 @@ namespace AIIL.Services.Api.Controllers
             {
                 return BadRequest(new ResponseDto { IsSuccess = false, Message = ex.Message });
             }
+        }
+        [HttpGet("GetTestExamsByClassId/{classId}")]
+        public async Task<IActionResult> GetTestExamsByClassId(Guid classId)
+        {
+            // Gọi repository để lấy danh sách các bài kiểm tra từ database
+            var testExams = await _testExamRepository.GetTestExamsByClassIdAsync(classId);
+
+            if (testExams == null || testExams.Count == 0)
+            {
+                return NotFound("No TestExams found for the given ClassId.");
+            }
+
+            return Ok(testExams);
         }
     }
 }

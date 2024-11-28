@@ -19,7 +19,6 @@ namespace AIIL.Services.Api.Controllers
             _courseLessonContentRepository = courseLessonContentRepository;
         }
 
-        // GET: api/CourseLessonContent
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CourseLessonContent>>> GetAll()
         {
