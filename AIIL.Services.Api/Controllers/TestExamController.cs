@@ -145,8 +145,9 @@ namespace AIIL.Services.Api.Controllers
                 id = skill.Id,
                 duration = skill.Duration,
                 type = skill.Type,
-                parts = skill.Parts.Select(part => new
-                {
+                parts = skill.Parts.OrderBy(part => part.PartNumber) // Sắp xếp tăng dần theo PartNumber
+                    .Select(part => new
+                    {
                     id = part.Id,
                     partNumber = part.PartNumber,
                     contentText = part.ContentText,
@@ -159,17 +160,21 @@ namespace AIIL.Services.Api.Controllers
                         sectionGuide = section.SectionGuide,
                         sectionType = section.SectionType,
                         image = section.Image,
-                        questions = section.SectionQuestions.Select(sq => new
-                        {
-                            id = sq.Question.Id,
-                            questionName = sq.Question.QuestionName,
-                            answers = sq.Question.Answers?.Select(ans => new
+                        sectionContext = section.SectionContext,
+                        questions = section.SectionQuestions.OrderBy(sq => sq.QuestionOrder) 
+                            .Select(sq => new
                             {
-                                id = ans.Id,
-                                answerText = ans.AnswerText,
-                                isCorrect = ans.TypeCorrect
-                            }).ToList() 
-                        }).ToList()
+                                id = sq.Question.Id,
+                                questionName = sq.Question.QuestionName,
+                                questionOrder = sq.QuestionOrder,
+                                questionType = sq.Question.QuestionType,
+                                answers = sq.Question.Answers?.Select(ans => new
+                                {
+                                    id = ans.Id,
+                                    answerText = ans.AnswerText,
+                                    isCorrect = ans.TypeCorrect
+                                }).ToList()
+                            }).ToList()
                     }).ToList()
                 }).ToList()
             };
@@ -206,7 +211,8 @@ namespace AIIL.Services.Api.Controllers
                     id = skill.Id,
                     duration = skill.Duration,
                     type = skill.Type,
-                    parts = skill.Parts.Select(part => new
+                    parts = skill.Parts.OrderBy(part => part.PartNumber) // Sắp xếp tăng dần theo PartNumber
+                    .Select(part => new
                     {
                         id = part.Id,
                         partNumber = part.PartNumber,
@@ -219,10 +225,14 @@ namespace AIIL.Services.Api.Controllers
                             sectionGuide = section.SectionGuide,
                             sectionType = section.SectionType,
                             image = section.Image,
-                            questions = section.SectionQuestions.Select(sq => new
+                            sectionContext = section.SectionContext,
+                            questions = section.SectionQuestions.OrderBy(sq => sq.QuestionOrder)
+                            .Select(sq => new
                             {
                                 id = sq.Question.Id,
                                 questionName = sq.Question.QuestionName,
+                                questionOrder = sq.QuestionOrder,
+                                questionType = sq.Question.QuestionType,
                                 answers = sq.Question.Answers?.Select(ans => new
                                 {
                                     id = ans.Id,
