@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241124100705_DeleteCoursePartConnectWithTextExams")]
-    partial class DeleteCoursePartConnectWithTextExams
+    [Migration("20241126071850_updateSectionQuestions")]
+    partial class updateSectionQuestions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -808,6 +808,26 @@ namespace Entity.Migrations
                     b.ToTable("Answers");
                 });
 
+            modelBuilder.Entity("Entity.Test.AttempTest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TotalAttempt")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AttempTests");
+                });
+
             modelBuilder.Entity("Entity.Test.Part", b =>
                 {
                     b.Property<Guid>("Id")
@@ -841,6 +861,10 @@ namespace Entity.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Explain")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PartNumber")
                         .HasColumnType("int");
@@ -895,6 +919,9 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Explain")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -935,11 +962,53 @@ namespace Entity.Migrations
                     b.ToTable("Skills");
                 });
 
+            modelBuilder.Entity("Entity.Test.TestExam", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TestCreateBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TestName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestExams");
+                });
+
             modelBuilder.Entity("Entity.Test.TestResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("NumberOfCorrect")
                         .HasColumnType("int");
@@ -984,6 +1053,9 @@ namespace Entity.Migrations
 
                     b.Property<string>("AnswerText")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
@@ -1202,42 +1274,6 @@ namespace Entity.Migrations
                     b.HasIndex("UserEducationsTeacherId");
 
                     b.ToTable("UserEducationSpecializations", (string)null);
-                });
-
-            modelBuilder.Entity("TestExam", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SectionCourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TestCreateBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TestName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TestExams");
                 });
 
             modelBuilder.Entity("ApplicationUserEvent", b =>
@@ -1556,7 +1592,7 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Test.Skill", b =>
                 {
-                    b.HasOne("TestExam", null)
+                    b.HasOne("Entity.Test.TestExam", null)
                         .WithMany("SkillTests")
                         .HasForeignKey("TestExamId");
                 });
@@ -1754,7 +1790,7 @@ namespace Entity.Migrations
                     b.Navigation("Parts");
                 });
 
-            modelBuilder.Entity("TestExam", b =>
+            modelBuilder.Entity("Entity.Test.TestExam", b =>
                 {
                     b.Navigation("SkillTests");
                 });

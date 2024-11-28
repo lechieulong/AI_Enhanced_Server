@@ -8,7 +8,8 @@ using System.Security.Claims;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using Newtonsoft.Json;
-using Service; // For .xlsx files
+using Service;
+using Model.Utility; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -55,7 +56,6 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
-
         [HttpPost("{testId}/submitTest/{userId}")]
         public async Task<IActionResult> CalculateScore([FromRoute] Guid testId, [FromRoute] Guid userId, [FromBody] SubmitTestDto model)
         {
@@ -63,20 +63,22 @@ namespace AIIL.Services.Api.Controllers
             return Ok(result);
         }
 
-
         [HttpPost("")]
         public async Task<IActionResult> CreateTest([FromBody] TestModel model)
         {
 
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var userRoleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            // Lấy tất cả các claims liên quan đến vai trò
+            var userRoleClaims = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            int role = userRoleClaims.Contains(SD.Teacher) && userRoleClaims.Contains(SD.Admin) ? 1 : 0;
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
             {
                 return Unauthorized("Invalid user ID.");
             }
 
-            var result = await _testExamService.CreateTestAsync(userId, model, userRoleClaim);
+            var result = await _testExamService.CreateTestAsync(userId, model, role);
             return Ok(result);
         }
 

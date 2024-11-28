@@ -53,18 +53,25 @@ namespace Repository
 
             return attemptCount;
         }
-
-        public async Task UpdateExplainQuestionAsync(Guid questionId, string explain)
+        public async Task UpdateExplainQuestionAsync(Guid questionId, string? explain)
         {
-            var question = await _context.Questions.FindAsync(questionId);
-            if(question == null)
+            // Retrieve the SectionQuestion entity and include the related Question
+            var sectionQuestion = await _context.SectionQuestion
+                .Include(sq => sq.Question)  // Explicitly include the Question navigation property
+                .Where(sq => sq.Question.Id == questionId) // Filter by Question Id
+                .FirstOrDefaultAsync();
+
+            if (sectionQuestion == null)
             {
-                return;
+                throw new KeyNotFoundException($"SectionQuestion with QuestionId {questionId} not found.");
             }
-            question.Explain = explain;
+
+            // Update the Explain property
+            sectionQuestion.Explain = explain;
+
+            // Save changes to the database
             await _context.SaveChangesAsync();
         }
-
         public async Task AddAttemptTestForYear(Guid userId, int year)
         {
             var testAttempt = await _context.AttempTests
@@ -344,7 +351,7 @@ namespace Repository
             {
                 newTest.ClassId = model.ClassId.Value;
             }
-            if (model.Id != Guid.Empty && model.ClassId != null)
+            if (model.LessonId != Guid.Empty && model.LessonId != null)
             {
                 newTest.LessonId = model.LessonId.Value;
             }

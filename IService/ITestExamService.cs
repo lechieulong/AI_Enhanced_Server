@@ -8,7 +8,7 @@ namespace IService
 {
     public interface ITestExamService
     {
-        Task<TestModel> CreateTestAsync(Guid userId,TestModel model, string userRoleClaim);
+        Task<TestModel> CreateTestAsync(Guid userId,TestModel model, int userRoleClaim);
         Task<TestResult> CalculateScore( Guid testId, Guid userId, SubmitTestDto model);
         Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model);
 
