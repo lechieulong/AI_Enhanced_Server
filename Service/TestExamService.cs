@@ -156,6 +156,7 @@ namespace Service
                     await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
                 }
 
+
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
                 decimal questionScore = isCorrect ? 1 : 0;
@@ -226,7 +227,7 @@ namespace Service
                 switch (skill)
                 {
                     case 0:
-                        if (sectionType == 2 )
+                        if (sectionType == 2  || sectionType == 3)
                         {
                             if (int.TryParse(usewrAnswers[0].AnswerText, out int userAnswerNumber))
                             {
@@ -243,8 +244,8 @@ namespace Service
                     case 1:
                         if (sectionType == 8)
                             return CompareMutipleAnswerSets(correctAnswers, usewrAnswers);
-                        else if (sectionType == 1)
-                            return true;
+                        else if (sectionType == 1 ||sectionType == 2 ||sectionType == 3 || sectionType == 7 )
+                            return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                         else if (sectionType == 6)
                             return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
                         else

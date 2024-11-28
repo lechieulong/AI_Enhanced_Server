@@ -131,6 +131,7 @@ namespace Repository
                     if (skillDto.Parts != null && skillDto.Parts.Any())
                     {
                         int partIndex = 1;
+                        int questionOrder = 1;
 
                         foreach (var partDto in skillDto.Parts)
                         {
@@ -185,6 +186,7 @@ namespace Repository
 
                                     if (sectionDto.Questions != null && sectionDto.Questions.Any())
                                     {
+
                                         foreach (var questionDto in sectionDto.Questions)
                                         {
                                             if (questionDto == null)
@@ -250,10 +252,12 @@ namespace Repository
                                             {
                                                 Id = Guid.NewGuid(),
                                                 Section = section,
-                                                Question = question
+                                                Question = question,
+                                                QuestionOrder = questionOrder,
                                             };
 
                                             section.SectionQuestions.Add(sectionQuestion);
+                                            questionOrder++;
                                         }
                                     }
 
@@ -756,7 +760,7 @@ namespace Repository
         }
         public async Task<List<Part>> GetParts(Guid skillId)
         {
-            return await _context.Parts.Where(part => part.Skill.Id == skillId).ToListAsync();
+            return await _context.Parts.Where(part => part.Skill.Id == skillId).OrderBy(part => part.PartNumber).ToListAsync();
         }
 
         public async Task<TestExam> GetTestAsync(Guid id)
