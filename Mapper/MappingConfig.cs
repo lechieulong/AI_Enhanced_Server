@@ -43,6 +43,8 @@ namespace Mapper
                 config.CreateMap<UpdateScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<BookedTeacherSession, BookedTeacherSessionDto>();
                 config.CreateMap<BookedTeacherSessionDto, BookedTeacherSession>();
+                config.CreateMap<BookedTeacherSession, GetSessionsByUserIdDto>();
+                config.CreateMap<GetSessionsByUserIdDto, BookedTeacherSession>();
                 config.CreateMap<TestExam, TestModel>();
 
                 config.CreateMap<Question, QuestionResponse>()

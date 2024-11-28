@@ -10,5 +10,6 @@ namespace IRepository
     public interface IBookedScheduleSessionRepository
     {
         Task<BookedTeacherSession> CreateScheduleSessionAsync(BookedTeacherSession bookedTeacherSession);
+        Task<IEnumerable<BookedTeacherSession>> GetSessionsByUserIdAsync(string userId);
     }
 }
