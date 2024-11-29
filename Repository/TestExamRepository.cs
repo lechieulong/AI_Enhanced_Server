@@ -167,6 +167,7 @@ namespace Repository
                                            && (sectionDto.SectionType == 1
                                             || sectionDto.SectionType == 2
                                             || sectionDto.SectionType == 3
+                                            || sectionDto.SectionType == 4
                                             || sectionDto.SectionType == 7);
 
 
@@ -253,6 +254,7 @@ namespace Repository
                                                 Id = Guid.NewGuid(),
                                                 Section = section,
                                                 Question = question,
+                                                Explain = questionDto.Explain ?? "",
                                                 QuestionOrder = questionOrder,
                                             };
 

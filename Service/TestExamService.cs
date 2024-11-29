@@ -75,6 +75,8 @@ namespace Service
                             id = section.Id,
                             sectionGuide = section.SectionGuide,
                             sectionType = section.SectionType,
+                            sectionContext = section.SectionContext,
+                            explain = section.Explain,
                             image = section.Image,
                             questions = section.SectionQuestions.Select(sq =>
                             {
@@ -118,6 +120,7 @@ namespace Service
                                 {
                                     id = sq.Question.Id,
                                     questionName = sq.Question.QuestionName,
+                                    explain = sq.Explain,
                                     answers = sq.Question.Answers?.Select(ans => new
                                     {
                                         id = ans.Id,
