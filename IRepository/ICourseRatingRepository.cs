@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
+using Model;
 
 namespace IRepository
 {
@@ -11,5 +12,6 @@ namespace IRepository
         Task<bool> UserHasRatedCourseAsync(Guid courseId, string userId);
         Task AddRatingAsync(CourseRating rating);
         Task<List<CourseRating>> GetCourseRatingsAsync(Guid courseId);
+        Task<List<CourseRatingWithUserInfo>> GetCourseRatingsWithUserInfoAsync(Guid courseId);
     }
 }

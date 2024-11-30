@@ -40,7 +40,7 @@ namespace IRepository
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
         Task DeleteQuestionAsync(Guid id); // Added
         Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
-        Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
+        Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
         Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId);
 
     }

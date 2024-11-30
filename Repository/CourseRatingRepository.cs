@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Entity.CourseFolder;
 using IRepository;
 using Entity.Data;
+using Model;
 
 namespace Repository
 {
@@ -71,5 +72,23 @@ namespace Repository
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<List<CourseRatingWithUserInfo>> GetCourseRatingsWithUserInfoAsync(Guid courseId)
+        {
+            var courseRatings = await _context.CourseRatings
+                .Where(cr => cr.CourseId == courseId)
+                .Include(cr => cr.User) // Ensure User is included in the query
+                .ToListAsync();
+
+            return courseRatings.Select(cr => new CourseRatingWithUserInfo
+            {
+                RatingValue = cr.RatingValue,
+                Review = cr.Review,
+                RatedAt = cr.RatedAt.ToString("yyyy/MM/dd"), // Format the date as required
+                Username = cr.User.UserName,  // Mapping the User's username
+                ImageUrl = cr.User.ImageURL  // Mapping the User's imageUrl
+            }).ToList();
+        }
+
+
     }
 }
