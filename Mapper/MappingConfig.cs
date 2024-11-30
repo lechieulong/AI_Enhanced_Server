@@ -46,6 +46,8 @@ namespace Mapper
                 config.CreateMap<BookedTeacherSession, GetSessionsByUserIdDto>();
                 config.CreateMap<GetSessionsByUserIdDto, BookedTeacherSession>();
                 config.CreateMap<TestExam, TestModel>();
+                config.CreateMap<TestExam, TestUpdateDto>();
+                config.CreateMap<TestUpdateDto, TestExam>();
 
                 config.CreateMap<Question, QuestionResponse>()
                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers));

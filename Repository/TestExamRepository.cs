@@ -890,5 +890,38 @@ namespace Repository
 
             return (tests, totalCount);
         }
+
+        public async Task<TestExam> UpdateTestAsync(TestExam testExam)
+        {
+            if (testExam == null) throw new ArgumentNullException(nameof(testExam));
+
+            var existingTest = await _context.TestExams.FindAsync(testExam.Id);
+
+            if (existingTest == null) throw new KeyNotFoundException("TestExam not found.");
+
+            existingTest.TestName = testExam.TestName;
+            existingTest.TestType = testExam.TestType;
+            existingTest.StartTime = testExam.StartTime;
+            existingTest.EndTime = testExam.EndTime;
+            existingTest.UpdateAt = DateTime.UtcNow;
+
+            _context.TestExams.Update(existingTest);
+
+            await _context.SaveChangesAsync();
+
+            return existingTest;
+        }
+
+        public async Task<bool> DeleteTestAsync(Guid id)
+        {
+            var test = await _context.TestExams.FirstOrDefaultAsync(p => p.Id == id);
+            if (test != null)
+            {
+                _context.TestExams.Remove(test);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }
