@@ -539,19 +539,32 @@ namespace Repository
             {
                 newTest.LessonId = model.LessonId.Value;
             }
+
+            if(model.LessonId != Guid.Empty && model.LessonId != null)
+            {
+                var lessonTest = new LessonTest
+                {
+                    Id= new Guid(),
+                    LessonId = model.LessonId.Value,
+                    TestId = newTest.Id,
+                };
+                _context.LessonTest.Add(lessonTest);
+
+            }
             _context.TestExams.Add(newTest);
 
-            foreach (var classId in model.ClassIds)
-            {
-                var classRelation = new ClassRelationShip
-                {
-                    Id = Guid.NewGuid(),
-                    TestId = newTest.Id,
-                    ClassId = classId
-                };
 
-                _context.ClassRelationShip.Add(classRelation);
-            }
+            //foreach (var classId in model.ClassIds)
+            //{
+            //    var classRelation = new ClassRelationShip
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        TestId = newTest.Id,
+            //        ClassId = classId
+            //    };
+
+            //    _context.ClassRelationShip.Add(classRelation);
+            //}
 
             await _context.SaveChangesAsync();
 

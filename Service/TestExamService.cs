@@ -81,7 +81,7 @@ namespace Service
                             questions = section.SectionQuestions.Select(sq =>
                             {
                                 List<object> filteredUserAnswers;
-                                if (skill.Type == 0 && section.SectionType == 1)
+                                if ((skill.Type == 0 && section.SectionType == 1) || skill.Type == 1 && section.SectionType == 8)
                                 {
 
                                     var maxAttemptNumber = userAnswers
