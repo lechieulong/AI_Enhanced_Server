@@ -14,10 +14,11 @@ namespace API.Controllers
     public class CourseLessonsController : ControllerBase
     {
         private readonly ICourseLessonRepository _courseLessonRepository;
-
-        public CourseLessonsController(ICourseLessonRepository courseLessonRepository)
+        private readonly ITestExamRepository _testExamRepository;
+        public CourseLessonsController(ICourseLessonRepository courseLessonRepository, ITestExamRepository testExamRepository)
         {
             _courseLessonRepository = courseLessonRepository;
+            _testExamRepository = testExamRepository;
         }
 
         [HttpGet]
@@ -96,6 +97,16 @@ namespace API.Controllers
                 CourseLessons = courseLessons,
             });
         }
+        [HttpGet("GetTestExamByLessonId/{lessonId}")]
+        public async Task<IActionResult> GetTestExamByLessonId(Guid lessonId)
+        {
+            var testExam = await _testExamRepository.GetTestExamByLessonIdAsync(lessonId);
+            if (testExam == null)
+            {
+                return NotFound("TestExam not found for the given LessonId.");
+            }
 
+            return Ok(testExam);
+        }
     }
 }

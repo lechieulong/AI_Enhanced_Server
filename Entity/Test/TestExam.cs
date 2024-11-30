@@ -4,6 +4,7 @@
     {
         public Guid Id { get; set; }
         public string TestName { get; set; }
+        public int  TestType{ get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime CreateAt { get; set; }

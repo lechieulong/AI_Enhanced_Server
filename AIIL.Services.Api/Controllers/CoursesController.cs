@@ -37,19 +37,26 @@ namespace Auth.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var courses = await _repository.GetAllAsync();
+            var totalCourses = await _repository.CountAsync();
 
-            //if (courses == null || !courses.Any())
-            //{
-            //    return NotFound();
-            //}
+            var courses = await _repository.GetAllAsync(pageNumber, pageSize);
 
             var coursesDto = _mapper.Map<List<GetCourseListDto>>(courses);
 
-            return Ok(coursesDto);
+            var result = new
+            {
+                TotalCount = totalCourses,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(totalCourses / (double)pageSize),
+                Data = coursesDto
+            };
+
+            return Ok(result);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CourseDto courseDto)

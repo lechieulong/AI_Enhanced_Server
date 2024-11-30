@@ -168,6 +168,7 @@ namespace Repository
                                            && (sectionDto.SectionType == 1
                                             || sectionDto.SectionType == 2
                                             || sectionDto.SectionType == 3
+                                            || sectionDto.SectionType == 4
                                             || sectionDto.SectionType == 7);
 
 
@@ -254,6 +255,7 @@ namespace Repository
                                                 Id = Guid.NewGuid(),
                                                 Section = section,
                                                 Question = question,
+                                                Explain = questionDto.Explain ?? "",
                                                 QuestionOrder = questionOrder,
                                             };
 
@@ -523,6 +525,7 @@ namespace Repository
                 Id = Guid.NewGuid(),
                 TestName = model.TestName,
                 StartTime = model.StartTime,
+                TestType = model.TestType,
                 EndTime = model.EndTime,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
@@ -859,6 +862,19 @@ namespace Repository
             }
         }
 
+        public async Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId)
+        {
+            return await _context.Set<TestExam>()
+                .FirstOrDefaultAsync(te => te.LessonId == lessonId);
+        }
+
+        public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)
+        {
+            return await _context.TestExams
+                                 .Where(te => te.ClassId == classId)
+                                 .ToListAsync();
+        }
+
         public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize)
         {
             if (page <= 0) throw new ArgumentException("Page number must be greater than 0", nameof(page));
@@ -874,6 +890,5 @@ namespace Repository
 
             return (tests, totalCount);
         }
-
     }
 }
