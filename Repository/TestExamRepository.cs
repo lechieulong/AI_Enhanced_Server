@@ -540,19 +540,32 @@ namespace Repository
             {
                 newTest.LessonId = model.LessonId.Value;
             }
+
+            if(model.LessonId != Guid.Empty && model.LessonId != null)
+            {
+                var lessonTest = new LessonTest
+                {
+                    Id= new Guid(),
+                    LessonId = model.LessonId.Value,
+                    TestId = newTest.Id,
+                };
+                _context.LessonTest.Add(lessonTest);
+
+            }
             _context.TestExams.Add(newTest);
 
-            foreach (var classId in model.ClassIds)
-            {
-                var classRelation = new ClassRelationShip
-                {
-                    Id = Guid.NewGuid(),
-                    TestId = newTest.Id,
-                    ClassId = classId
-                };
 
-                _context.ClassRelationShip.Add(classRelation);
-            }
+            //foreach (var classId in model.ClassIds)
+            //{
+            //    var classRelation = new ClassRelationShip
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        TestId = newTest.Id,
+            //        ClassId = classId
+            //    };
+
+            //    _context.ClassRelationShip.Add(classRelation);
+            //}
 
             await _context.SaveChangesAsync();
 
@@ -862,10 +875,11 @@ namespace Repository
             }
         }
 
-        public async Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId)
+        public async Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId)
         {
-            return await _context.Set<TestExam>()
-                .FirstOrDefaultAsync(te => te.LessonId == lessonId);
+            return await _context.TestExams
+                                 .Where(te => te.LessonId == lessonId)
+                                 .ToListAsync();
         }
 
         public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)

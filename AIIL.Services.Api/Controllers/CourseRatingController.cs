@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Entity.CourseFolder;
 using Model;
 using IRepository;
+using Repository;
 
 namespace YourNamespace.Controllers
 {
@@ -65,6 +66,26 @@ namespace YourNamespace.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("{courseId}")]
+        public async Task<ActionResult<List<CourseRatingWithUserInfo>>> GetCourseRatingsWithUserInfo(Guid courseId)
+        {
+            try
+            {
+                var ratings = await _repository.GetCourseRatingsWithUserInfoAsync(courseId);
+                if (ratings == null || ratings.Count == 0)
+                {
+                    return NotFound("No ratings found for this course.");
+                }
+
+                return Ok(ratings);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
     }
 }
