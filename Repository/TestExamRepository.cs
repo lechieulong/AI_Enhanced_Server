@@ -524,6 +524,7 @@ namespace Repository
                 Id = Guid.NewGuid(),
                 TestName = model.TestName,
                 StartTime = model.StartTime,
+                TestType = model.TestType,
                 EndTime = model.EndTime,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
