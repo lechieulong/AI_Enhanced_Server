@@ -379,7 +379,7 @@ namespace Repository
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = WebUtility.UrlEncode(token);
             var baseUrl = _configuration["AllowedOrigins:FrontendUrl"];
-            var resetLink = $"{baseUrl}/reset-password?token={encodedToken}&email={email}";
+            var resetLink = $"http://localhost:5173/reset-password?token={encodedToken}&email={email}";
 
             await _emailSenderService.SendResetPasswordRequestEmail(user.Email, user.Name, resetLink);
 

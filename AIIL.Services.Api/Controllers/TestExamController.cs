@@ -9,7 +9,8 @@ using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using Newtonsoft.Json;
 using Service;
-using Model.Utility; // For .xlsx files
+using Model.Utility;
+using Microsoft.AspNetCore.Authorization; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -26,6 +27,32 @@ namespace AIIL.Services.Api.Controllers
             _testExamService = testExamService;
             _testRepository = testRepository;
             _mapper = mapper;
+        }
+
+        [HttpGet("tests")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetTests(int page, int pageSize)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
+
+            var (tests, totalCount) = await _testRepository.GetTestsAsync(page, pageSize);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                Tests = tests,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+
+            return Ok(response);
         }
 
         [HttpPost("skills/{testId}")]

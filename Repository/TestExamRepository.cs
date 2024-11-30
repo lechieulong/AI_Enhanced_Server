@@ -5,6 +5,7 @@ using Entity.Data;
 using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
+using Model;
 using Model.Test;
 using System.Text.RegularExpressions;
 
@@ -874,5 +875,20 @@ namespace Repository
                                  .ToListAsync();
         }
 
+        public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize)
+        {
+            if (page <= 0) throw new ArgumentException("Page number must be greater than 0", nameof(page));
+            if (pageSize <= 0) throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
+
+            var totalCount = await _context.TestExams.CountAsync();
+
+            var tests = await _context.TestExams
+                .OrderByDescending(t => t.CreateAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (tests, totalCount);
+        }
     }
 }
