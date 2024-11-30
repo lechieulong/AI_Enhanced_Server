@@ -245,7 +245,7 @@ namespace Entity.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("ClassFiles");
+                    b.ToTable("ClassFiles", (string)null);
                 });
 
             modelBuilder.Entity("Entity.ClassRelationShip", b =>
@@ -531,7 +531,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LessonTest");
+                    b.ToTable("LessonTest", (string)null);
                 });
 
             modelBuilder.Entity("Entity.Live.Gift", b =>

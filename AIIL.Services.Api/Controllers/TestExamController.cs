@@ -10,7 +10,8 @@ using NPOI.XSSF.UserModel;
 using Newtonsoft.Json;
 using Service;
 using Model.Utility;
-using Microsoft.AspNetCore.Authorization; // For .xlsx files
+using Microsoft.AspNetCore.Authorization;
+using Model; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -20,7 +21,6 @@ namespace AIIL.Services.Api.Controllers
         private readonly ITestExamService _testExamService;
         private readonly ITestExamRepository _testRepository;
         private readonly IMapper _mapper;
-
 
         public TestExamController(ITestExamService testExamService, ITestExamRepository testRepository, IMapper mapper)
         {
@@ -81,6 +81,54 @@ namespace AIIL.Services.Api.Controllers
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
+        }
+
+        [HttpPut("update-test")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
+        public async Task<IActionResult> UpdateTest([FromBody] TestUpdateDto testModel)
+        {
+            if (testModel == null)
+            {
+                return BadRequest("Test model is null.");
+            }
+
+            try
+            {
+                var testExamEntity = _mapper.Map<TestExam>(testModel);
+
+                var updatedTest = await _testRepository.UpdateTestAsync(testExamEntity);
+
+                if (updatedTest == null)
+                {
+                    return NotFound("Test not found.");
+                }
+
+                return Ok(updatedTest);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
+        public async Task<IActionResult> DeleteTest(Guid id)
+        {
+            try
+            {
+                bool isDeleted = await _testRepository.DeleteTestAsync(id);
+                if (!isDeleted)
+                {
+                    return BadRequest("Failed to delete test.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+            return Ok("Test deleted successfully.");
         }
 
         [HttpPost("{testId}/submitTest/{userId}")]
