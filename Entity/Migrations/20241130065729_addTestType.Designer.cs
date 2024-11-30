@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241130065729_addTestType")]
+    partial class addTestType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,37 +218,6 @@ namespace Entity.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("Entity.ClassFile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UploadDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.ToTable("ClassFiles");
                 });
 
             modelBuilder.Entity("Entity.ClassRelationShip", b =>
@@ -1374,17 +1346,6 @@ namespace Entity.Migrations
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("Entity.ClassFile", b =>
-                {
-                    b.HasOne("Entity.Class", "Class")
-                        .WithMany("ClassFiles")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-                });
-
             modelBuilder.Entity("Entity.CourseFolder.Course", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "User")
@@ -1772,8 +1733,6 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Class", b =>
                 {
-                    b.Navigation("ClassFiles");
-
                     b.Navigation("Enrollments");
                 });
 
