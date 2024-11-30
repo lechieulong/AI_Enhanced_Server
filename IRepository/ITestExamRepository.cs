@@ -1,5 +1,6 @@
 ﻿using Entity.Test;
 using Microsoft.EntityFrameworkCore;
+using Model;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize);
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
         Task<int> GetAttemptCountByTestAndUserAsync(Guid testId, Guid userId);
         Task AddAttemptTestForYear(Guid userId, int year);
