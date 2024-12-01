@@ -540,17 +540,9 @@ namespace Repository
             {
                 newTest.LessonId = model.LessonId.Value;
             }
-
-            if(model.LessonId != Guid.Empty && model.LessonId != null)
+            if (model.SkilLIdCourse != Guid.Empty && model.SkilLIdCourse != null)
             {
-                var lessonTest = new LessonTest
-                {
-                    Id= new Guid(),
-                    LessonId = model.LessonId.Value,
-                    TestId = newTest.Id,
-                };
-                _context.LessonTest.Add(lessonTest);
-
+                newTest.SkillIdCourse = model.SkilLIdCourse.Value;
             }
             if (model.SkillIdCourse != Guid.Empty && model.SkillIdCourse != null)
             {
