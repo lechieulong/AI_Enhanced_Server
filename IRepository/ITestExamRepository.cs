@@ -1,5 +1,6 @@
 ﻿using Entity.Test;
 using Microsoft.EntityFrameworkCore;
+using Model;
 using Model.Test;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,9 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize);
+        Task<TestExam> UpdateTestAsync(TestExam testExam);
+        Task<bool> DeleteTestAsync(Guid id);
         Task SaveUserAnswerAsync(List<UserAnswers> userAnswers);
         Task<int> GetAttemptCountByTestAndUserAsync(Guid testId, Guid userId);
         Task AddAttemptTestForYear(Guid userId, int year);
@@ -40,7 +44,7 @@ namespace IRepository
         Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
         Task DeleteQuestionAsync(Guid id); // Added
         Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
-        Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
+        Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
         Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId);
 
     }

@@ -5,6 +5,7 @@ using Entity.Data;
 using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
+using Model;
 using Model.Test;
 using System.Text.RegularExpressions;
 
@@ -886,10 +887,11 @@ namespace Repository
             }
         }
 
-        public async Task<TestExam> GetTestExamByLessonIdAsync(Guid lessonId)
+        public async Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId)
         {
-            return await _context.Set<TestExam>()
-                .FirstOrDefaultAsync(te => te.LessonId == lessonId);
+            return await _context.TestExams
+                                 .Where(te => te.LessonId == lessonId)
+                                 .ToListAsync();
         }
 
         public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)
@@ -899,5 +901,53 @@ namespace Repository
                                  .ToListAsync();
         }
 
+        public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize)
+        {
+            if (page <= 0) throw new ArgumentException("Page number must be greater than 0", nameof(page));
+            if (pageSize <= 0) throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
+
+            var totalCount = await _context.TestExams.CountAsync();
+
+            var tests = await _context.TestExams
+                .OrderByDescending(t => t.CreateAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (tests, totalCount);
+        }
+
+        public async Task<TestExam> UpdateTestAsync(TestExam testExam)
+        {
+            if (testExam == null) throw new ArgumentNullException(nameof(testExam));
+
+            var existingTest = await _context.TestExams.FindAsync(testExam.Id);
+
+            if (existingTest == null) throw new KeyNotFoundException("TestExam not found.");
+
+            existingTest.TestName = testExam.TestName;
+            existingTest.TestType = testExam.TestType;
+            existingTest.StartTime = testExam.StartTime;
+            existingTest.EndTime = testExam.EndTime;
+            existingTest.UpdateAt = DateTime.UtcNow;
+
+            _context.TestExams.Update(existingTest);
+
+            await _context.SaveChangesAsync();
+
+            return existingTest;
+        }
+
+        public async Task<bool> DeleteTestAsync(Guid id)
+        {
+            var test = await _context.TestExams.FirstOrDefaultAsync(p => p.Id == id);
+            if (test != null)
+            {
+                _context.TestExams.Remove(test);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }

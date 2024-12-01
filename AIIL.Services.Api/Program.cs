@@ -21,8 +21,19 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ void ConfigureServices(IServiceCollection services)
+{
+    services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
+
+    services.AddSingleton<IRedisService, RedisService>();
+
+    services.AddControllers();
+}
+
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 

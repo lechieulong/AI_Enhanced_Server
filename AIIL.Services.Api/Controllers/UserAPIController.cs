@@ -398,8 +398,8 @@ namespace AIIL.Services.Api.Controllers
             try
             {
                 var token = await _userRepository.UpdateRole(userId);
-                
-                if(token == null)
+
+                if (token == null)
                 {
                     _response.IsSuccess = false;
                     _response.Message = "Can't update role";

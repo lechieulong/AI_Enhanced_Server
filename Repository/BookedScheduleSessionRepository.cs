@@ -2,6 +2,7 @@
 using Entity;
 using Entity.Data;
 using IRepository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,14 @@ namespace Repository
                 // Log the error
                 throw new Exception("An error occurred while booking the session.", ex);
             }
+        }
+
+        public async Task<IEnumerable<BookedTeacherSession>> GetSessionsByUserIdAsync(string userId)
+        {
+            return await _db.BookedTeacherSessions
+                .Include(b => b.TeacherAvailableSchedule)
+                .Where(b => b.LearnerId == userId)
+                .ToListAsync();
         }
 
     }

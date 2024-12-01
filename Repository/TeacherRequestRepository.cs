@@ -205,7 +205,6 @@ namespace Repository
                 }
                 catch (Exception ex)
                 {
-                    // Log the exception and handle it as needed
                     throw new Exception("An error occurred while processing the request.", ex);
                 }
             }
@@ -271,7 +270,6 @@ namespace Repository
 
         private Specialization GetSpecialization(Guid specializationId)
         {
-            // Implement logic to retrieve the name, e.g., from the database or other source
             var specialization = _context.Specializations.Find(specializationId);
             return specialization;
         }
