@@ -552,6 +552,18 @@ namespace Repository
                 _context.LessonTest.Add(lessonTest);
 
             }
+            if (model.SkillIdCourse != Guid.Empty && model.SkillIdCourse != null)
+            {
+                var skillCourseTest = new FinalTestRelationship
+                {
+                    Id = new Guid(),
+                    TestId = newTest.Id,
+                    SkillIdCourse = newTest.Id,
+                };
+                _context.FinalTestRelationship.Add(skillCourseTest);
+
+            }
+
             _context.TestExams.Add(newTest);
 
 
