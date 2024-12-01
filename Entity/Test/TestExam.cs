@@ -11,6 +11,7 @@
         public DateTime UpdateAt { get; set; }
         public Guid LessonId { get; set; }
         public Guid ClassId { get; set; }
+        public Guid SkillIdCourse { get; set; }
         public Guid UserID { get; set; }
         public ICollection<Skill> SkillTests { get; set; } = new List<Skill>();
         public int TestCreateBy { get; set; }
