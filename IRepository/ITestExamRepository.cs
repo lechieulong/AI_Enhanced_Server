@@ -46,6 +46,6 @@ namespace IRepository
         Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
         Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
         Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId);
-
+        Task<List<TestExam>> GetTestExamsBySkillIdCourseIdAsync(Guid skillIdCourse);
     }
 }

@@ -544,17 +544,17 @@ namespace Repository
             {
                 newTest.SkillIdCourse = model.SkilLIdCourse.Value;
             }
-            if (model.SkillIdCourse != Guid.Empty && model.SkillIdCourse != null)
-            {
-                var skillCourseTest = new FinalTestRelationship
-                {
-                    Id = new Guid(),
-                    TestId = newTest.Id,
-                    SkillIdCourse = newTest.Id,
-                };
-                _context.FinalTestRelationship.Add(skillCourseTest);
+            //if (model.SkillIdCourse != Guid.Empty && model.SkillIdCourse != null)
+            //{
+            //    var skillCourseTest = new FinalTestRelationship
+            //    {
+            //        Id = new Guid(),
+            //        TestId = newTest.Id,
+            //        SkillIdCourse = newTest.Id,
+            //    };
+            //    _context.FinalTestRelationship.Add(skillCourseTest);
 
-            }
+            //}
 
             _context.TestExams.Add(newTest);
 
@@ -892,7 +892,12 @@ namespace Repository
                                  .Where(te => te.ClassId == classId)
                                  .ToListAsync();
         }
-
+        public async Task<List<TestExam>> GetTestExamsBySkillIdCourseIdAsync(Guid skillIdCourse)
+        {
+            return await _context.TestExams
+                                 .Where(te => te.SkillIdCourse == skillIdCourse)
+                                 .ToListAsync();
+        }
         public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize)
         {
             if (page <= 0) throw new ArgumentException("Page number must be greater than 0", nameof(page));

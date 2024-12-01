@@ -14,10 +14,11 @@ namespace API.Controllers
     public class CourseSkillsController : ControllerBase
     {
         private readonly ICourseSkillRepository _courseSkillRepository;
-
-        public CourseSkillsController(ICourseSkillRepository courseSkillRepository)
+        private readonly ITestExamRepository _testExamRepository;
+        public CourseSkillsController(ICourseSkillRepository courseSkillRepository, ITestExamRepository testExamRepository)
         {
             _courseSkillRepository = courseSkillRepository;
+            _testExamRepository = testExamRepository;
         }
 
         [HttpGet]
@@ -139,5 +140,19 @@ namespace API.Controllers
 
             return Ok(new { Description = courseSkill.Description });
         }
+        [HttpGet("GetTestExamsBySkillIdCourse/{classkillIdCoursesId}")]
+        public async Task<IActionResult> GetTestExamsByClassId(Guid skillIdCourse)
+        {
+            // Gọi repository để lấy danh sách các bài kiểm tra từ database
+            var testExams = await _testExamRepository.GetTestExamsBySkillIdCourseIdAsync(skillIdCourse);
+
+            if (testExams == null || testExams.Count == 0)
+            {
+                return NotFound("No TestExams found for the given ClassId.");
+            }
+
+            return Ok(testExams);
+        }
+
     }
 }
