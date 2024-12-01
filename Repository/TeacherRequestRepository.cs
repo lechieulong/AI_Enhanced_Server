@@ -2,6 +2,7 @@
 using Common;
 using Entity;
 using Entity.Data;
+using Entity.Test;
 using IRepository;
 using IService;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -72,6 +73,16 @@ namespace Repository
                 await transaction.RollbackAsync();
                 throw new Exception("An error occurred while adding the teacher request and related information.", ex);
             }
+        }
+
+        public async Task<TestExam> GetRandomAdminTestAsync()
+        {
+            var randomTest = await _context.Set<TestExam>()
+                .Where(te => te.TestCreateBy == 1)
+                .OrderBy(te => Guid.NewGuid())
+                .FirstOrDefaultAsync();
+
+            return randomTest;
         }
 
         public async Task<TeacherRequestDto> GetRequestByRequestId(Guid requestId)
@@ -194,7 +205,6 @@ namespace Repository
                 }
                 catch (Exception ex)
                 {
-                    // Log the exception and handle it as needed
                     throw new Exception("An error occurred while processing the request.", ex);
                 }
             }
@@ -260,7 +270,6 @@ namespace Repository
 
         private Specialization GetSpecialization(Guid specializationId)
         {
-            // Implement logic to retrieve the name, e.g., from the database or other source
             var specialization = _context.Specializations.Find(specializationId);
             return specialization;
         }

@@ -75,11 +75,13 @@ namespace Service
                             id = section.Id,
                             sectionGuide = section.SectionGuide,
                             sectionType = section.SectionType,
+                            sectionContext = section.SectionContext,
+                            explain = section.Explain,
                             image = section.Image,
                             questions = section.SectionQuestions.Select(sq =>
                             {
                                 List<object> filteredUserAnswers;
-                                if (skill.Type == 0 && section.SectionType == 1)
+                                if ((skill.Type == 0 && section.SectionType == 1) || skill.Type == 1 && section.SectionType == 8)
                                 {
 
                                     var maxAttemptNumber = userAnswers
@@ -118,6 +120,7 @@ namespace Service
                                 {
                                     id = sq.Question.Id,
                                     questionName = sq.Question.QuestionName,
+                                    explain = sq.Explain,
                                     answers = sq.Question.Answers?.Select(ans => new
                                     {
                                         id = ans.Id,
@@ -155,6 +158,7 @@ namespace Service
                 {
                     await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
                 }
+
 
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
@@ -226,7 +230,7 @@ namespace Service
                 switch (skill)
                 {
                     case 0:
-                        if (sectionType == 2 )
+                        if (sectionType == 2  || sectionType == 3)
                         {
                             if (int.TryParse(usewrAnswers[0].AnswerText, out int userAnswerNumber))
                             {
@@ -243,8 +247,8 @@ namespace Service
                     case 1:
                         if (sectionType == 8)
                             return CompareMutipleAnswerSets(correctAnswers, usewrAnswers);
-                        else if (sectionType == 1)
-                            return true;
+                        else if (sectionType == 1 ||sectionType == 2 ||sectionType == 3 || sectionType == 7 )
+                            return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                         else if (sectionType == 6)
                             return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
                         else

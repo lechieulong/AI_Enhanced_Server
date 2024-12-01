@@ -9,7 +9,9 @@ using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using Newtonsoft.Json;
 using Service;
-using Model.Utility; // For .xlsx files
+using Model.Utility;
+using Microsoft.AspNetCore.Authorization;
+using Model; // For .xlsx files
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
@@ -20,12 +22,37 @@ namespace AIIL.Services.Api.Controllers
         private readonly ITestExamRepository _testRepository;
         private readonly IMapper _mapper;
 
-
         public TestExamController(ITestExamService testExamService, ITestExamRepository testRepository, IMapper mapper)
         {
             _testExamService = testExamService;
             _testRepository = testRepository;
             _mapper = mapper;
+        }
+
+        [HttpGet("tests")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> GetTests(int page, int pageSize)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
+
+            var (tests, totalCount) = await _testRepository.GetTestsAsync(page, pageSize);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                Tests = tests,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+
+            return Ok(response);
         }
 
         [HttpPost("skills/{testId}")]
@@ -54,6 +81,54 @@ namespace AIIL.Services.Api.Controllers
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
+        }
+
+        [HttpPut("update-test")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
+        public async Task<IActionResult> UpdateTest([FromBody] TestUpdateDto testModel)
+        {
+            if (testModel == null)
+            {
+                return BadRequest("Test model is null.");
+            }
+
+            try
+            {
+                var testExamEntity = _mapper.Map<TestExam>(testModel);
+
+                var updatedTest = await _testRepository.UpdateTestAsync(testExamEntity);
+
+                if (updatedTest == null)
+                {
+                    return NotFound("Test not found.");
+                }
+
+                return Ok(updatedTest);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
+        public async Task<IActionResult> DeleteTest(Guid id)
+        {
+            try
+            {
+                bool isDeleted = await _testRepository.DeleteTestAsync(id);
+                if (!isDeleted)
+                {
+                    return BadRequest("Failed to delete test.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+            return Ok("Test deleted successfully.");
         }
 
         [HttpPost("{testId}/submitTest/{userId}")]
@@ -145,8 +220,9 @@ namespace AIIL.Services.Api.Controllers
                 id = skill.Id,
                 duration = skill.Duration,
                 type = skill.Type,
-                parts = skill.Parts.Select(part => new
-                {
+                parts = skill.Parts.OrderBy(part => part.PartNumber) // Sắp xếp tăng dần theo PartNumber
+                    .Select(part => new
+                    {
                     id = part.Id,
                     partNumber = part.PartNumber,
                     contentText = part.ContentText,
@@ -159,17 +235,21 @@ namespace AIIL.Services.Api.Controllers
                         sectionGuide = section.SectionGuide,
                         sectionType = section.SectionType,
                         image = section.Image,
-                        questions = section.SectionQuestions.Select(sq => new
-                        {
-                            id = sq.Question.Id,
-                            questionName = sq.Question.QuestionName,
-                            answers = sq.Question.Answers?.Select(ans => new
+                        sectionContext = section.SectionContext,
+                        questions = section.SectionQuestions.OrderBy(sq => sq.QuestionOrder) 
+                            .Select(sq => new
                             {
-                                id = ans.Id,
-                                answerText = ans.AnswerText,
-                                isCorrect = ans.TypeCorrect
-                            }).ToList() 
-                        }).ToList()
+                                id = sq.Question.Id,
+                                questionName = sq.Question.QuestionName,
+                                questionOrder = sq.QuestionOrder,
+                                questionType = sq.Question.QuestionType,
+                                answers = sq.Question.Answers?.Select(ans => new
+                                {
+                                    id = ans.Id,
+                                    answerText = ans.AnswerText,
+                                    isCorrect = ans.TypeCorrect
+                                }).ToList()
+                            }).ToList()
                     }).ToList()
                 }).ToList()
             };
@@ -206,7 +286,8 @@ namespace AIIL.Services.Api.Controllers
                     id = skill.Id,
                     duration = skill.Duration,
                     type = skill.Type,
-                    parts = skill.Parts.Select(part => new
+                    parts = skill.Parts.OrderBy(part => part.PartNumber) // Sắp xếp tăng dần theo PartNumber
+                    .Select(part => new
                     {
                         id = part.Id,
                         partNumber = part.PartNumber,
@@ -219,10 +300,14 @@ namespace AIIL.Services.Api.Controllers
                             sectionGuide = section.SectionGuide,
                             sectionType = section.SectionType,
                             image = section.Image,
-                            questions = section.SectionQuestions.Select(sq => new
+                            sectionContext = section.SectionContext,
+                            questions = section.SectionQuestions.OrderBy(sq => sq.QuestionOrder)
+                            .Select(sq => new
                             {
                                 id = sq.Question.Id,
                                 questionName = sq.Question.QuestionName,
+                                questionOrder = sq.QuestionOrder,
+                                questionType = sq.Question.QuestionType,
                                 answers = sq.Question.Answers?.Select(ans => new
                                 {
                                     id = ans.Id,

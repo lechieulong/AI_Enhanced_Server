@@ -379,7 +379,7 @@ namespace Repository
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = WebUtility.UrlEncode(token);
             var baseUrl = _configuration["AllowedOrigins:FrontendUrl"];
-            var resetLink = $"{baseUrl}/reset-password?token={encodedToken}&email={email}";
+            var resetLink = $"http://localhost:5173/reset-password?token={encodedToken}&email={email}";
 
             await _emailSenderService.SendResetPasswordRequestEmail(user.Email, user.Name, resetLink);
 
@@ -411,5 +411,23 @@ namespace Repository
                 return result.Errors.FirstOrDefault()?.Description ?? "Password reset failed.";
             }
         }
+
+        public async Task<(bool isLocked, TimeSpan? lockoutEnd)> CheckIfUserIsLocked(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return (false, null);
+            }
+            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+            if (lockoutEndDate.HasValue && lockoutEndDate.Value.UtcDateTime > DateTime.UtcNow)
+            {
+                var lockoutRemainingTime = lockoutEndDate.Value.UtcDateTime - DateTime.UtcNow;
+                return (true, lockoutRemainingTime);
+            }
+
+            return (false, null);
+        }
+
     }
 }

@@ -125,10 +125,10 @@ builder.Services.AddHostedService<StatusBackgroundService>();
 
 builder.Services.AddCors(options =>
 {
-    var allowedOrigin = builder.Configuration.GetValue<string>("AllowedOrigins:FrontendUrl");
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FrontendUrls").Get<string[]>();
 
     options.AddPolicy("AllowMyOrigin",
-        policy => policy.WithOrigins(allowedOrigin)
+        policy => policy.WithOrigins(allowedOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
@@ -148,10 +148,10 @@ builder.Services.AddSwaggerGen(options =>
     {
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter your token"
+        Description = "Enter your JWT token in the format: Bearer {your_token}"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -163,7 +163,10 @@ builder.Services.AddSwaggerGen(options =>
                 {
                     Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
                     Id = "Bearer"
-                }
+                },
+                Scheme = "bearer",
+                Name = "Bearer",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header
             },
             new string[] {}
         }

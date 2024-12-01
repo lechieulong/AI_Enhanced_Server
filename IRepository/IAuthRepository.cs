@@ -18,5 +18,6 @@ namespace IRepository
         Task<string> ChangePassword(string email, string currentPassword, string newPassword);
         Task<string> RequestPasswordReset(string email);
         Task<string> ResetPassword(string email, string token, string newPassword);
+        Task<(bool isLocked, TimeSpan? lockoutEnd)> CheckIfUserIsLocked(string email);
     }
 }

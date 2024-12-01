@@ -11,7 +11,7 @@ namespace IRepository
 {
     public interface IUserRepository
     {
-        Task<IEnumerable<ApplicationUser>> GetTopTeachersAsync(string userId);
+        Task<IEnumerable<UserDto>> GetTopTeachersAsync(string userId);
         Task<IEnumerable<TeacherSearchDto>> SearchTeachersAsync(string searchText);
         Task<UserDto> GetUserProfileByUsernameAsync(string username);
         Task<UserDto> GetUserUserByIdAsync(string userId);

@@ -3,6 +3,7 @@ using Entity;
 using IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Repository;
@@ -18,13 +19,15 @@ namespace AIIL.Services.Api.Controllers
         private ResponseDto _response;
         private readonly IBookedScheduleSessionRepository _bookedScheduleSessionRepository;
         private readonly IEventRepository _eventRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BookedTeacherSessionAPIController(IMapper mapper, IBookedScheduleSessionRepository bookedScheduleSessionRepository, IEventRepository eventRepository)
+        public BookedTeacherSessionAPIController(IMapper mapper, IBookedScheduleSessionRepository bookedScheduleSessionRepository, IEventRepository eventRepository, UserManager<ApplicationUser> userManager)
         {
             _bookedScheduleSessionRepository = bookedScheduleSessionRepository;
             _mapper = mapper;
             _response = new ResponseDto();
             _eventRepository = eventRepository;
+            _userManager = userManager;
         }
 
         [HttpPost("create-schedule-session")]
@@ -55,5 +58,44 @@ namespace AIIL.Services.Api.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+
+        [HttpGet("getSessionsByUserId")]
+        [Authorize]
+        public async Task<IActionResult> GetSessionsByUserId()
+        {
+            try
+            {
+                var currentUserId = _userManager.GetUserId(User);
+
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "User not found.";
+                    return NotFound(_response);
+                }
+
+                var sessions = await _bookedScheduleSessionRepository.GetSessionsByUserIdAsync(currentUserId);
+
+                if (sessions == null || !sessions.Any())
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "No sessions found for this user.";
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<IEnumerable<GetSessionsByUserIdDto>>(sessions);
+                _response.IsSuccess = true;
+                _response.Message = "Get sessions successful";
+
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, _response); // Internal Server Error
+            }
+        }
+
     }
 }

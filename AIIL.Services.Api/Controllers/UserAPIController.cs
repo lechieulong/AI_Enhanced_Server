@@ -145,15 +145,7 @@ namespace AIIL.Services.Api.Controllers
             }
 
             _response.IsSuccess = true;
-            _response.Result = topTeachers.Select(u => new UserDto
-            {
-                ID = u.Id,
-                UserName = u.UserName,
-                Name = u.Name,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                ImageURL = u.ImageURL
-            }).ToList(); // Return a list of UserDto
+            _response.Result = topTeachers;
 
             return Ok(_response);
         }
@@ -406,8 +398,8 @@ namespace AIIL.Services.Api.Controllers
             try
             {
                 var token = await _userRepository.UpdateRole(userId);
-                
-                if(token == null)
+
+                if (token == null)
                 {
                     _response.IsSuccess = false;
                     _response.Message = "Can't update role";

@@ -25,6 +25,9 @@ namespace Entity.Data
         public DbSet<Class> Classes { get; set; }
         // Test Exam 
         public DbSet<TestExam> TestExams { get; set; }
+        public DbSet<LessonTest> LessonTest { get; set; }
+        public DbSet<FinalTestRelationship> FinalTestRelationship { get; set; }
+        
         public DbSet<UserAnswers> UserAnswers { get; set; }
         public DbSet<TestResult> TestResult { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -133,6 +136,13 @@ namespace Entity.Data
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // Convert back to list
                 );
 
+            modelBuilder.Entity<Gift>()
+                .Property(g => g.Price)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Ticket>()
+                .Property(t => t.Price)
+                .HasColumnType("decimal(18,2)");
         }
 
     }
