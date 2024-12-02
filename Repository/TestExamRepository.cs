@@ -7,6 +7,7 @@ using IRepository;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Test;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Repository
@@ -26,6 +27,14 @@ namespace Repository
         {
             await _context.UserAnswers.AddRangeAsync(userAnswers);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetQuestionNameById(Guid questionId)
+        {
+            var question = await _context.Questions
+                .FirstOrDefaultAsync(q => q.Id == questionId);
+
+            return question?.QuestionName; 
         }
 
         public async Task SaveTestResultAsync(TestResult testResult)

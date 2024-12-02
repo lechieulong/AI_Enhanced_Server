@@ -5,6 +5,8 @@ using IService; // Adjust the namespace as needed
 using System.IO;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Service;
+using Entity.Test;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -13,11 +15,62 @@ namespace AIIL.Services.Api.Controllers
     public class CommonController : ControllerBase
     {
         private readonly IBlogStorageService _blobStorageService;
+        private readonly IAzureService _azureService;
+        private readonly IGeminiService _geminiService;
 
-        public CommonController(IBlogStorageService blobStorageService)
+
+
+        public CommonController(IBlogStorageService blobStorageService, IAzureService azureService, IGeminiService geminiService)
         {
             _blobStorageService = blobStorageService;
+            _azureService = azureService;
+            _geminiService = geminiService;
         }
+
+        [HttpPost("extract-text")]
+        public async Task<IActionResult> ExtractTextFromImage(IFormFile imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest("No image file provided.");
+            }
+
+            try
+            {
+                // Process the uploaded image
+                using (var stream = imageFile.OpenReadStream())
+                {
+                    var result = await _azureService.ExtractTextFromImageAsync(stream);
+                    return Ok(new { extractedText = result });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error processing image: {ex.Message}");
+            }
+        }
+
+
+    
+            /// <summary>
+            /// Transcribes an audio file from Azure Blob Storage.
+            /// </summary>
+            /// <param name="containerName">The name of the Blob container.</param>
+            /// <param name="blobName">The name of the Blob.</param>
+            /// <returns>The transcription result as a string.</returns>
+            [HttpPost("transcribe")]
+            public async Task<IActionResult> TranscribeAudio([FromBody] string fileName)
+            {
+                try
+                {
+                    var transcription = await _azureService.TranscribeAudioFromBlobAsync(fileName);
+                    return Ok(new { Success = true, Transcription = transcription });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { Success = false, Message = ex.Message });
+                }
+            }
 
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(IFormFile file)

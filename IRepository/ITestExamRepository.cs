@@ -12,6 +12,7 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        Task<string> GetQuestionNameById(Guid questionId);
         Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize);
         Task<TestExam> UpdateTestAsync(TestExam testExam);
         Task<bool> DeleteTestAsync(Guid id);
