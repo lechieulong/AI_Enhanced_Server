@@ -229,7 +229,7 @@ namespace AIIL.Services.Api.Controllers
                     audio = part.Audio,
                     image = part.Image,
                     questionName = $"Part {part.PartNumber}",
-                    sections = part.Sections.Select(section => new
+                    sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                     {
                         id = section.Id,
                         sectionGuide = section.SectionGuide,
@@ -294,7 +294,7 @@ namespace AIIL.Services.Api.Controllers
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        sections = part.Sections.Select(section => new
+                        sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
                             id = section.Id,
                             sectionGuide = section.SectionGuide,

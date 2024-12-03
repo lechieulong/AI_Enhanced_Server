@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Model.Test;
 using IRepository;
 using System.Text.RegularExpressions;
+using Common;
+using System.Linq;
 
 namespace Service
 {
@@ -268,6 +270,105 @@ Please evaluate the response based on the following criteria:
 - Make sure the feedback is constructive and detailed for the user to improve.
 ";
         }
+
+
+        public async Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model)
+        {
+            // Group UserAnswers by SectionType
+            var sectionGroups = model.UserAnswers.Values.GroupBy(t => t.SectionType).ToList();
+
+            foreach (var sectionGroup in sectionGroups)
+            {
+                var prompts = new StringBuilder();
+                string context = string.Empty;
+
+                foreach (var userAnswer in sectionGroup)
+                {
+                    // Fetch question details
+                    var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
+                    var correctAnswers = await _testExamRepository.GetCorrectAnswers(userAnswer.QuestionId, userAnswer.SectionType, userAnswer.Skill); // Correct answers as a list
+
+                    // Append to prompt
+                    prompts.AppendLine($"Question: {questionName}");
+                    prompts.AppendLine($"Correct Answers: {string.Join(", ", correctAnswers.Select(a => a?.AnswerText))}");
+                    prompts.AppendLine();
+                }
+
+                // Fetch context for reading skill if applicable
+                if (model.UserAnswers.Values.First().Skill == 0)
+                {
+                    context = await _testExamRepository.GetContentText(model.UserAnswers.Values.First().PartId.Value);
+                }
+
+                // Build the final prompt based on skill type
+                var finalPrompt = model.UserAnswers.Values.First().Skill == 0
+                    ? BuildExplainReadingPrompt(prompts.ToString(), context)
+                    : BuildExplainListeningPrompt(prompts.ToString());
+
+                // Prepare request data for the external API
+                var requestData = new
+                {
+                    contents = new[]
+                    {
+          new
+          {
+              parts = new[]
+              {
+                  new { text = finalPrompt }
+              }
+          }
+      }
+                };
+
+                // Send the prompt to the API for explanation
+                var client = _clientFactory.CreateClient();
+                var response = await client.PostAsync(
+                    _apiUrl,
+                    new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"API call failed with status code: {response.StatusCode}");
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                // Extract explanation details from the API response
+                var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    // Add explanation to each answer in the section group
+                    foreach (var userAnswer in sectionGroup)
+                    {
+                        userAnswer.Explain = result;
+                    }
+                }
+            }
+
+            return model;
+        }
+
+        private string BuildExplainReadingPrompt(string prompts, string context)
+        {
+            return $@"
+      You are an expert in reading comprehension. Based on the following context and questions, explain why each correct answer is the best choice for each question.
+      Context:
+      {context}
+      Questions and Answers:
+      {prompts}
+      Instructions:
+      For each question listed in the prompts, provide a explanation below the question to justify why the correct answer(s) is the best choice. Maintain clarity and precision in your explanations.
+      ";
+        }
+
+        private string BuildExplainListeningPrompt(string prompts)
+        {
+            return $"You are an expert in listening comprehension. Based on the following questions and answers, explain why each correct answer is the best choice and provide detailed feedback for each question.\n\nQuestions:\n{prompts}";
+        }
+
 
     }
 }
