@@ -5,7 +5,6 @@ using Azure.Storage.Blobs;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech;
 using System.Diagnostics;
-using FFMpegCore;
 using NAudio.Wave;
 
 namespace Service
