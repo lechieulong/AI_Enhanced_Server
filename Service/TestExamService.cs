@@ -16,11 +16,14 @@ namespace Service
     public class TestExamService : ITestExamService
     {
         private readonly ITestExamRepository _testExamRepository;
+        private readonly IGeminiService _geminiService;
+
         private readonly IMapper _mapper;
 
-        public TestExamService(ITestExamRepository testExamRepository)
+        public TestExamService(ITestExamRepository testExamRepository, IGeminiService geminiService)
         {
             _testExamRepository = testExamRepository;
+            _geminiService = geminiService;
         }
 
         public async Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model)
@@ -138,9 +141,18 @@ namespace Service
             return result;
         }
 
-
+        
         public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
+            if(model.UserAnswers.Values.First().Skill == 2)
+            {
+                model = await _geminiService.ScoreAndExplain(model);
+            }
+            if(model.UserAnswers.Values.First().Skill == 3)
+            {
+                model = await _geminiService.ScoreAndExplainSpeaking(model);
+            }
+
             var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;

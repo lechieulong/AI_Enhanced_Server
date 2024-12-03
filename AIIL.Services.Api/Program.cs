@@ -95,6 +95,10 @@ builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
+builder.Services.AddScoped<IAzureService, AzureService>();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
+
+
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -122,7 +126,7 @@ builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddScoped<IClassFileRepository, ClassFileRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
-
+builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FrontendUrls").Get<string[]>();

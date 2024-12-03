@@ -5,8 +5,10 @@ using Entity.Data;
 using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using Model;
 using Model.Test;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Repository
@@ -26,6 +28,14 @@ namespace Repository
         {
             await _context.UserAnswers.AddRangeAsync(userAnswers);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetQuestionNameById(Guid questionId)
+        {
+            var question = await _context.Questions
+                .FirstOrDefaultAsync(q => q.Id == questionId);
+
+            return question?.QuestionName; 
         }
 
         public async Task SaveTestResultAsync(TestResult testResult)
@@ -532,10 +542,7 @@ namespace Repository
                 UserID = userId,
                 TestCreateBy = role,
             };
-            if (model.ClassId != Guid.Empty && model.ClassId != null)
-            {
-                newTest.ClassId = model.ClassId.Value;
-            }
+           
             if (model.LessonId != Guid.Empty && model.LessonId != null)
             {
                 newTest.LessonId = model.LessonId.Value;
@@ -544,20 +551,27 @@ namespace Repository
             {
                 newTest.SkillIdCourse = model.SkilLIdCourse.Value;
             }
+            if (model.CourseId != Guid.Empty && model.CourseId != null)
+            {
+                newTest.CourseId = model.CourseId.Value;
+            }
+            
+            if(model.ClassId != Guid.Empty && model.ClassId != null)
+            {
+                foreach (var classId in model.ClassIds)
+                {
+                    var classRelation = new ClassRelationShip
+                    {
+                        Id = Guid.NewGuid(),
+                        TestId = newTest.Id,
+                        ClassId = classId
+                    };
+
+                    _context.ClassRelationShip.Add(classRelation);
+                }
+            }
+         
             _context.TestExams.Add(newTest);
-
-
-            //foreach (var classId in model.ClassIds)
-            //{
-            //    var classRelation = new ClassRelationShip
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        TestId = newTest.Id,
-            //        ClassId = classId
-            //    };
-
-            //    _context.ClassRelationShip.Add(classRelation);
-            //}
 
             await _context.SaveChangesAsync();
 
@@ -876,10 +890,18 @@ namespace Repository
 
         public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)
         {
+            // Fetch the TestIds associated with the ClassId
+            var testIds = await _context.ClassRelationShip
+                                        .Where(t => t.ClassId == classId)
+                                        .Select(t => t.TestId)
+                                        .ToListAsync();
+
+            // Fetch TestExams that match the TestIds
             return await _context.TestExams
-                                 .Where(te => te.ClassId == classId)
+                                 .Where(te => testIds.Contains(te.Id)) // Assuming TestExam has an Id matching TestId
                                  .ToListAsync();
         }
+
 
         public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize)
         {
