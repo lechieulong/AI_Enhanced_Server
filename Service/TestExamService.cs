@@ -35,13 +35,13 @@ namespace Service
             // Determine the skills to process
             if (model.SkillId != null && model.SkillId != Guid.Empty)
             {
-                var skill = await _testExamRepository.GetSkillByIdAsync(model.SkillId.Value);
+                var skill = await _testExamRepository.GetSkillExplainByIdAsync(model.SkillId.Value, model.TotalPartsSubmit);
                 if (skill == null) return result;
                 sortedSkills = new List<Skill> { skill };
             }
             else
             {
-                var skills = await _testExamRepository.GetSkillsByTestIdAsync(model.TestId);
+                var skills = await _testExamRepository.GetSkillsExplainByTestIdAsync(model.TestId , model.TotalPartsSubmit);
                 if (skills == null || !skills.Any()) return result; // No skills found
                 sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
             }
@@ -73,7 +73,7 @@ namespace Service
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        sections = part.Sections.Select(section => new
+                        sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
                             id = section.Id,
                             sectionGuide = section.SectionGuide,
@@ -81,7 +81,7 @@ namespace Service
                             sectionContext = section.SectionContext,
                             explain = section.Explain,
                             image = section.Image,
-                            questions = section.SectionQuestions.Select(sq =>
+                            questions = section.SectionQuestions.OrderBy(q => q.QuestionOrder).Select(sq =>
                             {
                                 List<object> filteredUserAnswers;
                                 if ((skill.Type == 0 && section.SectionType == 1) || skill.Type == 1 && section.SectionType == 8)
@@ -152,8 +152,12 @@ namespace Service
             {
                 model = await _geminiService.ScoreAndExplainSpeaking(model);
             }
+            if (model.UserAnswers.Values.First().Skill == 0 || model.UserAnswers.Values.First().Skill == 1)
+            {
+                model = await _geminiService.ExplainListeningAndReading(model);
+            }
 
-            var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
+            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
@@ -166,11 +170,7 @@ namespace Service
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
-                if(questionDetail.Skill == 2)
-                {
-                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
-                }
-
+                await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
 
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
@@ -214,9 +214,9 @@ namespace Service
                 UserId = userId,
                 TestId = testId,
                 SkillType = model.UserAnswers.Values.First().Skill,
-                Score = !writingSpeakingCondition ? ScaleScore(totalScore, totalQuestion) : skillScore,
+                Score = !writingSpeakingCondition ? ScaleScore(totalScore, model.TotalQuestions) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
-                TotalQuestion = totalQuestion,
+                TotalQuestion = model.TotalQuestions,
                 TestDate = DateTime.UtcNow,
                 TimeMinutesTaken = model.TimeMinutesTaken,
                 SecondMinutesTaken = model.TimeSecondsTaken,

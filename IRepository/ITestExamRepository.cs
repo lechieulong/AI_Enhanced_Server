@@ -13,6 +13,8 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task<string> GetQuestionNameById(Guid questionId);
+        Task<string> GetContentText(Guid partId);
+        Task<List<Answer>> GetCorrectAnswers(Guid questionId, int sectionType, int skill);
         Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize);
         Task<TestExam> UpdateTestAsync(TestExam testExam);
         Task<bool> DeleteTestAsync(Guid id);
@@ -31,6 +33,8 @@ namespace IRepository
         Task<TestExam> GetTestBySecionCourseId(Guid id);
 
         Task<List<Skill>> GetSkills(Guid testId);
+        Task<Skill> GetSkillExplainByIdAsync(Guid SkillId, List<int> parts);
+        Task<List<Skill>> GetSkillsExplainByTestIdAsync(Guid testId, List<int> parts);
         Task<Skill> GetSkillByIdAsync(Guid SkillId);
         Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
         Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId,  Guid userId);

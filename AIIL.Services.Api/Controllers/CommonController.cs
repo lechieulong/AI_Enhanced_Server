@@ -59,11 +59,11 @@ namespace AIIL.Services.Api.Controllers
             /// <param name="blobName">The name of the Blob.</param>
             /// <returns>The transcription result as a string.</returns>
             [HttpPost("transcribe")]
-            public async Task<IActionResult> TranscribeAudio([FromBody] string fileName)
+            public async Task<IActionResult> TranscribeAudio([FromBody] string fileUrl)
             {
                 try
                 {
-                    var transcription = await _azureService.TranscribeAudioFromBlobAsync(fileName);
+                    var transcription = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(fileUrl);
                     return Ok(new { Success = true, Transcription = transcription });
                 }
                 catch (Exception ex)

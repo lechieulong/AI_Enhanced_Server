@@ -38,6 +38,47 @@ namespace Repository
             return question?.QuestionName; 
         }
 
+        public async Task<string> GetContentText(Guid partId)
+        {
+            return await _context.Parts
+                .Where(p => p.Id == partId)
+                .Select(p => p.ContentText) // Select only the `Context` property
+                .FirstOrDefaultAsync(); // Get the first or default value
+        }
+
+        public async Task<List<Answer>> GetCorrectAnswers(Guid questionId, int sectionType, int skill)
+        {
+            var result = new List<Answer>();
+
+            if (skill == 0 )
+            {
+                if (sectionType == 1 || sectionType == 2 || sectionType == 3) { 
+                    var ans = _context.Answers.Where(a => a.QuestionId == questionId && a.TypeCorrect == 1).ToList();
+                    result.AddRange(ans);
+
+                }
+                else
+                {
+                    var a = _context.Answers.Where(a => a.QuestionId == questionId).FirstOrDefault();
+                    result.Add(a);
+                }
+            }else { 
+                
+                if(sectionType == 8)
+                {
+                    var ans = _context.Answers.Where(a => a.QuestionId == questionId && a.TypeCorrect == 1).ToList();
+                    result.AddRange(ans);
+                }
+                else
+                {
+                    var a = _context.Answers.Where(a => a.QuestionId == questionId).FirstOrDefault();
+                    result.Add(a);
+                }
+            }
+
+            return result;
+        }
+
         public async Task SaveTestResultAsync(TestResult testResult)
         {
             await _context.TestResult.AddAsync(testResult);
@@ -159,7 +200,7 @@ namespace Repository
                                 Skill = skill,
                                 Sections = new List<Section>()
                             };
-
+                            int sectionOrder = 1;
                             if (partDto.Sections != null && partDto.Sections.Any())
                             {
                                 foreach (var sectionDto in partDto.Sections)
@@ -188,6 +229,7 @@ namespace Repository
                                         Id = Guid.NewGuid(),
                                         SectionGuide = sectionDto.SectionGuide,
                                         SectionType = sectionDto.SectionType,
+                                        SectionOrder = sectionOrder,
                                         Image = sectionDto.Image,
                                         Explain = sectionDto.Explain,
                                         SectionContext = sectionDto.SectionContext,
@@ -275,6 +317,7 @@ namespace Repository
                                     }
 
                                     part.Sections.Add(section);
+                                    sectionOrder++;
                                 }
                             }
 
@@ -747,11 +790,11 @@ namespace Repository
         }
 
 
-        public async Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId)
+        public async Task<List<Skill>> GetSkillsExplainByTestIdAsync(Guid testId, List<int> totalParts)
         {
             return await _context.Skills
                 .Where(s => s.TestId == testId)
-                .Include(s => s.Parts)
+                .Include(s => s.Parts.Where(p => totalParts.Contains(p.PartNumber)))  // Filter Parts by PartNumber
                     .ThenInclude(p => p.Sections)
                         .ThenInclude(sec => sec.SectionQuestions)
                             .ThenInclude(sq => sq.Question)
@@ -759,6 +802,18 @@ namespace Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId)
+        {
+            return await _context.Skills
+                .Where(s => s.TestId == testId)
+                .Include(s => s.Parts)  // Filter Parts by PartNumber
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .ToListAsync();
+        }
+        
 
         public async Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId, Guid userId)
         {
@@ -767,9 +822,20 @@ namespace Repository
         }
 
         public async Task<Skill> GetSkillByIdAsync(Guid skillId)
-        {
+        {  
             return await _context.Skills
                 .Include(s => s.Parts)
+                    .ThenInclude(p => p.Sections)
+                        .ThenInclude(sec => sec.SectionQuestions)
+                            .ThenInclude(sq => sq.Question)
+                                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(s => s.Id == skillId);
+        }
+
+        public async Task<Skill> GetSkillExplainByIdAsync(Guid skillId, List<int> parts)
+        {
+            return await _context.Skills
+                .Include(s => s.Parts.Where(p => parts.Contains(p.PartNumber)))
                     .ThenInclude(p => p.Sections)
                         .ThenInclude(sec => sec.SectionQuestions)
                             .ThenInclude(sq => sq.Question)
