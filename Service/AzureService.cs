@@ -5,6 +5,7 @@ using Azure.Storage.Blobs;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech;
 using System.Diagnostics;
+using NAudio.Wave;
 
 namespace Service
 {
@@ -56,65 +57,146 @@ namespace Service
 
 
 
-        public async Task<string> TranscribeAudioFromBlobAsync(string localFilePath)
+        public async Task<string> ProcessAndTranscribeAudioFromBlobAsync(string blobUri)
         {
-            // Check if file exists
+            string localFilePath = await DownloadFileFromBlobAsync(blobUri);
+
             string wavFilePath = localFilePath;
             if (Path.GetExtension(localFilePath).ToLower() != ".wav")
             {
-                wavFilePath = await ConvertToWavAsync(localFilePath);
+                wavFilePath =  ConvertToWav(localFilePath);
             }
 
-            // Ensure the file is valid WAV
-            var speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
-            var audioConfig = AudioConfig.FromWavFileInput(wavFilePath);
-
-            var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
-
-            var result = await recognizer.RecognizeOnceAsync();
-
-            if (result.Reason == ResultReason.RecognizedSpeech)
-            {
-                return result.Text;
-            }
-            else if (result.Reason == ResultReason.NoMatch)
-            {
-                throw new Exception("No speech could be recognized.");
-            }
-            else
-            {
-                throw new Exception($"Speech recognition failed.");
-            }
+            return await TranscribeAudioFromBlobAsync(wavFilePath);
         }
-   
 
-        private async Task<string> ConvertToWavAsync(string inputFilePath)
+        private async Task<string> DownloadFileFromBlobAsync(string blobUri)
+        {
+            // Tạo BlobClient từ URL
+            var blobClient = new BlobClient(new Uri(blobUri));
+
+            // Kiểm tra blob có tồn tại không
+            if (!await blobClient.ExistsAsync())
+            {
+                throw new Exception($"Blob không tồn tại: {blobUri}");
+            }
+
+            // Xác định tên file và tạo đường dẫn cục bộ
+            string fileName = Path.GetFileName(blobClient.Uri.LocalPath);
+            string localFilePath = Path.Combine(Path.GetTempPath(), fileName);
+
+            // Tải xuống tệp
+            await blobClient.DownloadToAsync(localFilePath);
+
+            return localFilePath;
+        }
+
+        private string ConvertToWav(string inputFilePath)
         {
             string outputFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
 
-            // FFmpeg command to convert to WAV
-            var ffmpegArgs = $"-i \"{inputFilePath}\" -ar 16000 -ac 1 -c:a pcm_s16le \"{outputFilePath}\"";
-
-            using (var process = new Process())
+            try
             {
-                process.StartInfo.FileName = "ffmpeg";
-                process.StartInfo.Arguments = ffmpegArgs;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.CreateNoWindow = true;
-
-                process.Start();
-                await process.WaitForExitAsync();
-
-                if (process.ExitCode != 0)
+                // Ensure the file exists before processing
+                if (!File.Exists(inputFilePath))
                 {
-                    throw new Exception($"FFmpeg conversion failed: {process.StandardError.ReadToEnd()}");
+                    throw new FileNotFoundException("Input audio file not found.", inputFilePath);
                 }
-            }
 
-            return outputFilePath;
+                using (var reader = new AudioFileReader(inputFilePath))
+                {
+                    // Resample to mono, 16 kHz, 16-bit PCM
+                    using (var resampler = new MediaFoundationResampler(reader, new WaveFormat(16000, 1)))
+                    {
+                        resampler.ResamplerQuality = 60; // Chất lượng chuyển đổi
+                        WaveFileWriter.CreateWaveFile(outputFilePath, resampler);
+                    }
+                }
+
+                Console.WriteLine($"Conversion successful: {outputFilePath}");
+                return outputFilePath;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during conversion: {ex.Message}");
+                throw new Exception("Error converting to WAV.", ex);
+            }
         }
+
+        private async Task<string> TranscribeAudioFromBlobAsync(string wavFilePath)
+        {
+            try
+            {
+                if (!File.Exists(wavFilePath))
+                {
+                    string error = $"WAV file not found: {wavFilePath}";
+                    Console.WriteLine(error);
+                    throw new FileNotFoundException(error, wavFilePath);
+                }
+
+
+                var speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+                speechConfig.SpeechRecognitionLanguage = "en-US"; // Customize language as needed
+
+                using var audioConfig = AudioConfig.FromWavFileInput(wavFilePath);
+
+                using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+                var resultText = new StringBuilder();
+
+                recognizer.Recognizing += (s, e) =>
+                {
+                    Console.WriteLine($"Recognizing: {e.Result.Text}");
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        resultText.Append(e.Result.Text + " ");
+                        Console.WriteLine($"Recognized: {e.Result.Text}");
+                    }
+                };
+
+                // Event handler for cancellation (errors)
+                recognizer.Canceled += (s, e) =>
+                {
+                    if (e.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"Recognition canceled: {e.ErrorDetails}");
+                    }
+                };
+
+                // Event handler when the session is stopped (i.e., recognition is complete)
+                TaskCompletionSource<bool> sessionStoppedTcs = new TaskCompletionSource<bool>();
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine("Session stopped.");
+                    sessionStoppedTcs.SetResult(true); // Set the TaskCompletionSource when the session is stopped
+                };
+
+                // Start continuous recognition asynchronously
+                await recognizer.StartContinuousRecognitionAsync();
+
+                // Wait for the session to stop (no fixed delay, just wait until recognition is done)
+                await sessionStoppedTcs.Task;
+
+                // Stop the recognition session after it has finished
+                await recognizer.StopContinuousRecognitionAsync();
+
+                // Return the transcribed text
+                return resultText.ToString();
+            }
+            catch (Exception ex)
+            {
+                // Log detailed error message
+                string detailedError = $"Error during transcription: {ex.Message}";
+                Console.WriteLine(detailedError);
+                throw new Exception("An error occurred during audio transcription.", ex);
+            }
+        }
+
+
 
     }
 }

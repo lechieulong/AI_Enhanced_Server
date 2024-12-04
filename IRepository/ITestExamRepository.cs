@@ -13,6 +13,9 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task<string> GetQuestionNameById(Guid questionId);
+        Task<string> GetContentText(Guid partId);
+        Task<string> GetUrlAudioByPartId(Guid partId);
+        Task<List<Answer>> GetCorrectAnswers(Guid questionId, int sectionType, int skill);
         Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestsAsync(int page, int pageSize);
         Task<TestExam> UpdateTestAsync(TestExam testExam);
         Task<bool> DeleteTestAsync(Guid id);
@@ -26,17 +29,20 @@ namespace IRepository
         Task<int> GetTotalQuestionBySkillId(Guid skillId);
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
+        Task<IEnumerable<TestExam>> GetAdminTests();
         Task<TestExam> GetTestAsync(Guid id);
         Task<List<TestResult>> GetResultTest( Guid userId, List<Guid> ids);
         Task<TestExam> GetTestBySecionCourseId(Guid id);
 
         Task<List<Skill>> GetSkills(Guid testId);
+        Task<Skill> GetSkillExplainByIdAsync(Guid SkillId, List<int> parts);
+        Task<List<Skill>> GetSkillsExplainByTestIdAsync(Guid testId, List<int> parts);
         Task<Skill> GetSkillByIdAsync(Guid SkillId);
         Task<List<Skill>> GetSkillsByTestIdAsync(Guid testId);
         Task<List<UserAnswers>> GetUserAnswersByTestId(Guid testId,  Guid userId);
         Task<List<Part>> GetParts(Guid skillId);
         Task ImportQuestionAsync(List<Question> questions, Guid userId);
-        Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize);
+        Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int skill,int sectionType, int page, int pageSize);
         Task<List<Question>> GetQuestionsAsync(Guid userId,  int page, int pageSize);
         Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize);
         Task<object> GetTestAnalysisAttempt(Guid userId);

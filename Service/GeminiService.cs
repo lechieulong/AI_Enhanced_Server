@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Model.Test;
 using IRepository;
 using System.Text.RegularExpressions;
+using Common;
+using System.Linq;
 
 namespace Service
 {
@@ -16,14 +18,16 @@ namespace Service
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ITestExamRepository _testExamRepository;
+        private readonly IAzureService _azureService;
 
         private readonly string _apiUrl;
 
-        public GeminiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ITestExamRepository testExamRepository)
+        public GeminiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ITestExamRepository testExamRepository, IAzureService azureService)
         {
             _clientFactory = httpClientFactory;
             _testExamRepository = testExamRepository;
             _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAkFBzNmOixBE8Elh-nNseThbJZMJAMc_A";
+            _azureService = azureService;
         }
 
         public async Task<SubmitTestDto> ScoreAndExplain(SubmitTestDto model)
@@ -267,6 +271,120 @@ Please evaluate the response based on the following criteria:
 - Task Relevance is the most important factor in determining the score. If the response does not directly address the question, the overall score should be lowered accordingly.
 - Make sure the feedback is constructive and detailed for the user to improve.
 ";
+        }
+
+
+        public async Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model)
+        {
+            var sectionGroups = model.UserAnswers.Values.GroupBy(t => t.SectionType).ToList();
+
+            foreach (var sectionGroup in sectionGroups)
+            {
+                var prompts = new StringBuilder();
+                string context = string.Empty;
+
+                foreach (var userAnswer in sectionGroup)
+                {
+                    // Fetch question details
+                    var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
+                    var correctAnswers = await _testExamRepository.GetCorrectAnswers(userAnswer.QuestionId, userAnswer.SectionType, userAnswer.Skill); // Correct answers as a list
+
+                    // Append to prompt
+                    prompts.AppendLine($"Question: {questionName}");
+                    prompts.AppendLine($"Correct Answers: {string.Join(", ", correctAnswers.Select(a => a?.AnswerText))}");
+                    prompts.AppendLine();
+                }
+
+                // Fetch context for reading skill if applicable
+                if (model.UserAnswers.Values.First().Skill == 0)
+                {
+                    context = await _testExamRepository.GetContentText(model.UserAnswers.Values.First().PartId.Value);
+                }
+
+                if(model.UserAnswers.Values.First().Skill == 1)
+                {
+                    var urlAudio = await _testExamRepository.GetUrlAudioByPartId(model.UserAnswers.Values.First().PartId.Value);
+                    context = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(urlAudio);
+                }
+
+                // Build the final prompt based on skill type
+                var finalPrompt = model.UserAnswers.Values.First().Skill == 0
+                    ? BuildExplainReadingPrompt(prompts.ToString(), context)
+                    : BuildExplainListeningPrompt(prompts.ToString(), context);
+
+                // Prepare request data for the external API
+                var requestData = new
+                {
+                    contents = new[]
+                    {
+          new
+          {
+              parts = new[]
+              {
+                  new { text = finalPrompt }
+              }
+          }
+      }
+                };
+
+                // Send the prompt to the API for explanation
+                var client = _clientFactory.CreateClient();
+                var response = await client.PostAsync(
+                    _apiUrl,
+                    new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"API call failed with status code: {response.StatusCode}");
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                // Extract explanation details from the API response
+                var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    // Add explanation to each answer in the section group
+                    foreach (var userAnswer in sectionGroup)
+                    {
+                        userAnswer.Explain = result;
+                    }
+                }
+            }
+
+            return model;
+        }
+
+        private string BuildExplainReadingPrompt(string prompts, string context)
+        {
+            return $@"
+      You are an expert in reading comprehension. Based on the following context and questions, explain why each correct answer is the best choice for each question.
+      Context:
+      {context}
+      Questions and Answers:
+      {prompts}
+      Instructions:
+      For each question listed in the prompts, provide a explanation below the question to justify why the correct answer(s) is the best choice. Maintain clarity and precision in your explanations.
+      ";
+        }
+
+        private string BuildExplainListeningPrompt(string prompts, string transcriptAudio)
+        {
+            return $@"
+        You are an expert in listening comprehension. Based on the following audio transcript and the associated questions, provide a detailed explanation for each correct answer. 
+
+        Audio Transcript:
+        {transcriptAudio}
+
+        Questions and Answers:
+        {prompts}
+
+        Instructions:
+        For each question listed in the prompts, explain why the correct answer(s) is the best choice. Your explanation should reference specific details from the transcript and offer precise reasoning. Maintain clarity and accuracy in your responses, and ensure that the explanation directly addresses why each correct answer is supported by the audio content.
+        ";
         }
 
     }
