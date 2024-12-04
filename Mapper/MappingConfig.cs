@@ -41,6 +41,8 @@ namespace Mapper
                 config.CreateMap<TeacherAvailableScheduleDto, TeacherAvailableSchedule>();
                 config.CreateMap<TeacherAvailableSchedule, UpdateScheduleDto>();
                 config.CreateMap<UpdateScheduleDto, TeacherAvailableSchedule>();
+                config.CreateMap<GetSessionsTeacherAvailableDto, TeacherAvailableSchedule>();
+                config.CreateMap<TeacherAvailableSchedule, GetSessionsTeacherAvailableDto>();
                 config.CreateMap<BookedTeacherSession, BookedTeacherSessionDto>();
                 config.CreateMap<BookedTeacherSessionDto, BookedTeacherSession>();
                 config.CreateMap<BookedTeacherSession, GetSessionsByUserIdDto>();

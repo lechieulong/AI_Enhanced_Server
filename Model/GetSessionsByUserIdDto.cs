@@ -11,8 +11,9 @@ namespace Model
     {
         public Guid Id { get; set; }
         public Guid ScheduleId { get; set; }
-        public TeacherAvailableScheduleDto TeacherAvailableSchedule { get; set; }
+        public GetSessionsTeacherAvailableDto TeacherAvailableSchedule { get; set; }
         public string LearnerId { get; set; }
+        public UserDto Learner { get; set; }
         public DateTime BookedDate { get; set; }
     }
 }

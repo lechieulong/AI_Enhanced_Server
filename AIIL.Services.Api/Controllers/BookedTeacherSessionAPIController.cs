@@ -97,5 +97,43 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("getIsBookedSessionsByUserId")]
+        [Authorize]
+        public async Task<IActionResult> GetIsBookedSessionsByUserId()
+        {
+            try
+            {
+                var currentUserId = _userManager.GetUserId(User);
+
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "User not found.";
+                    return NotFound(_response);
+                }
+
+                var sessions = await _bookedScheduleSessionRepository.GetIsBookedSessionsByUserIdAsync(currentUserId);
+
+                if (sessions == null || !sessions.Any())
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "No sessions found for this user.";
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<IEnumerable<GetSessionsByUserIdDto>>(sessions);
+                _response.IsSuccess = true;
+                _response.Message = "Get sessions successful";
+
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, _response); // Internal Server Error
+            }
+        }
+
     }
 }
