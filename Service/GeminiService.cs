@@ -18,14 +18,16 @@ namespace Service
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ITestExamRepository _testExamRepository;
+        private readonly IAzureService _azureService;
 
         private readonly string _apiUrl;
 
-        public GeminiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ITestExamRepository testExamRepository)
+        public GeminiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ITestExamRepository testExamRepository, IAzureService azureService)
         {
             _clientFactory = httpClientFactory;
             _testExamRepository = testExamRepository;
             _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAkFBzNmOixBE8Elh-nNseThbJZMJAMc_A";
+            _azureService = azureService;
         }
 
         public async Task<SubmitTestDto> ScoreAndExplain(SubmitTestDto model)
@@ -274,7 +276,6 @@ Please evaluate the response based on the following criteria:
 
         public async Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model)
         {
-            // Group UserAnswers by SectionType
             var sectionGroups = model.UserAnswers.Values.GroupBy(t => t.SectionType).ToList();
 
             foreach (var sectionGroup in sectionGroups)
@@ -300,10 +301,16 @@ Please evaluate the response based on the following criteria:
                     context = await _testExamRepository.GetContentText(model.UserAnswers.Values.First().PartId.Value);
                 }
 
+                if(model.UserAnswers.Values.First().Skill == 1)
+                {
+                    var urlAudio = await _testExamRepository.GetUrlAudioByPartId(model.UserAnswers.Values.First().PartId.Value);
+                    context = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(urlAudio);
+                }
+
                 // Build the final prompt based on skill type
                 var finalPrompt = model.UserAnswers.Values.First().Skill == 0
                     ? BuildExplainReadingPrompt(prompts.ToString(), context)
-                    : BuildExplainListeningPrompt(prompts.ToString());
+                    : BuildExplainListeningPrompt(prompts.ToString(), context);
 
                 // Prepare request data for the external API
                 var requestData = new
@@ -364,11 +371,21 @@ Please evaluate the response based on the following criteria:
       ";
         }
 
-        private string BuildExplainListeningPrompt(string prompts)
+        private string BuildExplainListeningPrompt(string prompts, string transcriptAudio)
         {
-            return $"You are an expert in listening comprehension. Based on the following questions and answers, explain why each correct answer is the best choice and provide detailed feedback for each question.\n\nQuestions:\n{prompts}";
-        }
+            return $@"
+        You are an expert in listening comprehension. Based on the following audio transcript and the associated questions, provide a detailed explanation for each correct answer. 
 
+        Audio Transcript:
+        {transcriptAudio}
+
+        Questions and Answers:
+        {prompts}
+
+        Instructions:
+        For each question listed in the prompts, explain why the correct answer(s) is the best choice. Your explanation should reference specific details from the transcript and offer precise reasoning. Maintain clarity and accuracy in your responses, and ensure that the explanation directly addresses why each correct answer is supported by the audio content.
+        ";
+        }
 
     }
 }

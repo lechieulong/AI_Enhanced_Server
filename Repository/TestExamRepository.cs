@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using Model;
 using Model.Test;
+using Model.Utility;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -46,6 +47,14 @@ namespace Repository
                 .FirstOrDefaultAsync(); // Get the first or default value
         }
 
+        public async Task<string> GetUrlAudioByPartId(Guid partId)
+        {
+            return await _context.Parts
+                .Where(p => p.Id == partId)
+                .Select(p => p.Audio) // Select only the `Context` property
+                .FirstOrDefaultAsync(); // Get the first or default value
+        }
+        
         public async Task<List<Answer>> GetCorrectAnswers(Guid questionId, int sectionType, int skill)
         {
             var result = new List<Answer>();
@@ -250,7 +259,7 @@ namespace Repository
                                             {
                                             
                                                 question = _context.Questions
-                                                          .FirstOrDefault(q => q.Id ==                                                     questionDto.QuestionId);
+                                                          .FirstOrDefault(q => q.Id ==questionDto.QuestionId);
                                                 if (question == null)
                                                     continue; 
                                             }else if (readingCondition || listeningCondition)
@@ -261,7 +270,8 @@ namespace Repository
                                                     UserId = userId,
                                                     QuestionName = questionDto.QuestionName ?? "",
                                                     Explain = questionDto.Explain ?? "",
-                                                    QuestionType = questionDto.QuestionType,
+                                                    QuestionType = section.SectionType,
+                                                    Skill = (int)skillDto.Type,
                                                     Answers = new List<Answer>()
                                                 };
                                                 question.Answers.Add(new Answer()
@@ -280,7 +290,8 @@ namespace Repository
                                                     UserId = userId,
                                                     QuestionName = questionDto.QuestionName ?? "",
                                                     Explain = questionDto.Explain ?? "",
-                                                    QuestionType = questionDto.QuestionType,
+                                                    QuestionType = section.SectionType,
+                                                    Skill = (int)skillDto.Type,
                                                     Answers = new List<Answer>()
                                                 };
 
@@ -622,13 +633,13 @@ namespace Repository
             return model;
         }
 
-        public async Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int sectionType, int page, int pageSize)
+        public async Task<List<Question>> GetQuestionsBySecionTypeAsync(Guid userId, int skill, int sectionType, int page, int pageSize)
         {
             // Calculate the skip count based on page and pageSize
             int skip = (page - 1) * pageSize;
 
             return await _context.Questions
-                                 .Where(q => q.UserId == userId && q.QuestionType == sectionType)
+                                 .Where(q => q.UserId == userId && q.Skill == skill && q.QuestionType == sectionType)
                                  .Include(q => q.Answers)
                                  .Skip(skip)  // Skip the previous pages' items
                                  .Take(pageSize)  // Take the next 'pageSize' items
@@ -747,38 +758,52 @@ namespace Repository
                 var newQuestion = new Question
                 {
                     Id = Guid.NewGuid(),
-                    QuestionName = question.QuestionName == null ? "" : question.QuestionName,
+                    QuestionName = question.QuestionName ?? string.Empty, // Default empty if null
                     QuestionType = question.QuestionType,
                     Skill = question.Skill,
                     PartNumber = question.PartNumber,
+                    Explain = question.Explain ?? string.Empty, // Default empty if null
                     UserId = userId,
                     Answers = new List<Answer>() // Initialize the Answers collection
                 };
 
-                // Check if there are any answers to add
-                if (question.Answers != null)
+                // Add answers if any
+                if (question.Answers != null && question.Answers.Any())
                 {
                     foreach (var answer in question.Answers)
                     {
-                        // Create a new Answer entity
-                        var newAnswer = new Answer
+                        if (!string.IsNullOrWhiteSpace(answer.AnswerText))
                         {
-                            Id = Guid.NewGuid(), // Assign a new Guid
-                            QuestionId = newQuestion.Id, // Associate with the new question
-                            AnswerText = answer.AnswerText,
-                            TypeCorrect = answer.TypeCorrect
-                        };
+                            var newAnswer = new Answer
+                            {
+                                Id = Guid.NewGuid(),
+                                QuestionId = newQuestion.Id,
+                                AnswerText = answer.AnswerText,
+                                TypeCorrect = answer.TypeCorrect ?? 0 // Default to 0 if null
+                            };
 
-                        _context.Answers.Add(newAnswer); // Add to the Answers table
-                                                         // Optionally, you can also add to the question's Answers collection
-                        newQuestion.Answers.Add(newAnswer);
+                            _context.Answers.Add(newAnswer);
+                            newQuestion.Answers.Add(newAnswer); // Associate with the question
+                        }
                     }
                 }
 
-                _context.Questions.Add(newQuestion); // Assuming you have a DbSet<Question> Questions in your context
+                _context.Questions.Add(newQuestion);
             }
 
-            await _context.SaveChangesAsync();
+            // Save changes with exception handling
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Database update error: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred: {ex.Message}");
+            }
         }
 
 
@@ -789,6 +814,12 @@ namespace Repository
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<TestExam>> GetAdminTests()
+        {
+            return await _context.TestExams
+                .Where(test => test.TestCreateBy == 1)
+                .ToListAsync();
+        }
 
         public async Task<List<Skill>> GetSkillsExplainByTestIdAsync(Guid testId, List<int> totalParts)
         {
