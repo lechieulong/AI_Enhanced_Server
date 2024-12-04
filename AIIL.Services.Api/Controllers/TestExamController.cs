@@ -165,6 +165,15 @@ namespace AIIL.Services.Api.Controllers
             return _mapper.Map<IEnumerable<TestModel>>(tests);
         }
 
+        [HttpGet("admintests")]
+        public async Task<IEnumerable<TestModel>> GetAdminTests()
+        {
+
+            var tests = await _testRepository.GetAdminTests();
+            return _mapper.Map<IEnumerable<TestModel>>(tests);
+        }
+
+
         [HttpGet("{id}/testDetail")]
         public async Task<TestModel> GetTestAsync([FromRoute] Guid id)
         {
@@ -386,6 +395,7 @@ namespace AIIL.Services.Api.Controllers
                             QuestionName = rowData.GetCell(0)?.ToString(),
                             QuestionType = int.TryParse(rowData.GetCell(1)?.ToString(), out var qType) ? qType : 0,
                             Skill = int.TryParse(rowData.GetCell(2)?.ToString(), out var skill) ? skill : 0,
+                            Explain = "",
                             PartNumber = int.TryParse(rowData.GetCell(3)?.ToString(), out var part) ? part : 0,
                             Answers = new List<Answer>()
                         };
@@ -472,16 +482,17 @@ namespace AIIL.Services.Api.Controllers
 
 
 
-        [HttpGet("{sectionType}/questionsBank/{userId}")]
+        [HttpGet("{sectionType}/questionsBank/{userId}/skill/{skill}")]
         public async Task<IActionResult> GetQuestionsAsync(
              [FromRoute] Guid userId,
              [FromRoute] int sectionType,
+             [FromRoute] int skill,
              [FromQuery] int page ,  // Default page is 1
              [FromQuery] int pageSize) // Default pageSize is 10
         {
             try
             {
-                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, sectionType, page, pageSize);
+                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, skill,sectionType, page, pageSize);
 
                 if (questions == null || !questions.Any())
                 {
