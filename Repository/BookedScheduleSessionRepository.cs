@@ -51,10 +51,22 @@ namespace Repository
             }
         }
 
+        public async Task<IEnumerable<BookedTeacherSession>> GetIsBookedSessionsByUserIdAsync(string userId)
+        {
+            return await _db.BookedTeacherSessions
+                .Include(b => b.Learner)
+                .Include(b => b.TeacherAvailableSchedule)
+                .ThenInclude(t => t.Teacher)
+                .Where(b => b.TeacherAvailableSchedule.TeacherId == userId)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<BookedTeacherSession>> GetSessionsByUserIdAsync(string userId)
         {
             return await _db.BookedTeacherSessions
+                .Include(b => b.Learner)
                 .Include(b => b.TeacherAvailableSchedule)
+                .ThenInclude(t => t.Teacher)
                 .Where(b => b.LearnerId == userId)
                 .ToListAsync();
         }
