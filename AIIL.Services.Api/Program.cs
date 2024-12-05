@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,17 @@ ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB
+});
+
+// Configure Kestrel server to accept larger request bodies
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100_000_000; // 100 MB
 });
 
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
