@@ -25,39 +25,48 @@ namespace Service
             };
         }
 
-        public async Task<string> ExtractTextFromImageAsync(Stream imageStream)
-        {
-            try
+        public async Task<string> ExtractTextFromImageAsync(string imageUrl)
             {
-                // Gọi API OCR để xử lý ảnh và nhận dạng văn bản
-                var ocrResult = await _visionClient.RecognizePrintedTextInStreamAsync(true, imageStream);
-
-                var resultText = new StringBuilder();
-
-                // Duyệt qua các vùng chứa văn bản và trích xuất văn bản từ từng dòng
-                foreach (var region in ocrResult.Regions)
+                try
                 {
-                    foreach (var line in region.Lines)
+                    // Create a HttpClient to download the image as a stream
+                    using (var httpClient = new HttpClient())
                     {
-                        foreach (var word in line.Words)
+                        // Download the image as a stream from the provided URI (imageUrl)
+                        using (var imageStream = await httpClient.GetStreamAsync(imageUrl))
                         {
-                            resultText.Append(word.Text + " "); // Gộp các từ lại với nhau
+                            // Call the OCR API to process the image and recognize text
+                            var ocrResult = await _visionClient.RecognizePrintedTextInStreamAsync(true, imageStream);
+
+                            var resultText = new StringBuilder();
+
+                            // Iterate through the recognized regions and extract text from each word
+                            foreach (var region in ocrResult.Regions)
+                            {
+                                foreach (var line in region.Lines)
+                                {
+                                    foreach (var word in line.Words)
+                                    {
+                                        resultText.Append(word.Text + " "); // Concatenate the words
+                                    }
+                                    resultText.AppendLine(); // Add a new line after each line of text
+                                }
+                            }
+
+                            return resultText.ToString(); // Return the recognized text
                         }
-                        resultText.AppendLine(); // Thêm dòng mới sau mỗi dòng văn bản
                     }
                 }
-
-                return resultText.ToString(); // Trả về văn bản đã nhận dạng được
+                catch (Exception ex)
+                {
+                    return $"Error: {ex.Message}"; // Return error message if there's an exception
+                }
             }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}"; // Trả về thông báo lỗi nếu có
-            }
-        }
 
 
 
-        public async Task<string> ProcessAndTranscribeAudioFromBlobAsync(string blobUri)
+
+    public async Task<string> ProcessAndTranscribeAudioFromBlobAsync(string blobUri)
         {
             string localFilePath = await DownloadFileFromBlobAsync(blobUri);
 

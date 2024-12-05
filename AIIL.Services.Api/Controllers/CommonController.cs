@@ -28,21 +28,14 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPost("extract-text")]
-        public async Task<IActionResult> ExtractTextFromImage(IFormFile imageFile)
+        public async Task<IActionResult> ExtractTextFromImage([FromBody]string imageFile)
         {
-            if (imageFile == null || imageFile.Length == 0)
-            {
-                return BadRequest("No image file provided.");
-            }
 
             try
             {
-                // Process the uploaded image
-                using (var stream = imageFile.OpenReadStream())
-                {
-                    var result = await _azureService.ExtractTextFromImageAsync(stream);
+               
+                    var result = await _azureService.ExtractTextFromImageAsync(imageFile);
                     return Ok(new { extractedText = result });
-                }
             }
             catch (Exception ex)
             {
@@ -73,6 +66,8 @@ namespace AIIL.Services.Api.Controllers
             }
 
         [HttpPost("upload")]
+        [RequestSizeLimit(100_000_000)] // Allow up to 100 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 100_000_000)] // Multipart form limits
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)

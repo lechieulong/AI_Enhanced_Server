@@ -8,7 +8,7 @@ namespace IService
 {
     public interface IAzureService
     {
-        Task<string> ExtractTextFromImageAsync(Stream imageStream);
+        Task<string> ExtractTextFromImageAsync(string imageUrl);
         Task<string> ProcessAndTranscribeAudioFromBlobAsync(string fileUrl);
     }
 }

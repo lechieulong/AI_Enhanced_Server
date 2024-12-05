@@ -31,6 +31,9 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Part> GetPartNumber(Guid partId) {
+            return await _context.Parts.Where(p => p.Id == partId).FirstOrDefaultAsync();
+        }
         public async Task<string> GetQuestionNameById(Guid questionId)
         {
             var question = await _context.Questions
