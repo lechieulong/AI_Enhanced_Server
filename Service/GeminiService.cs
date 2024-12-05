@@ -338,10 +338,10 @@ Please evaluate the response based on the following criteria:
                 var finalPrompt = "";
 
 
-                var excludedKeysSkill0 = new HashSet<int> { 1, 2, 3, 4, 5, 6 };
-                var excludedKeysSkill1 = new HashSet<int> { 6, 8 };
-                var isHasSectionContext = (skill == 0 && !excludedKeysSkill0.Contains(sectionGroup.Key)) ||
-                                          (skill == 1 && !excludedKeysSkill1.Contains(sectionGroup.Key));
+                var readingKey = new HashSet<int> { 1, 2, 3, 4, 5, 6 };
+                var listeningKey = new HashSet<int> { 6, 8 };
+                var isHasSectionContext = (skill == 0 && !readingKey.Contains(sectionGroup.Key)) ||
+                                          (skill == 1 && !listeningKey.Contains(sectionGroup.Key));
 
 
                 foreach (var userAnswer in sectionGroup)
@@ -351,7 +351,7 @@ Please evaluate the response based on the following criteria:
 
                     // Fetch question details
                     var correctAnswers = await _testExamRepository.GetCorrectAnswers(userAnswer.QuestionId, userAnswer.SectionType, userAnswer.Skill);
-                    if (!isHasSectionContext)
+                    if (isHasSectionContext)
                     {
                         var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
                         prompts.AppendLine($"Question: {questionName}");
@@ -362,7 +362,7 @@ Please evaluate the response based on the following criteria:
                     {
                         foreach (var answer in correctAnswers.Where(a => a?.QuestionId != null))
                         {
-                            prompts.AppendLine($"QuestionId: {answer?.QuestionId}");
+                            prompts .AppendLine($"QuestionId: {answer?.QuestionId}");
                             prompts.AppendLine($"Correct Answer: {answer?.AnswerText}");
                             prompts.AppendLine();
                         }

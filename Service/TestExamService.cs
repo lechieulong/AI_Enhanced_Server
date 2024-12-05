@@ -263,6 +263,8 @@ namespace Service
                             return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                         else if (sectionType == 6)
                             return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
+                        else if(sectionType == 5)
+                            return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
                         else
                             return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                     default:
@@ -358,6 +360,11 @@ namespace Service
 
         public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, int role)
         {
+            var isExistedTestName = await _testExamRepository.CheckExistedName(userId, model.TestName);
+            if (isExistedTestName)
+            {
+                throw new Exception("Duplicate name");
+            }
             return await _testExamRepository.AddTestAsync(userId, model, role);
         }
 
