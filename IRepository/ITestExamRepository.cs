@@ -13,6 +13,7 @@ namespace IRepository
     public interface ITestExamRepository
     {
         Task<string> GetQuestionNameById(Guid questionId);
+        Task<Part> GetPartNumber(Guid partId);
         Task<string> GetContentText(Guid partId);
         Task<string> GetUrlAudioByPartId(Guid partId);
         Task<List<Answer>> GetCorrectAnswers(Guid questionId, int sectionType, int skill);
