@@ -10,6 +10,7 @@ namespace Entity.Test
     {
         public Guid Id { get; set; } 
         public Guid TestId { get; set; }
+        public TestExam TestExam { get; set; }
         public Guid UserId { get; set; }
         public int SkillType { get; set; } 
         public Decimal Score { get; set; }

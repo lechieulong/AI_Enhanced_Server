@@ -197,6 +197,14 @@ namespace AIIL.Services.Api.Controllers
             return _mapper.Map<TestModel>(test);
         }
 
+        [HttpGet("{skillId}/skillType")]
+        public async Task<IActionResult> GetSkillById([FromRoute] Guid skillId)
+        {
+            var skill = await _testRepository.GetSkillByIdNe(skillId);
+            return Ok(skill);
+        }
+
+
         [HttpGet("{testId}/skills")]
         public async Task<List<Skill>> GetSkills([FromRoute] Guid testId)
         {
