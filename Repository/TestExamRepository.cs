@@ -585,6 +585,12 @@ namespace Repository
             return questions;
         }
 
+        public async Task<bool> CheckExistedName(Guid userId, string testName)
+        {
+            return await _context.TestExams
+                .AnyAsync(t => t.UserID == userId && t.TestName.ToLower() == testName.ToLower());
+        }
+
         public async Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role)
         {
             var newTest = new TestExam

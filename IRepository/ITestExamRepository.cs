@@ -29,6 +29,7 @@ namespace IRepository
         Task<List<Answer>> GetAnswerByQuestionId(Guid questionId);
         Task<int> GetTotalQuestionBySkillId(Guid skillId);
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
+        Task<bool> CheckExistedName(Guid userId, string testName);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
         Task<IEnumerable<TestExam>> GetAdminTests();
         Task<TestExam> GetTestAsync(Guid id);
