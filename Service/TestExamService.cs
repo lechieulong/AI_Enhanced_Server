@@ -294,6 +294,7 @@ namespace Service
         }
 
 
+
         private decimal ScaleScore(decimal rawScore, int totalQuestion)
         {
             if (totalQuestion == 0) return 0; // Prevent division by zero

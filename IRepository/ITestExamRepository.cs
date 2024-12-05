@@ -35,7 +35,7 @@ namespace IRepository
         Task<TestExam> GetTestAsync(Guid id);
         Task<List<TestResult>> GetResultTest( Guid userId, List<Guid> ids);
         Task<TestExam> GetTestBySecionCourseId(Guid id);
-
+        Task<Skill> GetSkillByIdNe(Guid skillId);
         Task<List<Skill>> GetSkills(Guid testId);
         Task<Skill> GetSkillExplainByIdAsync(Guid SkillId, List<int> parts);
         Task<List<Skill>> GetSkillsExplainByTestIdAsync(Guid testId, List<int> parts);

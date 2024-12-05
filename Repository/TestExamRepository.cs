@@ -906,7 +906,10 @@ namespace Repository
                 .ToListAsync();
         }
 
-
+        public async Task<Skill> GetSkillByIdNe(Guid skillId)
+        {
+            return await _context.Skills.Where(s => s.Id == skillId).FirstAsync();
+        }
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {
             return await _context.TestExams
