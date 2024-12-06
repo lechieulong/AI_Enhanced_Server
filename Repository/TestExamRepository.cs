@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common;
 using Entity;
+using Entity.CourseFolder;
 using Entity.Data;
 using Entity.Test;
 using IRepository;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.Json;
 using Model;
 using Model.Test;
 using Model.Utility;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -1060,5 +1062,95 @@ namespace Repository
             }
             return false;
         }
+
+        public async Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestExamByCourseIdAsync(Guid courseId, int page, int pageSize)
+        {
+            if (page <= 0) throw new ArgumentException("Page number must be greater than 0", nameof(page));
+            if (pageSize <= 0) throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
+
+            var query = _context.TestExams.Where(t => t.CourseId == courseId);
+            var totalCount = await query.CountAsync();
+
+            var tests = await query
+                .OrderByDescending(t => t.CreateAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (tests, totalCount);
+        }
+
+        public async Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultByUserIdAsync(Guid courseId, string userId)
+        {
+            var query = _context.TestResult
+                .Join(
+                    _context.TestExams,
+                    tr => tr.TestId,
+                    te => te.Id,
+                    (tr, te) => new { TestResult = tr, TestExam = te }
+                )
+                .Where(joined => joined.TestExam.CourseId == courseId && joined.TestResult.UserId == Guid.Parse(userId))
+                .Select(joined => new
+                {
+                    TestResult = joined.TestResult,
+                    TestExam = joined.TestExam
+                });
+
+            var totalCount = await query.CountAsync();
+            var testResults = await query.ToListAsync();
+
+            // Project into a model that includes both TestResult and TestExam data
+            var result = testResults.Select(item => new TestResultWithExamDto
+            {
+                Id = item.TestResult.Id,
+                TestId = item.TestResult.TestId,
+                UserId = item.TestResult.UserId,
+                SkillType = item.TestResult.SkillType,
+                Score = item.TestResult.Score,
+                NumberOfCorrect = item.TestResult.NumberOfCorrect,
+                TotalQuestion = item.TestResult.TotalQuestion,
+                TestDate = item.TestResult.TestDate,
+                TimeMinutesTaken = item.TestResult.TimeMinutesTaken,
+                SecondMinutesTaken = item.TestResult.SecondMinutesTaken,
+                AttemptNumber = item.TestResult.AttemptNumber,
+                TestName = item.TestExam.TestName,  // assuming `Title` is a property of `TestExam`
+            });
+
+            return (result, totalCount);
+        }
+
+        public async Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultOfTest(Guid testId)
+        {
+            var query = from tr in _context.TestResult
+                        join te in _context.TestExams on tr.TestId equals te.Id
+                        join user in _context.ApplicationUsers on tr.UserId.ToString() equals user.Id
+                        where tr.TestId == testId
+                        select new TestResultWithExamDto
+                        {
+                            Id = tr.Id,
+                            TestId = tr.TestId,
+                            UserId = tr.UserId,
+                            SkillType = tr.SkillType,
+                            Score = tr.Score,
+                            NumberOfCorrect = tr.NumberOfCorrect,
+                            TotalQuestion = tr.TotalQuestion,
+                            TestDate = tr.TestDate,
+                            TimeMinutesTaken = tr.TimeMinutesTaken,
+                            SecondMinutesTaken = tr.SecondMinutesTaken,
+                            AttemptNumber = tr.AttemptNumber,
+                            TestName = te.TestName,
+                            UserName = user.Name,
+                            UserEmail = user.Email
+                        };
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Get test results
+            var testResults = await query.ToListAsync();
+
+            return (testResults, totalCount);
+        }
+
     }
 }

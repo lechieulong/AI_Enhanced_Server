@@ -680,6 +680,82 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("test-by-course/{courseId}")]
+        public async Task<IActionResult> GetTestsByCourseId(Guid courseId, int page = 1, int pageSize = 10)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and pageSize must be greater than zero.");
+            }
+
+            try
+            {
+                var (tests, totalCount) = await _testRepository.GetTestExamByCourseIdAsync(courseId, page, pageSize);
+
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                return Ok(new
+                {
+                    Data = tests,
+                    Pagination = new
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalItems = totalCount,
+                        TotalPages = totalPages
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test-history/{courseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetTestResultHistory(Guid courseId)
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                var (testResults, totalCount) = await _testRepository.GetTestResultByUserIdAsync(courseId, userIdClaim);
+
+                return Ok(new
+                {
+                    Data = testResults,
+                    TotalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test-results/{testId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetTestResultOfATest(Guid testId)
+        {
+            try
+            {
+                var (testResults, totalCount) = await _testRepository.GetTestResultOfTest(testId);
+
+                return Ok(new
+                {
+                    Data = testResults,
+                    TotalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }
