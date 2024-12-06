@@ -12,7 +12,7 @@ namespace IService
     {
         Task<SubmitTestDto> ScoreAndExplain(SubmitTestDto model);
         Task<SubmitTestDto> ScoreAndExplainSpeaking(SubmitTestDto model);
-        Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model);
+        Task ExplainListeningAndReading(Guid partId, int skillType);
 
     }
 }

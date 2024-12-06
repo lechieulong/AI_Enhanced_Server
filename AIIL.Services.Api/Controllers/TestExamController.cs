@@ -231,7 +231,7 @@ namespace AIIL.Services.Api.Controllers
                 3 => "speaking",
                 _ => "unknown"
             };
-
+            var skillType = skill.Type;
             responseData[skillTypeKey] = new
             {
                 id = skill.Id,
@@ -263,8 +263,8 @@ namespace AIIL.Services.Api.Controllers
                                 answers = sq.Question.Answers?.Select(ans => new
                                 {
                                     id = ans.Id,
-                                    answerText = ans.AnswerText,
-                                    isCorrect = ans.TypeCorrect
+                                    answerText = (skillType == 0 && new[] { 1, 2, 3, 4, 5, 6 }.Contains(section.SectionType)) ||
+                                    (skillType == 1 && new[] { 5, 6, 8 }.Contains(section.SectionType)) ? ans.AnswerText : "",
                                 }).ToList()
                             }).ToList()
                     }).ToList()
@@ -297,7 +297,7 @@ namespace AIIL.Services.Api.Controllers
                     3 => "speaking",
                     _ => "unknown"
                 };
-
+                var skillType = skill.Type;
                 responseData[skillTypeKey] = new
                 {
                     id = skill.Id,
@@ -328,8 +328,8 @@ namespace AIIL.Services.Api.Controllers
                                 answers = sq.Question.Answers?.Select(ans => new
                                 {
                                     id = ans.Id,
-                                    answerText = ans.AnswerText,
-                                    isCorrect = ans.TypeCorrect
+                                    answerText = (skillType == 0 && new[] { 1, 2, 3, 4, 5, 6 }.Contains(section.SectionType)) ||
+                                    (skillType == 1 && new[] {5,6,8}.Contains(section.SectionType)) ? ans.AnswerText : "",
                                 }).ToList()
                             }).ToList()
                         }).ToList()
