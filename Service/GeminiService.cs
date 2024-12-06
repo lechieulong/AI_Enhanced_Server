@@ -36,7 +36,17 @@ namespace Service
 
             foreach (var userAnswer in model.UserAnswers.Values)
             {
+
+                var part  = await _testExamRepository.GetPartNumber(userAnswer.PartId.Value);
                 var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
+                var descriptionDiagram = string.Empty;
+                if (part.PartNumber == 1) {
+                    descriptionDiagram = await _azureService.ExtractTextFromImageAsync(part.Image);
+                    }
+
+                var finalPrompt = part.PartNumber == 2 ? BuildPrompt(questionName, userAnswer.Answers[0].AnswerText, part.PartNumber) 
+                                            : BuildPromptWithOCR(questionName,descriptionDiagram, userAnswer.Answers[0].AnswerText,part.PartNumber);
+
                 var requestData = new
                 {
                     contents = new[]
@@ -45,7 +55,7 @@ namespace Service
                 {
                     parts = new[]
                     {
-                        new { text = BuildPrompt(questionName, userAnswer.Answers[0].AnswerText,2) }
+                        new { text = finalPrompt}
                     }
                 }
                  }
@@ -148,6 +158,49 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 ";
         }
 
+        private string BuildPromptWithOCR(string questionName, string descriptionDiagram, string answer, int task)
+        {
+            return $@"
+IELTS Writing Task {task}
+Question: {questionName}
+Description analysis diagram:  {descriptionDiagram}
+User's Response: {answer}
+
+Please evaluate the response based on the following criteria:
+
+1. **Task Relevance:**
+   - Does the response directly and fully address the question?
+   - If not, how much of the response is off-topic or irrelevant? (This is the most important factor in determining the score.)
+
+2. **Task Response:**
+   - Does the response provide clear arguments and relevant examples to support its points?
+   - Is the argument sufficiently developed?
+
+3. **Coherence and Cohesion:**
+   - Is the essay well-structured, with a clear introduction, body paragraphs, and conclusion?
+   - Are ideas logically organized, with appropriate transitions and cohesive devices?
+
+4. **Lexical Resource:**
+   - Is the vocabulary varied and used accurately?
+   - Are there any errors in word choice, spelling, or repetition?
+
+5. **Grammatical Range and Accuracy:**
+   - Are a variety of sentence structures used effectively?
+   - Are there any significant grammatical errors, such as incorrect tense, article usage, or sentence fragments?
+
+### Evaluation Format:
+- **Overall Score:** [Numeric score only, e.g., 3.0, 6.5, 7.5]
+- **Feedback:** 
+  - Task Relevance: [Your feedback]
+  - Task Response: [Your feedback]
+  - Coherence: [Your feedback]
+  - Lexical Resource: [Your feedback]
+  - Grammar: [Your feedback]
+- **Suggestions for Improvement:** [Provide actionable tips for improvement]
+
+Now, please evaluate the user's response based on the criteria above. Remember, Task Relevance is the most important factor when determining the score. If the answer doesn't directly address the question, the overall score should be lowered accordingly.
+";
+    }
 
         public async Task<SubmitTestDto> ScoreAndExplainSpeaking(SubmitTestDto model)
         {
@@ -277,57 +330,80 @@ Please evaluate the response based on the following criteria:
         public async Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model)
         {
             var sectionGroups = model.UserAnswers.Values.GroupBy(t => t.SectionType).ToList();
-
+            var skill = model.UserAnswers.Values.First().Skill;
             foreach (var sectionGroup in sectionGroups)
             {
                 var prompts = new StringBuilder();
-                string context = string.Empty;
+                var sectionContext = string.Empty;
+                var finalPrompt = "";
+
+
+                var readingKey = new HashSet<int> { 1, 2, 3, 4, 5, 6 };
+                var listeningKey = new HashSet<int> { 6, 8 };
+                var isHasSectionContext = (skill == 0 && !readingKey.Contains(sectionGroup.Key)) ||
+                                          (skill == 1 && !listeningKey.Contains(sectionGroup.Key));
+
 
                 foreach (var userAnswer in sectionGroup)
                 {
+
+                    sectionContext = userAnswer.SectionContext;
+
                     // Fetch question details
-                    var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
-                    var correctAnswers = await _testExamRepository.GetCorrectAnswers(userAnswer.QuestionId, userAnswer.SectionType, userAnswer.Skill); // Correct answers as a list
+                    var correctAnswers = await _testExamRepository.GetCorrectAnswers(userAnswer.QuestionId, userAnswer.SectionType, userAnswer.Skill);
+                    if (isHasSectionContext)
+                    {
+                        var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
+                        prompts.AppendLine($"Question: {questionName}");
+                        prompts.AppendLine($"Correct Answers: {string.Join(", ", correctAnswers.Select(a => a?.AnswerText))}");
+                        prompts.AppendLine();
+                    }
+                    else
+                    {
+                        foreach (var answer in correctAnswers.Where(a => a?.QuestionId != null))
+                        {
+                            prompts .AppendLine($"QuestionId: {answer?.QuestionId}");
+                            prompts.AppendLine($"Correct Answer: {answer?.AnswerText}");
+                            prompts.AppendLine();
+                        }
+                    }
 
-                    // Append to prompt
-                    prompts.AppendLine($"Question: {questionName}");
-                    prompts.AppendLine($"Correct Answers: {string.Join(", ", correctAnswers.Select(a => a?.AnswerText))}");
-                    prompts.AppendLine();
                 }
 
-                // Fetch context for reading skill if applicable
-                if (model.UserAnswers.Values.First().Skill == 0)
-                {
-                    context = await _testExamRepository.GetContentText(model.UserAnswers.Values.First().PartId.Value);
-                }
+                if (skill == 0)
+                 {
+                    var context = await _testExamRepository.GetContentText(model.UserAnswers.Values.First().PartId.Value);
 
-                if(model.UserAnswers.Values.First().Skill == 1)
-                {
+                    if (isHasSectionContext)
+                            finalPrompt = BuildExplainReadingPrompt(prompts.ToString(), context);
+                    else
+                          finalPrompt = BuildExplainReadingPromptWithSectionContext(prompts.ToString(), context, sectionContext);
+                }
+                else
+                    {
                     var urlAudio = await _testExamRepository.GetUrlAudioByPartId(model.UserAnswers.Values.First().PartId.Value);
-                    context = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(urlAudio);
-                }
+                    var script = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(urlAudio);
+                    if (isHasSectionContext)
+                             finalPrompt = BuildExplainListeningPrompt(prompts.ToString(), script);
+                    else
+                        finalPrompt = BuildExplainLíteningPromptWithSectionContext(prompts.ToString(), script, sectionContext);
+                    }
 
-                // Build the final prompt based on skill type
-                var finalPrompt = model.UserAnswers.Values.First().Skill == 0
-                    ? BuildExplainReadingPrompt(prompts.ToString(), context)
-                    : BuildExplainListeningPrompt(prompts.ToString(), context);
 
-                // Prepare request data for the external API
                 var requestData = new
                 {
                     contents = new[]
                     {
-          new
-          {
-              parts = new[]
-              {
-                  new { text = finalPrompt }
-              }
-          }
-      }
+                          new
+                          {
+                              parts = new[]
+                              {
+                                  new { text = finalPrompt }
+                              }
+                          }
+                      }
                 };
 
-                // Send the prompt to the API for explanation
                 var client = _clientFactory.CreateClient();
                 var response = await client.PostAsync(
                     _apiUrl,
@@ -342,7 +418,6 @@ Please evaluate the response based on the following criteria:
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
 
-                // Extract explanation details from the API response
                 var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
 
                 if (!string.IsNullOrEmpty(result))
@@ -371,6 +446,32 @@ Please evaluate the response based on the following criteria:
       ";
         }
 
+        private string BuildExplainReadingPromptWithSectionContext(string prompts, string context, string sectionContext)
+        {
+            return $@"
+                  You are an expert in reading comprehension. Based on the following context, the associated questions, and the contextual information provided, offer a detailed explanation for each correct answer. 
+
+                  Context:
+                  {context}
+
+                  Section Context:
+                  {sectionContext}
+
+                  Questions and Answers:
+                  {prompts}
+
+                  Instructions:
+                  1. Use the **Section Context** to understand the format of the questions and any specific instructions or requirements (e.g., answer length, word limits, or specific topics).
+                  2. For each question listed in the prompts, explain why the correct answer(s) is the best choice. Reference details from:
+                     - The context to highlight evidence supporting the answer.
+                     - The section context to ensure the answer adheres to the requirements.
+                  3. Your explanation should be clear, precise, and directly address how the answer is supported by the provided information. 
+                  4. Where applicable, describe why other potential answers are incorrect.
+
+                  Provide thorough and structured explanations that align with the expectations of a reading comprehension expert.
+                  ";
+        }
+
         private string BuildExplainListeningPrompt(string prompts, string transcriptAudio)
         {
             return $@"
@@ -386,6 +487,34 @@ Please evaluate the response based on the following criteria:
         For each question listed in the prompts, explain why the correct answer(s) is the best choice. Your explanation should reference specific details from the transcript and offer precise reasoning. Maintain clarity and accuracy in your responses, and ensure that the explanation directly addresses why each correct answer is supported by the audio content.
         ";
         }
+
+        private string BuildExplainLíteningPromptWithSectionContext(string prompts, string transcriptAudio, string sectionContext)
+        {
+                        return $@"
+            You are an expert in listening comprehension. Based on the following audio transcript, the associated questions, and the contextual information provided, offer a detailed explanation for each correct answer. 
+
+            Audio Transcript:
+            {transcriptAudio}
+
+            Section Context:
+            {sectionContext}
+
+            Questions and Answers:
+            {prompts}
+
+            Instructions:
+            1. Use the **Section Context** to understand the format of the questions and any specific instructions or requirements (e.g., answer length, word limits, or specific topics).
+            2. For each question listed in the prompts, explain why the correct answer(s) is the best choice. Reference details from:
+               - The audio transcript to highlight evidence supporting the answer.
+               - The section context to ensure the answer adheres to the requirements.
+            3. Your explanation should be clear, precise, and directly address how the answer is supported by the provided information. 
+            4. Where applicable, describe why other potential answers are incorrect.
+
+            Provide thorough and structured explanations that align with the expectations of a listening comprehension expert.
+            ";
+                    }
+
+
 
     }
 }

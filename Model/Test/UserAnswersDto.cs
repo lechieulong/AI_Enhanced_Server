@@ -12,6 +12,7 @@ namespace Model.Test
         public Guid QuestionId { get; set; }
         public Guid SkillId { get; set; }
         public int SectionType { get; set; }
+        public string? SectionContext { get; set; }
         public string? Explain { get; set; }
         public Guid? PartId { get; set; }
         public string? OverallScore { get; set; }

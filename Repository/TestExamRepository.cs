@@ -33,6 +33,9 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Part> GetPartNumber(Guid partId) {
+            return await _context.Parts.Where(p => p.Id == partId).FirstOrDefaultAsync();
+        }
         public async Task<string> GetQuestionNameById(Guid questionId)
         {
             var question = await _context.Questions
@@ -584,6 +587,12 @@ namespace Repository
             return questions;
         }
 
+        public async Task<bool> CheckExistedName(Guid userId, string testName)
+        {
+            return await _context.TestExams
+                .AnyAsync(t => t.UserID == userId && t.TestName.ToLower() == testName.ToLower());
+        }
+
         public async Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role)
         {
             var newTest = new TestExam
@@ -899,7 +908,10 @@ namespace Repository
                 .ToListAsync();
         }
 
-
+        public async Task<Skill> GetSkillByIdNe(Guid skillId)
+        {
+            return await _context.Skills.Where(s => s.Id == skillId).FirstAsync();
+        }
         public async Task<TestExam> GetTestBySecionCourseId(Guid id)
         {
             return await _context.TestExams
