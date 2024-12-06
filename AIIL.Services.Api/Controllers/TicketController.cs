@@ -33,15 +33,29 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTicket([FromBody] TicketModel ticketDto)
         {
+            var ticketexit = await _repository.GetActiveTicketsByLiveIdAsync(ticketDto.LiveStreamId);
             if (ticketDto == null)
             {
                 return BadRequest("Invalid data.");
             }
-            var ticket = _Mapper.Map<Ticket>(ticketDto);
-            ticket.Id = Guid.NewGuid();
 
+            var ticket = _Mapper.Map<Ticket>(ticketDto);
+
+            if (ticketexit == null|| ticketexit.Price != ticketDto.Price|| ticketexit.StartTime!= ticketDto.StartTime|| ticketexit.EndTime!= ticketDto.EndTime) {         
+            ticket.Id=Guid.NewGuid();
+            ticket.CreateDate = DateTime.Now;
             var result = await _repository.addTicketAsync(ticket);
-            return Ok(ticketDto);
+            return Ok(result);
+            }
+            else
+            {
+                ticket.CreateDate = DateTime.Now;
+                var result = await _repository.UpdateTicketAsync(ticket);
+                return Ok(result);
+            }
+            
+
+            
         }
 
     }

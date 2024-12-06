@@ -18,6 +18,11 @@ namespace Repository.Live
         {
             _context = context;
         }
+        public async Task<StreamSession> getStreamSession(Guid liveId)
+        {
+            return await _context.StreamSessions.FirstOrDefaultAsync(o => o.LiveStreamId.Equals(liveId)&&o.Status==1);
+
+        }
         public async Task<IEnumerable<StreamSession>> getStreamSessionsIsLive()
         {
             return await _context.StreamSessions.Where(o=>o.Status==1).ToListAsync();
@@ -33,14 +38,16 @@ namespace Repository.Live
         }
         public async Task<StreamSession> UpdateStreamSessionAsync(StreamSession mode)
         {
-            var exit=await _context.StreamSessions.FirstOrDefaultAsync(o=>o.Id.Equals(mode.Id));
+            var exit=await getStreamSession(mode.LiveStreamId);
             StreamSession modee = new StreamSession()
             {
-                Id = mode.Id,
+                Id = exit.Id,
                 Status = mode.Status,
+                Name=mode.Name,
                 StartTime = mode.StartTime,
-                EndTime = mode.EndTime,
+                EndTime = mode.Status==0?DateTime.Now:null,
                 LiveStreamId = mode.LiveStreamId,
+                Type = mode.Type,
 
             };
             if (exit != null)

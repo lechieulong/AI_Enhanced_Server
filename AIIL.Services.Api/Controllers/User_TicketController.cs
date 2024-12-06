@@ -41,10 +41,10 @@ namespace AIIL.Services.Api.Controllers
         }
 
         // GET: api/UserTicket/{ticketId}/{userId}
-        [HttpGet("{ticketId}/{userId}")]
-        public async Task<IActionResult> GetUserTicketByUserIdTicketId(Guid ticketId, string userId)
+        [HttpGet("{liveId}/{userId}")]
+        public async Task<IActionResult> GetUserTicketByUserIdLiveId(Guid liveId, string userId)
         {
-            var userTicket = await _userTicketRepository.GetUser_TicketByUserIdTicketIdAsync(ticketId, userId);
+            var userTicket = await _userTicketRepository.FindUserTicketByUserIdAndLiveStreamIdAsync(liveId, userId);
             if (userTicket == null)
             {
                 return Ok(null);
