@@ -11,5 +11,6 @@ namespace IRepository
     {
         Task<BookedTeacherSession> CreateScheduleSessionAsync(BookedTeacherSession bookedTeacherSession);
         Task<IEnumerable<BookedTeacherSession>> GetSessionsByUserIdAsync(string userId);
+        Task<IEnumerable<BookedTeacherSession>> GetIsBookedSessionsByUserIdAsync(string userId);
     }
 }

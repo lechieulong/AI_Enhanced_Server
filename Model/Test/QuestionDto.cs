@@ -13,7 +13,7 @@ namespace Model.Test
         public string? QuestionName { get; set; }
         public string? Explain { get; set; }
         public int QuestionType { get; set; }
-        public string Answer {  get; set; }
+        public string? Answer {  get; set; }
         public bool IsFromQuestionBank {  get; set; }
 
         public List<AnswerDto> Answers { get; set; } = new List<AnswerDto>();

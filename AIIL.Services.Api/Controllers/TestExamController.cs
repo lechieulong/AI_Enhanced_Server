@@ -165,6 +165,15 @@ namespace AIIL.Services.Api.Controllers
             return _mapper.Map<IEnumerable<TestModel>>(tests);
         }
 
+        [HttpGet("admintests")]
+        public async Task<IEnumerable<TestModel>> GetAdminTests()
+        {
+
+            var tests = await _testRepository.GetAdminTests();
+            return _mapper.Map<IEnumerable<TestModel>>(tests);
+        }
+
+
         [HttpGet("{id}/testDetail")]
         public async Task<TestModel> GetTestAsync([FromRoute] Guid id)
         {
@@ -187,6 +196,14 @@ namespace AIIL.Services.Api.Controllers
             var test = await _testRepository.GetTestBySecionCourseId(sectionCourseId);
             return _mapper.Map<TestModel>(test);
         }
+
+        [HttpGet("{skillId}/skillType")]
+        public async Task<IActionResult> GetSkillById([FromRoute] Guid skillId)
+        {
+            var skill = await _testRepository.GetSkillByIdNe(skillId);
+            return Ok(skill);
+        }
+
 
         [HttpGet("{testId}/skills")]
         public async Task<List<Skill>> GetSkills([FromRoute] Guid testId)
@@ -229,7 +246,7 @@ namespace AIIL.Services.Api.Controllers
                     audio = part.Audio,
                     image = part.Image,
                     questionName = $"Part {part.PartNumber}",
-                    sections = part.Sections.Select(section => new
+                    sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                     {
                         id = section.Id,
                         sectionGuide = section.SectionGuide,
@@ -294,7 +311,7 @@ namespace AIIL.Services.Api.Controllers
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        sections = part.Sections.Select(section => new
+                        sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
                             id = section.Id,
                             sectionGuide = section.SectionGuide,
@@ -386,6 +403,7 @@ namespace AIIL.Services.Api.Controllers
                             QuestionName = rowData.GetCell(0)?.ToString(),
                             QuestionType = int.TryParse(rowData.GetCell(1)?.ToString(), out var qType) ? qType : 0,
                             Skill = int.TryParse(rowData.GetCell(2)?.ToString(), out var skill) ? skill : 0,
+                            Explain = "",
                             PartNumber = int.TryParse(rowData.GetCell(3)?.ToString(), out var part) ? part : 0,
                             Answers = new List<Answer>()
                         };
@@ -472,16 +490,17 @@ namespace AIIL.Services.Api.Controllers
 
 
 
-        [HttpGet("{sectionType}/questionsBank/{userId}")]
+        [HttpGet("{sectionType}/questionsBank/{userId}/skill/{skill}")]
         public async Task<IActionResult> GetQuestionsAsync(
              [FromRoute] Guid userId,
              [FromRoute] int sectionType,
+             [FromRoute] int skill,
              [FromQuery] int page ,  // Default page is 1
              [FromQuery] int pageSize) // Default pageSize is 10
         {
             try
             {
-                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, sectionType, page, pageSize);
+                var questions = await _testRepository.GetQuestionsBySecionTypeAsync(userId, skill,sectionType, page, pageSize);
 
                 if (questions == null || !questions.Any())
                 {
@@ -661,6 +680,82 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        [HttpGet("test-by-course/{courseId}")]
+        public async Task<IActionResult> GetTestsByCourseId(Guid courseId, int page = 1, int pageSize = 10)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and pageSize must be greater than zero.");
+            }
+
+            try
+            {
+                var (tests, totalCount) = await _testRepository.GetTestExamByCourseIdAsync(courseId, page, pageSize);
+
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                return Ok(new
+                {
+                    Data = tests,
+                    Pagination = new
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalItems = totalCount,
+                        TotalPages = totalPages
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test-history/{courseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetTestResultHistory(Guid courseId)
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                var (testResults, totalCount) = await _testRepository.GetTestResultByUserIdAsync(courseId, userIdClaim);
+
+                return Ok(new
+                {
+                    Data = testResults,
+                    TotalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test-results/{testId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetTestResultOfATest(Guid testId)
+        {
+            try
+            {
+                var (testResults, totalCount) = await _testRepository.GetTestResultOfTest(testId);
+
+                return Ok(new
+                {
+                    Data = testResults,
+                    TotalCount = totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }

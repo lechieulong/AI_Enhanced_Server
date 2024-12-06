@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,17 @@ ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB
+});
+
+// Configure Kestrel server to accept larger request bodies
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100_000_000; // 100 MB
 });
 
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
@@ -99,6 +111,10 @@ builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
+builder.Services.AddScoped<IAzureService, AzureService>();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
+
+
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -127,7 +143,7 @@ builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddScoped<IClassFileRepository, ClassFileRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
-
+builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FrontendUrls").Get<string[]>();

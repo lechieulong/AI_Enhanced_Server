@@ -19,8 +19,8 @@
 
     public enum TypeCorrect
     {
-        True,    // 0
-        False,   // 1
+        False,    // 0
+        True,   // 1
         NotGiven,   // 2
     }
 

@@ -18,7 +18,7 @@ namespace Model.Test
         public DateTime UpdateAt { get; set; }
         public Guid? LessonId { get; set; }
         public Guid? SkilLIdCourse { get; set; }
-
+        public Guid? CourseId { get; set; }
         public Guid? ClassId { get; set; }
     }
 }

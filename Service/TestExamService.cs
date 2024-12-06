@@ -16,11 +16,14 @@ namespace Service
     public class TestExamService : ITestExamService
     {
         private readonly ITestExamRepository _testExamRepository;
+        private readonly IGeminiService _geminiService;
+
         private readonly IMapper _mapper;
 
-        public TestExamService(ITestExamRepository testExamRepository)
+        public TestExamService(ITestExamRepository testExamRepository, IGeminiService geminiService)
         {
             _testExamRepository = testExamRepository;
+            _geminiService = geminiService;
         }
 
         public async Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model)
@@ -32,13 +35,13 @@ namespace Service
             // Determine the skills to process
             if (model.SkillId != null && model.SkillId != Guid.Empty)
             {
-                var skill = await _testExamRepository.GetSkillByIdAsync(model.SkillId.Value);
+                var skill = await _testExamRepository.GetSkillExplainByIdAsync(model.SkillId.Value, model.TotalPartsSubmit);
                 if (skill == null) return result;
                 sortedSkills = new List<Skill> { skill };
             }
             else
             {
-                var skills = await _testExamRepository.GetSkillsByTestIdAsync(model.TestId);
+                var skills = await _testExamRepository.GetSkillsExplainByTestIdAsync(model.TestId , model.TotalPartsSubmit);
                 if (skills == null || !skills.Any()) return result; // No skills found
                 sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
             }
@@ -70,7 +73,7 @@ namespace Service
                         contentText = part.ContentText,
                         audio = part.Audio,
                         image = part.Image,
-                        sections = part.Sections.Select(section => new
+                        sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
                             id = section.Id,
                             sectionGuide = section.SectionGuide,
@@ -78,7 +81,7 @@ namespace Service
                             sectionContext = section.SectionContext,
                             explain = section.Explain,
                             image = section.Image,
-                            questions = section.SectionQuestions.Select(sq =>
+                            questions = section.SectionQuestions.OrderBy(q => q.QuestionOrder).Select(sq =>
                             {
                                 List<object> filteredUserAnswers;
                                 if ((skill.Type == 0 && section.SectionType == 1) || skill.Type == 1 && section.SectionType == 8)
@@ -138,10 +141,23 @@ namespace Service
             return result;
         }
 
-
+        
         public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
-            var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
+            if(model.UserAnswers.Values.First().Skill == 2)
+            {
+                model = await _geminiService.ScoreAndExplain(model);
+            }
+            if(model.UserAnswers.Values.First().Skill == 3)
+            {
+                model = await _geminiService.ScoreAndExplainSpeaking(model);
+            }
+            if (model.UserAnswers.Values.First().Skill == 0 || model.UserAnswers.Values.First().Skill == 1)
+            {
+                model = await _geminiService.ExplainListeningAndReading(model);
+            }
+
+            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
@@ -154,11 +170,7 @@ namespace Service
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
-                if(questionDetail.Skill == 2)
-                {
-                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
-                }
-
+                await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
 
                 bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
 
@@ -202,9 +214,9 @@ namespace Service
                 UserId = userId,
                 TestId = testId,
                 SkillType = model.UserAnswers.Values.First().Skill,
-                Score = !writingSpeakingCondition ? ScaleScore(totalScore, totalQuestion) : skillScore,
+                Score = !writingSpeakingCondition ? ScaleScore(totalScore, model.TotalQuestions) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
-                TotalQuestion = totalQuestion,
+                TotalQuestion = model.TotalQuestions,
                 TestDate = DateTime.UtcNow,
                 TimeMinutesTaken = model.TimeMinutesTaken,
                 SecondMinutesTaken = model.TimeSecondsTaken,
@@ -251,6 +263,8 @@ namespace Service
                             return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                         else if (sectionType == 6)
                             return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
+                        else if(sectionType == 5)
+                            return correctAnswers[0].Id == usewrAnswers[0].AnswerId;
                         else
                             return correctAnswers[0].AnswerText == usewrAnswers[0].AnswerText;
                     default:
@@ -278,6 +292,7 @@ namespace Service
 
             return correctIds.SetEquals(userAnswerIds);
         }
+
 
 
         private decimal ScaleScore(decimal rawScore, int totalQuestion)
@@ -346,6 +361,11 @@ namespace Service
 
         public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, int role)
         {
+            var isExistedTestName = await _testExamRepository.CheckExistedName(userId, model.TestName);
+            if (isExistedTestName)
+            {
+                throw new Exception("Duplicate name");
+            }
             return await _testExamRepository.AddTestAsync(userId, model, role);
         }
 

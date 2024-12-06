@@ -5,6 +5,8 @@ using IService; // Adjust the namespace as needed
 using System.IO;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Service;
+using Entity.Test;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -13,13 +15,59 @@ namespace AIIL.Services.Api.Controllers
     public class CommonController : ControllerBase
     {
         private readonly IBlogStorageService _blobStorageService;
+        private readonly IAzureService _azureService;
+        private readonly IGeminiService _geminiService;
 
-        public CommonController(IBlogStorageService blobStorageService)
+
+
+        public CommonController(IBlogStorageService blobStorageService, IAzureService azureService, IGeminiService geminiService)
         {
             _blobStorageService = blobStorageService;
+            _azureService = azureService;
+            _geminiService = geminiService;
         }
 
+        [HttpPost("extract-text")]
+        public async Task<IActionResult> ExtractTextFromImage([FromBody]string imageFile)
+        {
+
+            try
+            {
+               
+                    var result = await _azureService.ExtractTextFromImageAsync(imageFile);
+                    return Ok(new { extractedText = result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error processing image: {ex.Message}");
+            }
+        }
+
+
+    
+            /// <summary>
+            /// Transcribes an audio file from Azure Blob Storage.
+            /// </summary>
+            /// <param name="containerName">The name of the Blob container.</param>
+            /// <param name="blobName">The name of the Blob.</param>
+            /// <returns>The transcription result as a string.</returns>
+            [HttpPost("transcribe")]
+            public async Task<IActionResult> TranscribeAudio([FromBody] string fileUrl)
+            {
+                try
+                {
+                    var transcription = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(fileUrl);
+                    return Ok(new { Success = true, Transcription = transcription });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { Success = false, Message = ex.Message });
+                }
+            }
+
         [HttpPost("upload")]
+        [RequestSizeLimit(100_000_000)] // Allow up to 100 MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 100_000_000)] // Multipart form limits
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
