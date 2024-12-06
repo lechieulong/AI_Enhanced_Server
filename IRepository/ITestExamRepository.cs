@@ -52,7 +52,10 @@ namespace IRepository
         Task DeleteQuestionAsync(Guid id); // Added
         Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
         Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test
+        Task<(IEnumerable<TestExam> tests, int totalCount)> GetTestExamByCourseIdAsync(Guid courseId, int page, int pageSize);//Get Test by course id
+        Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultByUserIdAsync(Guid courseId, string userId);//Get Test result by user id on a course
         Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId);
+        Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultOfTest(Guid testId);
 
     }
 }
