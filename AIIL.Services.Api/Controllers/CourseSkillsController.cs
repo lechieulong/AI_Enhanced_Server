@@ -140,7 +140,7 @@ namespace API.Controllers
 
             return Ok(new { Description = courseSkill.Description });
         }
-        [HttpGet("GetTestExamsBySkillIdCourse/{classkillIdCoursesId}")]
+        [HttpGet("GetTestExamsBySkillIdCourse")]
         public async Task<IActionResult> GetTestExamsByClassId(Guid skillIdCourse)
         {
             // Gọi repository để lấy danh sách các bài kiểm tra từ database

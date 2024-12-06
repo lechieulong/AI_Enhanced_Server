@@ -998,6 +998,17 @@ namespace Repository
                                  .Where(te => te.LessonId == lessonId)
                                  .ToListAsync();
         }
+        public async Task<List<TestExam>> GetTestExamsBySkillIdCourseIdAsync(Guid skillId)
+        {
+            return await _context.TestExams
+                                 .Where(te => te.SkillIdCourse == skillId)
+                                 .Select(te => new TestExam
+                                 {
+                                     Id = te.Id,
+                                     TestName = te.TestName
+                                 })
+                                 .ToListAsync();
+        }
 
         public async Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId)
         {
