@@ -11,6 +11,7 @@ namespace IRepository.Live
 {
     public interface IStreamSessionRepository
     {
+        Task<StreamSession>  getStreamSession(Guid id);
         Task<IEnumerable<StreamSession>> getStreamSessionsIsLive();
         Task<StreamSession> AddStreamSessionAsync(StreamSession mode);
         Task<StreamSession> UpdateStreamSessionAsync(StreamSession mode);

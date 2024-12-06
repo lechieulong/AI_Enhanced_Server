@@ -32,7 +32,7 @@ namespace Repository
             {
                 Id = 0,
                 Amount = model.Amount,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 PaymentStatus = model.PaymentStatus,
                 UserId = model.UserId,
             };
@@ -52,7 +52,7 @@ namespace Repository
             {
                 Id = model.Id,
                 Amount = model.Amount,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 PaymentStatus = model.PaymentStatus,
                 UserId = model.UserId,
             };
