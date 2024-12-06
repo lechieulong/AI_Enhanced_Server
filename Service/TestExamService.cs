@@ -144,40 +144,45 @@ namespace Service
         
         public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
-            if(model.UserAnswers.Values.First().Skill == 2)
+            var skillType = model.UserAnswers.Values.First().Skill;
+
+            if (skillType == 2)
             {
                 model = await _geminiService.ScoreAndExplain(model);
             }
-            if(model.UserAnswers.Values.First().Skill == 3)
+            if(skillType == 3)
             {
                 model = await _geminiService.ScoreAndExplainSpeaking(model);
             }
-            if (model.UserAnswers.Values.First().Skill == 0 || model.UserAnswers.Values.First().Skill == 1)
-            {
-                model = await _geminiService.ExplainListeningAndReading(model);
-            }
-
-            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
+           
+            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(skillTypeId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
 
             int attemptNumber = await _testExamRepository.GetAttemptCountByTestAndUserAsync(userId, testId);
-
             int year = DateTime.Now.Year;
 
             await _testExamRepository.AddAttemptTestForYear(userId, year);
+
+            //add to userAnsers
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
-                await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
+                if(skillType == 0 || skillType == 1)
+                {
+                    bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
+                    decimal questionScore = isCorrect ? 1 : 0;
+                    int correctQuestion = isCorrect ? 1 : 0;
+                    totalScore += questionScore;
+                    totalCorrectAnswer += correctQuestion;
+                }
+                if(skillType == 2 || skillType == 3)
+                {
+                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
 
-                bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
+                }
 
-                decimal questionScore = isCorrect ? 1 : 0;
-                int correctQuestion = isCorrect ? 1 : 0;
-                totalScore += questionScore;
-                totalCorrectAnswer += correctQuestion;
                 foreach (var answer in questionDetail.Answers)
                 {
                     var userAnswer = new UserAnswers
@@ -193,17 +198,22 @@ namespace Service
                     userAnswers.Add(userAnswer);
 
                 }
-
             }
 
             await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
-         
-            var writingSpeakingCondition = model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3;
+            if (skillType == 1 || skillType == 0) {
+                foreach (var partId in model.PartIds)
+                {
+                    await _geminiService.ExplainListeningAndReading(partId, skillType);
 
+                }
+            }
+
+            var writingSpeakingCondition = skillType == 2 || skillType == 3;
 
             decimal skillScore = 0;
-            if (model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3)
+            if (writingSpeakingCondition)
             {
                 skillScore = await CalculateWritingOrSpeakingScore(model.UserAnswers.Values, model.TotalQuestions);
             }
@@ -213,7 +223,7 @@ namespace Service
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 TestId = testId,
-                SkillType = model.UserAnswers.Values.First().Skill,
+                SkillType = skillType,
                 Score = !writingSpeakingCondition ? ScaleScore(totalScore, model.TotalQuestions) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
                 TotalQuestion = model.TotalQuestions,

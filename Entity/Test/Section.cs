@@ -7,7 +7,6 @@
         public string SectionGuide { get; set; } 
         public int SectionType { get; set; }
         public int SectionOrder { get; set; }
-
         public string SectionContext { get; set; }
         public string Explain { get; set; }
         public Part Part { get; set; } 
