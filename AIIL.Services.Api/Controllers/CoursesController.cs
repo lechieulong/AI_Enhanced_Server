@@ -14,6 +14,7 @@ using Repository;
 using AutoMapper;
 using Model.Course;
 using System.Security.Claims;
+using Entity.Data;
 
 namespace Auth.Controllers
 {
@@ -26,14 +27,16 @@ namespace Auth.Controllers
         private readonly ICourseSkillRepository _courseSkillRepository;
         private readonly IMapper _mapper;
         private readonly ResponseDto _response;
+        private readonly AppDbContext _context;
 
-        public CoursesController(ICourseRepository repository, IClassRepository classRepository, ICourseSkillRepository courseSkillRepository, IMapper mapper)
+        public CoursesController(ICourseRepository repository, IClassRepository classRepository, ICourseSkillRepository courseSkillRepository, IMapper mapper, AppDbContext context)
         {
             _mapper = mapper;
             _repository = repository;
             _classRepository = classRepository;
             _courseSkillRepository = courseSkillRepository;
             _response = new ResponseDto();
+            _context = context;
         }
 
         [HttpGet]
@@ -130,9 +133,32 @@ namespace Auth.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _repository.DeleteAsync(id);
+            // Tìm course cần xóa
+            var course = await _context.Courses
+                .Include(c => c.Classes)
+                .Include(c => c.Enrollments)
+                .Include(c => c.CourseRatings)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
+            {
+                return NotFound(new { Message = "Course not found" });
+            }
+
+            // Xóa dữ liệu trong các bảng liên quan
+            _context.Classes.RemoveRange(course.Classes);
+            _context.Enrollments.RemoveRange(course.Enrollments);
+            _context.CourseRatings.RemoveRange(course.CourseRatings);
+
+            // Xóa dữ liệu bảng chính
+            _context.Courses.Remove(course);
+
+            // Lưu thay đổi vào database
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
+
 
         [HttpGet("course-info/{courseId}")]
         public async Task<IActionResult> GetCourseInfo(Guid courseId)
