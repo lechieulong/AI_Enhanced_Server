@@ -45,5 +45,6 @@ namespace Entity.CourseFolder
 
         [JsonIgnore]
         public ICollection<CourseRating> CourseRatings { get; set; } = new List<CourseRating>();
+
     }
 }

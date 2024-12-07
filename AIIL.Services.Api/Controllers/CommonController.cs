@@ -133,6 +133,12 @@ namespace AIIL.Services.Api.Controllers
                 path = $"/{id}";
                 useCourseStorage = true; 
             }
+            else if (type.Equals("reportCourse", StringComparison.OrdinalIgnoreCase))
+            {
+                containerName = "reportCourse";
+                path = $"/{id}";
+                useCourseStorage = true;
+            }
             else
             {
                 return BadRequest("Invalid type. Valid types are 'courseLesson', 'class', or 'course'.");

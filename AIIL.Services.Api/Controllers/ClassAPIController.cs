@@ -66,39 +66,39 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ClassDto classDto)
-        {
-            if (classDto == null ||
-                string.IsNullOrWhiteSpace(classDto.ClassName) ||
-                string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
-                classDto.CourseId == Guid.Empty ||
-                classDto.StartDate == DateTime.MinValue ||
-                classDto.EndDate == DateTime.MinValue ||
-                classDto.EndDate <= classDto.StartDate)
+            [HttpPost]
+            public async Task<IActionResult> Create([FromBody] ClassDto classDto)
             {
-                return BadRequest("Invalid class data.");
+                if (classDto == null ||
+                    string.IsNullOrWhiteSpace(classDto.ClassName) ||
+                    string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
+                    classDto.CourseId == Guid.Empty ||
+                    classDto.StartDate == DateTime.MinValue ||
+                    classDto.EndDate == DateTime.MinValue ||
+                    classDto.EndDate <= classDto.StartDate)
+                {
+                    return BadRequest("Invalid class data.");
+                }
+
+                var formattedStartDate = classDto.StartDate.ToString("dd/MM/yyyy");
+                var formattedEndDate = classDto.EndDate.ToString("dd/MM/yyyy");
+
+                var classEntity = new Class
+                {
+                    Id = Guid.NewGuid(),
+                    ClassName = classDto.ClassName,
+                    ClassDescription = classDto.ClassDescription,
+                    CourseId = classDto.CourseId,
+                    StartDate = DateTime.ParseExact(formattedStartDate, "dd/MM/yyyy", null),
+                    EndDate = DateTime.ParseExact(formattedEndDate, "dd/MM/yyyy", null),
+                    IsEnabled = classDto.IsEnabled
+                };
+
+                var createdClass = await _classRepository.CreateAsync(classEntity);
+                var createdClassDto = _mapper.Map<ClassDto>(createdClass);
+
+                return Ok(createdClassDto);
             }
-
-            var formattedStartDate = classDto.StartDate.ToString("dd/MM/yyyy");
-            var formattedEndDate = classDto.EndDate.ToString("dd/MM/yyyy");
-
-            var classEntity = new Class
-            {
-                Id = Guid.NewGuid(),
-                ClassName = classDto.ClassName,
-                ClassDescription = classDto.ClassDescription,
-                CourseId = classDto.CourseId,
-                StartDate = DateTime.ParseExact(formattedStartDate, "dd/MM/yyyy", null),
-                EndDate = DateTime.ParseExact(formattedEndDate, "dd/MM/yyyy", null),
-                IsEnabled = classDto.IsEnabled
-            };
-
-            var createdClass = await _classRepository.CreateAsync(classEntity);
-            var createdClassDto = _mapper.Map<ClassDto>(createdClass);
-
-            return Ok(createdClassDto);
-        }
 
         [HttpPut("update/{classId:guid}")]
         public async Task<ResponseDto> Put(Guid classId, [FromBody] ClassDto classDto)

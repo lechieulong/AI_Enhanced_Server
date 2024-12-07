@@ -17,19 +17,34 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost("set")]
         public IActionResult SetValue([FromQuery] string key, [FromQuery] string value)
         {
-            var db = _redis.GetDatabase();
-            db.StringSet(key, value);
-            return Ok("Value set in Redis");
+            try
+            {
+                var db = _redis.GetDatabase();
+                db.StringSet(key, value);
+                return Ok("Value set in Redis");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("get/{key}")]
         public IActionResult GetValue(string key)
         {
-            var db = _redis.GetDatabase();
-            var value = db.StringGet(key);
-            return value.HasValue ? Ok(value.ToString()) : NotFound("Key not found");
+            try
+            {
+                var db = _redis.GetDatabase();
+                var value = db.StringGet(key);
+                return value.HasValue ? Ok(value.ToString()) : NotFound("Key not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
+
 
 }
 
