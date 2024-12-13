@@ -11,6 +11,7 @@ using IRepository;
 using System.Text.RegularExpressions;
 using Common;
 using System.Linq;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Service
 {
@@ -202,80 +203,78 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 ";
     }
 
-        public async Task<SubmitTestDto> ScoreAndExplainSpeaking(SubmitTestDto model)
-        {
-            var client = _clientFactory.CreateClient();
 
-            foreach (var userAnswer in model.UserAnswers.Values)
+        public async Task<SpeakingResponseDto> ScoreSpeaking(SpeakingModel speakingModel)
+        {
+            var speakingExplains = new SpeakingResponseDto();
+
+            var client = _clientFactory.CreateClient();
+            var requestData = new
             {
-                var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
-                var requestData = new
-                {
-                    contents = new[]
-                    {
+                contents = new[]
+                 {
                 new
                 {
                     parts = new[]
                     {
-                        new { text = BuildPromptSpeaking(questionName, userAnswer.Answers[0].AnswerText,2) }
+                        new { text = BuildPromptSpeaking(speakingModel.QuestionName, speakingModel.Answer,speakingModel.PartNumber)
+
+                        }
                     }
                 }
-                 }
-                };
-
-                var response = await client.PostAsync(
-                    _apiUrl,
-                    new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
-                );
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"API call failed with status code: {response.StatusCode}");
                 }
+            };
 
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            var response = await client.PostAsync(
+                _apiUrl,
+                new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+            );
 
-                // Extract Overall Score and Feedback
-                var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
-
-                if (!string.IsNullOrEmpty(result))
-                {
-                    // Use a regular expression to extract the Overall Score
-                    var scoreMatch = Regex.Match(result, @"\*\*Overall Score:\*\*\s*([\d\.]+)");
-                    if (scoreMatch.Success)
-                    {
-                        var overallScore = scoreMatch.Groups[1].Value;
-                        userAnswer.OverallScore = overallScore;
-                    }
-
-                    // Extract Feedback
-                    var feedbackMatch = Regex.Match(result, @"\*\*Feedback:\*\*\s*([\s\S]+?)\*\*Suggestions for Improvement:\*\*");
-                    string feedback = string.Empty;
-                    if (feedbackMatch.Success)
-                    {
-                        feedback = feedbackMatch.Groups[1].Value.Trim();
-                    }
-
-                    // Extract Suggestions for Improvement
-                    var suggestionsMatch = Regex.Match(result, @"\*\*Suggestions for Improvement:\*\*\s*([\s\S]+)");
-                    string suggestions = string.Empty;
-                    if (suggestionsMatch.Success)
-                    {
-                        suggestions = suggestionsMatch.Groups[1].Value.Trim();
-                    }
-
-                    // Concatenate Feedback and Suggestions into Explain field
-                    userAnswer.Explain = $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
-                }
-
-
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API call failed with status code: {response.StatusCode}");
             }
 
-            return model;
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+            // Extract Overall Score and Feedback
+            var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                // Use a regular expression to extract the Overall Score
+                var scoreMatch = Regex.Match(result, @"\*\*Overall Score:\*\*\s*([\d\.]+)");
+                if (scoreMatch.Success)
+                {
+                    var overallScore = scoreMatch.Groups[1].Value;
+                    speakingExplains.Score = overallScore;
+                }
+
+                // Extract Feedback
+                var feedbackMatch = Regex.Match(result, @"\*\*Feedback:\*\*\s*([\s\S]+?)\*\*Suggestions for Improvement:\*\*");
+                string feedback = string.Empty;
+                if (feedbackMatch.Success)
+                {
+                    feedback = feedbackMatch.Groups[1].Value.Trim();
+                }
+
+                // Extract Suggestions for Improvement
+                var suggestionsMatch = Regex.Match(result, @"\*\*Suggestions for Improvement:\*\*\s*([\s\S]+)");
+                string suggestions = string.Empty;
+                if (suggestionsMatch.Success)
+                {
+                    suggestions = suggestionsMatch.Groups[1].Value.Trim();
+                }
+
+                // Concatenate Feedback and Suggestions into Explain field
+                speakingExplains.Explain = $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
+            }
+
+            return result;
         }
 
-
+ 
         private string BuildPromptSpeaking(string questionName, string answer, int part)
         {
             return $@"
@@ -385,8 +384,18 @@ Please evaluate the response based on the following criteria:
                 }
                 else
                     {
-                    var urlAudio = await _testExamRepository.GetUrlAudioByPartId(partId);
-                    var script = await _azureService.ProcessAndTranscribeAudioFromBlobAsync(urlAudio);
+                    string script = string.Empty;
+                    var part = await _testExamRepository.GetPartNumber(partId);
+
+
+                    while (part.AudioProcessingStatus == 0) 
+                    {
+                        await Task.Delay(2000); 
+                        part = await _testExamRepository.GetPartNumber(partId);
+                    }
+
+                   
+                     script = part.ScriptAudio;
                     if (isHasSectionContext)
                              finalPrompt = BuildExplainListeningPrompt(prompts.ToString(), script);
                     else
