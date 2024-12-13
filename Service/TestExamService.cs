@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Service
 {
@@ -72,6 +73,7 @@ namespace Service
                         partNumber = part.PartNumber,
                         contentText = part.ContentText,
                         audio = part.Audio,
+                        script = part.ScriptAudio,
                         image = part.Image,
                         sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
@@ -150,10 +152,7 @@ namespace Service
             {
                 model = await _geminiService.ScoreAndExplain(model);
             }
-            if(skillType == 3)
-            {
-                model = await _geminiService.ScoreAndExplainSpeaking(model);
-            }
+           
            
             //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(skillTypeId);
             var userAnswers = new List<UserAnswers>();
@@ -307,8 +306,29 @@ namespace Service
 
         private decimal ScaleScore(decimal rawScore, int totalQuestion)
         {
-            if (totalQuestion == 0) return 0; // Prevent division by zero
-            return Math.Round((rawScore / totalQuestion) * 9, 2);
+            decimal score = rawScore / totalQuestion; 
+            if (score < 0.25m)
+                return 0;
+            if (score >= 0.25m && score < 0.5m)
+                return 0.5m;
+            if (score >= 0.5m && score < 0.75m)
+                return 0.5m;
+            if (score >= 0.75m && score < 1.0m)
+                return 1m;
+
+            var integralPart = Math.Floor(score); // Get the integer part of the score
+            var decimalPart = score - integralPart;
+
+            if (decimalPart < 0.25m)
+                return integralPart;
+            if (decimalPart >= 0.25m && decimalPart < 0.5m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.5m && decimalPart < 0.75m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.75m)
+                return integralPart + 1m;
+
+            return score;
         }
 
         private async Task<decimal> CalculateWritingOrSpeakingScore(IEnumerable<UserAnswersDto> userAnswers, int totalQuestions)

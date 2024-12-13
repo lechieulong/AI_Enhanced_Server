@@ -5,8 +5,10 @@ using Entity.CourseFolder;
 using Entity.Data;
 using Entity.Test;
 using IRepository;
+using IService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Model;
 using Model.Test;
@@ -21,13 +23,15 @@ namespace Repository
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
-
-        public TestExamRepository(AppDbContext context, IMapper mapper)
+        private readonly IAzureService _azureService;
+        private readonly IServiceProvider _serviceProvider;
+        public TestExamRepository(AppDbContext context, IMapper mapper, IAzureService azureService, IServiceProvider serviceProvider)
         {
             _context = context;
             _mapper = mapper;
+            _azureService = azureService;
+            _serviceProvider = serviceProvider;
         }
-
         public async Task SaveUserAnswerAsync(List<UserAnswers> userAnswers)
         {
             await _context.UserAnswers.AddRangeAsync(userAnswers);
@@ -215,6 +219,27 @@ namespace Repository
                                 Skill = skill,
                                 Sections = new List<Section>()
                             };
+
+                            if ( skill.Type == 1 && !string.IsNullOrWhiteSpace(partDto.Audio))
+                            {
+                                part.AudioProcessingStatus = 0;
+                                var partId = part.Id;
+                                Task.Run(async () =>
+                                {
+                                    using (var scope = _serviceProvider.CreateScope()) // Create a new scope
+                                    {
+                                        var scopedContext = scope.ServiceProvider.GetRequiredService<AppDbContext>(); // Get a new instance of DbContext
+                                        string audioText = await _azureService.ProcessAndTranscribeAudioCreateInSkills(partDto.Audio);
+                                        Console.WriteLine("Test convert ended");
+
+                                        await UpdatePartContentTextAsync(scopedContext, partId, audioText);
+                                        Console.WriteLine("Convert successfully.");
+                                    }
+                                });
+
+
+                            }
+
                             int sectionOrder = 1;
                             if (partDto.Sections != null && partDto.Sections.Any())
                             {
@@ -358,6 +383,40 @@ namespace Repository
             }
         }
 
+        private async Task UpdatePartContentTextAsync(AppDbContext scopedContext, Guid partId, string audioText)
+        {
+            try
+            {
+                var part = await scopedContext.Parts.FirstOrDefaultAsync(p => p.Id == partId);
+
+                if (part == null)
+                {
+                    Console.WriteLine($"Part with Id {partId} not found.");
+                    return;
+                }
+
+                part.ScriptAudio = audioText;
+                part.AudioProcessingStatus = 1;
+
+                scopedContext.Parts.Update(part);
+
+                // Save changes to the database
+                await scopedContext .SaveChangesAsync();
+                Console.WriteLine($"Successfully updated part with Id {partId}.");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Log specific database-related errors
+                Console.WriteLine($"Database update error: {dbEx.Message}");
+                Console.WriteLine($"Stack Trace: {dbEx.StackTrace}");
+            }
+            catch (Exception ex)
+            {
+                // Log any other general errors
+                Console.WriteLine($"Error updating part with Id {partId}: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+            }
+        }
 
         public async Task<List<Answer>> GetAnswerByQuestionId(Guid questionId)
         {
@@ -918,7 +977,7 @@ namespace Repository
                     te => te.Id,
                     (tr, te) => new { TestResult = tr, TestExam = te }
                 )
-                .Where(joined => joined.TestExam.CourseId == courseId && joined.TestResult.UserId == Guid.Parse(userId))
+                .Where(joined =>  joined.TestResult.UserId == Guid.Parse(userId))
                 .Select(joined => new
                 {
                     TestResult = joined.TestResult,

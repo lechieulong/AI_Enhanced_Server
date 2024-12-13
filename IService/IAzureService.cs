@@ -10,5 +10,6 @@ namespace IService
     {
         Task<string> ExtractTextFromImageAsync(string imageUrl);
         Task<string> ProcessAndTranscribeAudioFromBlobAsync(string fileUrl);
+        Task<string> ProcessAndTranscribeAudioCreateInSkills(string fileUrl);
     }
 }
