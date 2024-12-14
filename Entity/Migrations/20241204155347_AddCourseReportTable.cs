@@ -11,9 +11,6 @@ namespace Entity.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "FinalTestRelationship");
-
             migrationBuilder.CreateTable(
                 name: "CourseReport",
                 columns: table => new
