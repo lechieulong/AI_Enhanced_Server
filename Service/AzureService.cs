@@ -65,8 +65,8 @@ namespace Service
 
 
 
-
-    public async Task<string> ProcessAndTranscribeAudioFromBlobAsync(string blobUri)
+     
+        public async Task<string> ProcessAndTranscribeAudioFromBlobAsync(string blobUri)
         {
             string localFilePath = await DownloadFileFromBlobAsync(blobUri);
 
@@ -78,6 +78,22 @@ namespace Service
 
             return await TranscribeAudioFromBlobAsync(wavFilePath);
         }
+
+
+        public async Task<string> ProcessAndTranscribeAudioCreateInSkills(string blobUri)
+        {
+            string localFilePath = await DownloadFileFromBlobAsync(blobUri);
+
+            string wavFilePath = localFilePath;
+            if (Path.GetExtension(localFilePath).ToLower() != ".wav")
+            {
+                wavFilePath = ConvertToWav(localFilePath);
+            }
+
+            return await TranscribeAudioFromBlobAsync(wavFilePath);
+        }
+
+
 
         private async Task<string> DownloadFileFromBlobAsync(string blobUri)
         {

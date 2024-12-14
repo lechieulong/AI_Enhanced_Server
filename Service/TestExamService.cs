@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Service
 {
@@ -72,6 +73,7 @@ namespace Service
                         partNumber = part.PartNumber,
                         contentText = part.ContentText,
                         audio = part.Audio,
+                        script = part.ScriptAudio,
                         image = part.Image,
                         sections = part.Sections.OrderBy(s => s.SectionOrder).Select(section => new
                         {
@@ -144,40 +146,42 @@ namespace Service
         
         public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
-            if(model.UserAnswers.Values.First().Skill == 2)
+            var skillType = model.UserAnswers.Values.First().Skill;
+
+            if (skillType == 2)
             {
                 model = await _geminiService.ScoreAndExplain(model);
             }
-            if(model.UserAnswers.Values.First().Skill == 3)
-            {
-                model = await _geminiService.ScoreAndExplainSpeaking(model);
-            }
-            if (model.UserAnswers.Values.First().Skill == 0 || model.UserAnswers.Values.First().Skill == 1)
-            {
-                model = await _geminiService.ExplainListeningAndReading(model);
-            }
-
-            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(model.UserAnswers.Values.First().SkillId);
+           
+           
+            //var totalQuestion = await _testExamRepository.GetTotalQuestionBySkillId(skillTypeId);
             var userAnswers = new List<UserAnswers>();
             decimal totalScore = 0;
             int totalCorrectAnswer = 0;
 
             int attemptNumber = await _testExamRepository.GetAttemptCountByTestAndUserAsync(userId, testId);
-
             int year = DateTime.Now.Year;
 
             await _testExamRepository.AddAttemptTestForYear(userId, year);
+
+            //add to userAnsers
             foreach (var entry in model.UserAnswers)
             {
                 var questionDetail = entry.Value;
-                await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
+                if(skillType == 0 || skillType == 1)
+                {
+                    bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
+                    decimal questionScore = isCorrect ? 1 : 0;
+                    int correctQuestion = isCorrect ? 1 : 0;
+                    totalScore += questionScore;
+                    totalCorrectAnswer += correctQuestion;
+                }
+                if(skillType == 2 || skillType == 3)
+                {
+                    await _testExamRepository.UpdateExplainQuestionAsync(questionDetail.QuestionId, questionDetail.Explain);
 
-                bool isCorrect = await ValidateAnswer(questionDetail.QuestionId, questionDetail.Answers, questionDetail.SectionType, questionDetail.Skill);
+                }
 
-                decimal questionScore = isCorrect ? 1 : 0;
-                int correctQuestion = isCorrect ? 1 : 0;
-                totalScore += questionScore;
-                totalCorrectAnswer += correctQuestion;
                 foreach (var answer in questionDetail.Answers)
                 {
                     var userAnswer = new UserAnswers
@@ -193,17 +197,22 @@ namespace Service
                     userAnswers.Add(userAnswer);
 
                 }
-
             }
 
             await _testExamRepository.SaveUserAnswerAsync(userAnswers);
 
-         
-            var writingSpeakingCondition = model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3;
+            if (skillType == 1 || skillType == 0) {
+                foreach (var partId in model.PartIds)
+                {
+                    await _geminiService.ExplainListeningAndReading(partId, skillType);
 
+                }
+            }
+
+            var writingSpeakingCondition = skillType == 2 || skillType == 3;
 
             decimal skillScore = 0;
-            if (model.UserAnswers.Values.First().Skill == 2 || model.UserAnswers.Values.First().Skill == 3)
+            if (writingSpeakingCondition)
             {
                 skillScore = await CalculateWritingOrSpeakingScore(model.UserAnswers.Values, model.TotalQuestions);
             }
@@ -213,7 +222,7 @@ namespace Service
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 TestId = testId,
-                SkillType = model.UserAnswers.Values.First().Skill,
+                SkillType = skillType,
                 Score = !writingSpeakingCondition ? ScaleScore(totalScore, model.TotalQuestions) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
                 TotalQuestion = model.TotalQuestions,
@@ -297,8 +306,29 @@ namespace Service
 
         private decimal ScaleScore(decimal rawScore, int totalQuestion)
         {
-            if (totalQuestion == 0) return 0; // Prevent division by zero
-            return Math.Round((rawScore / totalQuestion) * 9, 2);
+            decimal score = rawScore / totalQuestion; 
+            if (score < 0.25m)
+                return 0;
+            if (score >= 0.25m && score < 0.5m)
+                return 0.5m;
+            if (score >= 0.5m && score < 0.75m)
+                return 0.5m;
+            if (score >= 0.75m && score < 1.0m)
+                return 1m;
+
+            var integralPart = Math.Floor(score); // Get the integer part of the score
+            var decimalPart = score - integralPart;
+
+            if (decimalPart < 0.25m)
+                return integralPart;
+            if (decimalPart >= 0.25m && decimalPart < 0.5m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.5m && decimalPart < 0.75m)
+                return integralPart + 0.5m;
+            if (decimalPart >= 0.75m)
+                return integralPart + 1m;
+
+            return score;
         }
 
         private async Task<decimal> CalculateWritingOrSpeakingScore(IEnumerable<UserAnswersDto> userAnswers, int totalQuestions)

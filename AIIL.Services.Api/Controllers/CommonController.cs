@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using Service;
 using Entity.Test;
+using Model.Test;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -27,6 +28,26 @@ namespace AIIL.Services.Api.Controllers
             _geminiService = geminiService;
         }
 
+        
+
+
+        [HttpPost("scoreSpeaking")]
+        public async Task<IActionResult> ScoreSpeaking([FromBody] SpeakingModel model)
+        {
+
+            try
+            {
+
+                var result = await _geminiService.ScoreSpeaking(model);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error processing image: {ex.Message}");
+            }
+        }
+
+
         [HttpPost("extract-text")]
         public async Task<IActionResult> ExtractTextFromImage([FromBody]string imageFile)
         {
@@ -45,12 +66,6 @@ namespace AIIL.Services.Api.Controllers
 
 
     
-            /// <summary>
-            /// Transcribes an audio file from Azure Blob Storage.
-            /// </summary>
-            /// <param name="containerName">The name of the Blob container.</param>
-            /// <param name="blobName">The name of the Blob.</param>
-            /// <returns>The transcription result as a string.</returns>
             [HttpPost("transcribe")]
             public async Task<IActionResult> TranscribeAudio([FromBody] string fileUrl)
             {
@@ -132,6 +147,12 @@ namespace AIIL.Services.Api.Controllers
                 containerName = "course";
                 path = $"/{id}";
                 useCourseStorage = true; 
+            }
+            else if (type.Equals("reportCourse", StringComparison.OrdinalIgnoreCase))
+            {
+                containerName = "reportCourse";
+                path = $"/{id}";
+                useCourseStorage = true;
             }
             else
             {

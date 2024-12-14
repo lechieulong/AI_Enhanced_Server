@@ -11,8 +11,8 @@ namespace IService
     public interface IGeminiService
     {
         Task<SubmitTestDto> ScoreAndExplain(SubmitTestDto model);
-        Task<SubmitTestDto> ScoreAndExplainSpeaking(SubmitTestDto model);
-        Task<SubmitTestDto> ExplainListeningAndReading(SubmitTestDto model);
-
+        //Task<SubmitTestDto> ScoreAndExplainSpeaking(SubmitTestDto model);
+        Task ExplainListeningAndReading(Guid partId, int skillType);
+        Task<SpeakingResponseDto> ScoreSpeaking(SpeakingModel model);
     }
 }

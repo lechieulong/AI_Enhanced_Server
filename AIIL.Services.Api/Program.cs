@@ -26,14 +26,18 @@ using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
- void ConfigureServices(IServiceCollection services)
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
 
-    services.AddSingleton<IRedisService, RedisService>();
+    var configuration = ConfigurationOptions.Parse("172.17.0.2:6379"); // Thay đổi theo IP của Docker container
+    configuration.AbortOnConnectFail = false;
+    configuration.ConnectTimeout = 10000;
+    return ConnectionMultiplexer.Connect(configuration);
+});
 
-    services.AddControllers();
-}
+
+
 
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -98,7 +102,7 @@ builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
 builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 builder.Services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
 builder.Services.AddScoped<IBookedScheduleSessionRepository, BookedScheduleSessionRepository>();
-
+builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
 
@@ -133,10 +137,12 @@ builder.Services.AddScoped<IUser_TicketRepository, User_TicketRepository>();
 builder.Services.AddScoped<ICourseSkillRepository, CourseSkillRepository>();
 builder.Services.AddScoped<ICoursePartRepository, CoursePartRepository>();
 builder.Services.AddScoped<ICourseLessonRepository, CourseLessonRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRepository>();
 builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddScoped<IClassFileRepository, ClassFileRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+//builder.Services.AddHostedService<LiveStreamBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
