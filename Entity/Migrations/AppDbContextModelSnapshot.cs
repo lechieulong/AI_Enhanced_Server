@@ -743,7 +743,7 @@ namespace Entity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PaymentStatus")
+                    b.Property<string>("PaymentStatus");
                     b.Property<bool>("FeedbackOption")
                         .HasColumnType("bit");
 
