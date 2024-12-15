@@ -12,6 +12,9 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+
+        public Task UpdateExplainSection(Guid sectionId, string explain);
+        Task<List<Section>> GetSectionsByPartId(Guid partId);
         Task<string> GetQuestionNameById(Guid questionId);
         Task<Part> GetPartNumber(Guid partId);
         Task<string> GetContentText(Guid partId);

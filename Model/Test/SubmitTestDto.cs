@@ -13,5 +13,6 @@ using System.Threading.Tasks;
             public int TimeMinutesTaken { get; set; }  // Time in minutes
             public int TimeSecondsTaken { get; set; }  // Time in seconds
             public int TotalQuestions { get; set; }
+            public List<Guid> PartIds { get; set; } 
         }
     }

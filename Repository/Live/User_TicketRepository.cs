@@ -27,14 +27,13 @@ namespace Repository.Live
             return await _context.User_Tickets.FirstOrDefaultAsync(o => o.Id.Equals(Id));
         }
 
-        public async Task<User_Ticket> GetUser_TicketByUserIdTicketIdAsync(Guid TicketId, String UserId)
+        public async Task<User_Ticket?> FindUserTicketByUserIdAndLiveStreamIdAsync(Guid liveStreamId, String UserId)
         {
-            var User_Ticket = await _context.User_Tickets.FirstOrDefaultAsync(o => o.TicketId.Equals(TicketId) && o.UserId.Equals(UserId));
-            if (User_Ticket != null)
-            {
-                return User_Ticket;
-            }
-            return null;
+            var currentTime = DateTime.Now;
+            return await _context.User_Tickets
+        .Include(ut => ut.Ticket)
+        .Where(ut => ut.UserId == UserId && ut.Ticket.LiveStreamId == liveStreamId && ut.Ticket.StartTime <= currentTime && ut.Ticket.EndTime > currentTime)
+        .FirstOrDefaultAsync();
         }
         public async Task<User_Ticket> AddUser_TicketAsync(User_Ticket model)
         {

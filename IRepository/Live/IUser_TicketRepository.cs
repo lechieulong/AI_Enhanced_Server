@@ -11,7 +11,7 @@ namespace IRepository.Live
     {
         Task<IEnumerable<User_Ticket>> GetUser_TicketAsync();
         Task<User_Ticket> GetUser_TicketByIdAsync(Guid Id);
-        Task<User_Ticket> GetUser_TicketByUserIdTicketIdAsync(Guid TicketId, string UserId);
+        Task<User_Ticket> FindUserTicketByUserIdAndLiveStreamIdAsync(Guid liveStreamId, String UserId);
         Task<User_Ticket> AddUser_TicketAsync(User_Ticket model);
     }
 }

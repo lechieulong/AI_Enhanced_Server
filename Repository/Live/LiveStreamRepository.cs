@@ -30,10 +30,11 @@ namespace Repository.Live
         {
             var LiveStream = new LiveStream
             {
-                Id=id,
-                CreateDate=DateTime.Now,
-                UpdateDate=DateTime.Now,
-                UserId=id.ToString(),
+                Id = id,
+                Status = 1,
+                CreateDate = DateTime.Now,
+                UpdateDate = DateTime.Now,
+                UserId = id.ToString(),
             };
             _context.LiveStreams.Add(LiveStream);
 
