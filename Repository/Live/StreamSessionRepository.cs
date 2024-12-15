@@ -2,6 +2,7 @@
 using Entity.Live;
 using IRepository.Live;
 using Microsoft.EntityFrameworkCore;
+using Model.Live;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +64,22 @@ namespace Repository.Live
             await _context.SaveChangesAsync();
 
             return mode;
+        }
+        public async Task<(IEnumerable<StreamSession> lives, int totalCount)> GetLivesAsync(int page, int pageSize, string? searchQuery)
+        {
+
+            var totalCount = await _context.StreamSessions.Where(o => o.Status == 1).CountAsync();
+            var live = new List<StreamSession>();
+            if (searchQuery != null)
+            {
+                live = await _context.StreamSessions.Where(o => o.Status == 1&&o.Name.Contains(searchQuery)).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            }
+            else
+            {
+                live = await _context.StreamSessions.Where(o => o.Status == 1).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+
+            }
+            return (live, totalCount);
         }
 
     }

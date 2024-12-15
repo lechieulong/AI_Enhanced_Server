@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Entity;
 using Entity.Data;
+using Entity.Payment;
 using Entity.Test;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +69,25 @@ namespace Repository
             model.Id = Transaction.Id;
             return model;
 
+        }
+        public async Task<(IEnumerable<Transaction> transactions, int totalCount)> GetTransactionAsyn(int page, int pageSize, string? searchQuery)
+        {
+
+            var totalCount = await _context.Transactions.CountAsync();
+            var transactions = new List<Transaction>();
+            if (searchQuery != null)
+            {
+                transactions = await _context.Transactions.Include(u => u.User).OrderBy(u => u.CreatedAt).Where(u => u.User.Name.Contains(searchQuery)).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            }
+            else
+            {
+                transactions = await _context.Transactions.Include(u => u.User).OrderBy(u => u.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+
+            }
+
+
+
+            return (transactions, totalCount);
         }
     }
 }
