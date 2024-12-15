@@ -1,6 +1,5 @@
 ﻿using IRepository;
 using Microsoft.AspNetCore.Mvc;
-using Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using IRepository.Live;
@@ -8,6 +7,7 @@ using Model.Live;
 using AutoMapper;
 using Entity.Live;
 using Model.Payment;
+using Entity.Payment;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -22,6 +22,30 @@ namespace AIIL.Services.Api.Controllers
         {
             _repository = repository;
             _Mapper = Mapper; 
+        }
+        [HttpGet("transactions")]
+        public async Task<IActionResult> GetTransactions(int page, int pageSize, string? searchQuery)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
+
+            var (Transactions, totalCount) = await _repository.GetTransactionAsyn(page, pageSize, searchQuery);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                Transactions = _Mapper.Map<List<TransactionModel>>(Transactions),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize) // Calculate total pages safely
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

@@ -8,6 +8,8 @@ using Model.Live;
 using AutoMapper;
 using Entity.Live;
 using Model.Payment;
+using Microsoft.AspNetCore.Authorization;
+using Repository;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -50,7 +52,7 @@ namespace AIIL.Services.Api.Controllers
             return Ok(_Mapper.Map<GiftModel>(result));
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateGiftce([FromBody] GiftModel model)
+        public async Task<IActionResult> UpdateGift([FromBody] GiftModel model)
         {
             if (model == null)
             {
@@ -59,6 +61,37 @@ namespace AIIL.Services.Api.Controllers
             var gift = _Mapper.Map<Gift>(model);
             var result = await _repository.UpdateGiftAsync(gift);
             return Ok(_Mapper.Map<GiftModel>(result));
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGift(Guid id)
+        {
+            var result = await _repository.DeleteAsync(id);
+            return Ok(_Mapper.Map<GiftModel>(result));
+        }
+
+        [HttpGet("gifts")]
+        public async Task<IActionResult> GetGifts(int page, int pageSize, string? searchQuery)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
+
+            var (gifts, totalCount) = await _repository.GetUsersAsync(page, pageSize, searchQuery);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                gifts = _Mapper.Map<List<GiftModel>>(gifts),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize) // Calculate total pages safely
+            };
+
+            return Ok(response);
         }
     }
 }
