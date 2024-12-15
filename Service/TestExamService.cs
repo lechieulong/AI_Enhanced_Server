@@ -304,9 +304,9 @@ namespace Service
 
 
 
-        private decimal ScaleScore(decimal rawScore, int totalQuestion)
+        private decimal ScaleScore(decimal correctQuestion, int totalQuestion)
         {
-            decimal score = rawScore / totalQuestion; 
+            decimal score =( correctQuestion / totalQuestion) * 9; 
             if (score < 0.25m)
                 return 0;
             if (score >= 0.25m && score < 0.5m)
