@@ -30,7 +30,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
 
-    var configuration = ConfigurationOptions.Parse("172.17.0.2:6379"); // Thay đổi theo IP của Docker container
+    var configuration = ConfigurationOptions.Parse("172.17.0.2"); // Thay đổi theo IP của Docker container
     configuration.AbortOnConnectFail = false;
     configuration.ConnectTimeout = 10000;
     return ConnectionMultiplexer.Connect(configuration);

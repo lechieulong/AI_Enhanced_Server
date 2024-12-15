@@ -19,7 +19,7 @@ namespace Entity
         public Class Class { get; set; }
 
         [Required]
-        public DateTime UploadDate { get; set; } = DateTime.UtcNow; 
+        public string UploadDate { get; set; }
 
         public string Topic { get; set; }
 

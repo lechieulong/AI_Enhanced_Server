@@ -15,18 +15,18 @@ namespace Entity
 
         [ForeignKey("CourseId")]
         [JsonIgnore]
-        public Course? Course { get; set; }
-        public Guid? ClassId { get; set; } 
+        public Course Course { get; set; }
+        public Guid ClassId { get; set; } 
 
         [ForeignKey("ClassId")]
         [JsonIgnore]
-        public Class? Class { get; set; }
+        public Class Class { get; set; }
 
         [Required]
         public string UserId { get; set; }
 
         [ForeignKey("UserId")]
         [JsonIgnore]
-        public ApplicationUser? User { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

@@ -19,5 +19,6 @@ namespace IRepository
         Task UpdateClassEnabledStatusAsync(Guid classId, bool isEnabled);
         Task<Enrollment> GetEnrollmentAsync(Guid courseId, string userId);
         Task<Class> GetEntityByIdAsync(Guid classId);
+        Task<List<object>> GetUnenrolledClassesAsync(Guid courseId, string userId);
     }
 }

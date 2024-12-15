@@ -2,6 +2,7 @@
 using Entity;
 using IRepository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Model;
 using NPOI.Util;
 using Repository;
@@ -67,35 +68,33 @@ namespace AIIL.Services.Api.Controllers
             return _response;
         }
             [HttpPost]
-            public async Task<IActionResult> Create([FromBody] ClassDto classDto)
+            public async Task<IActionResult> Create([FromBody] CreateClassDto classDto)
             {
-                if (classDto == null ||
-                    string.IsNullOrWhiteSpace(classDto.ClassName) ||
-                    string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
-                    classDto.CourseId == Guid.Empty ||
-                    classDto.StartDate == DateTime.MinValue ||
-                    classDto.EndDate == DateTime.MinValue ||
-                    classDto.EndDate <= classDto.StartDate)
-                {
-                    return BadRequest("Invalid class data.");
-                }
 
-                var formattedStartDate = classDto.StartDate.ToString("dd/MM/yyyy");
-                var formattedEndDate = classDto.EndDate.ToString("dd/MM/yyyy");
+            if (classDto == null ||
+                string.IsNullOrWhiteSpace(classDto.ClassName) ||
+                string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
+                classDto.CourseId == Guid.Empty ||
+                string.IsNullOrWhiteSpace(classDto.StartDate) ||
+                string.IsNullOrWhiteSpace(classDto.EndDate))
+            {
+                return BadRequest("Invalid class data.");
+            }
 
-                var classEntity = new Class
+            var classEntity = new Class
                 {
                     Id = Guid.NewGuid(),
                     ClassName = classDto.ClassName,
                     ClassDescription = classDto.ClassDescription,
                     CourseId = classDto.CourseId,
-                    StartDate = DateTime.ParseExact(formattedStartDate, "dd/MM/yyyy", null),
-                    EndDate = DateTime.ParseExact(formattedEndDate, "dd/MM/yyyy", null),
-                    IsEnabled = classDto.IsEnabled
-                };
+                    StartDate = classDto.StartDate,
+                    EndDate = classDto.EndDate,
+                    IsEnabled = classDto.IsEnabled,
+                    ImageUrl = classDto.ImageUrl,
+            };
 
                 var createdClass = await _classRepository.CreateAsync(classEntity);
-                var createdClassDto = _mapper.Map<ClassDto>(createdClass);
+                var createdClassDto = _mapper.Map<CreateClassDto>(createdClass);
 
                 return Ok(createdClassDto);
             }
@@ -241,5 +240,25 @@ namespace AIIL.Services.Api.Controllers
 
             return Ok(testExams);
         }
+
+        [HttpGet("unenrolled")]
+        public async Task<IActionResult> GetUnenrolledClasses([FromQuery] Guid courseId, [FromQuery] string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("User ID is required.");
+            }
+
+            try
+            {
+                var unenrolledClasses = await _classRepository.GetUnenrolledClassesAsync(courseId, userId);
+                return Ok(unenrolledClasses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 }

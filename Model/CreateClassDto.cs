@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Model
 {
-    public class ClassDto
+    public class CreateClassDto
     {
-        public Guid Id { get; set; }
         public string ClassName { get; set; }
         public string ClassDescription { get; set; }
         public Guid CourseId { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public bool IsEnabled { get; set; } = true;
+        public string? ImageUrl { get; set; }
         public int EnrollmentCount { get; set; }
     }
 }
