@@ -40,7 +40,7 @@ namespace YourNamespace.Controllers
                 UserId = ratingDto.UserId,
                 RatingValue = ratingDto.RatingValue,
                 Review = ratingDto.Review,
-                RatedAt = DateTime.Now
+                RatedAt = ratingDto.RatedAt
             };
 
             await _repository.AddRatingAsync(rating);

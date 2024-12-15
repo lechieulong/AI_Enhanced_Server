@@ -26,6 +26,6 @@ namespace Entity.CourseFolder
 
         public string Review { get; set; } // Nội dung đánh giá (tùy chọn)
 
-        public DateTime RatedAt { get; set; } = DateTime.Now; // Ngày đánh giá
+        public string RatedAt { get; set; } // Ngày đánh giá
     }
 }

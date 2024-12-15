@@ -13,6 +13,7 @@ namespace Repositories
         Task<IEnumerable<Enrollment>> GetEnrollmentsByUser(string userId);
         Task<bool> CheckEnrollment(Guid courseId, string userId);
         Task<Enrollment> GetEnrollment(Guid courseId, string userId);
+        Task<List<Guid>> GetClassIdsByEnrollment(Guid courseId, string userId);
     }
 
 

@@ -83,7 +83,7 @@ namespace Repository
             {
                 RatingValue = cr.RatingValue,
                 Review = cr.Review,
-                RatedAt = cr.RatedAt.ToString("yyyy/MM/dd"), // Format the date as required
+                RatedAt = cr.RatedAt, // Format the date as required
                 Username = cr.User.UserName,  // Mapping the User's username
                 ImageUrl = cr.User.ImageURL  // Mapping the User's imageUrl
             }).ToList();
