@@ -51,9 +51,9 @@ namespace IRepository
         Task<List<Question>> GetQuestionsAsync(Guid userId,  int page, int pageSize);
         Task<List<TestResult>> GetTestSubmittedAsync(Guid userId, int page, int pageSize);
         Task<object> GetTestAnalysisAttempt(Guid userId);
-        Task AddQuestionsAsync(List<Question> questionModels);
+        Task AddQuestionsAsync(Question question);
         Task<Question> GetQuestionByIdAsync(Guid id); // Updated to match implementation
-        Task UpdateQuestionAsync(QuestionResponse updatedQuestion); // Added
+        Task UpdateQuestionAsync(Guid Id,QuestionBankModel question); // Added
         Task DeleteQuestionAsync(Guid id); // Added
         Task CreateSkillsAsync(Guid userId, Guid testId, Dictionary<string, SkillDto> model);
         Task<List<TestExam>> GetTestExamByLessonIdAsync(Guid lessonId);//Get Test

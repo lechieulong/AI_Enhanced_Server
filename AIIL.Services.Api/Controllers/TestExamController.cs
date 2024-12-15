@@ -357,8 +357,141 @@ namespace AIIL.Services.Api.Controllers
         }
 
 
+        //[HttpPost("questionsBank/import")]
+        //public async Task<IActionResult> ImportQuestions([FromForm] IFormFile file)
+        //{
+        //    if (file == null || file.Length == 0)
+        //    {
+        //        return BadRequest("No file uploaded.");
+        //    }
+
+        //    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        //    if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+        //    {
+        //        return Unauthorized("Invalid user ID.");
+        //    }
+
+        //    var questions = new List<Question>();
+
+        //    try
+        //    {
+        //        using (var stream = new MemoryStream())
+        //        {
+        //            await file.CopyToAsync(stream);
+        //            stream.Position = 0; // Reset stream position for reading
+
+        //            IWorkbook workbook = new XSSFWorkbook(stream);
+        //            ISheet worksheet = workbook.GetSheetAt(0); // Get the first worksheet
+
+        //            // Debugging log for row detection
+        //            Console.WriteLine($"Total rows in worksheet (LastRowNum): {worksheet.LastRowNum}");
+
+        //            for (int row = 1; row <= worksheet.LastRowNum; row++) // Start from the second row
+        //            {
+        //                var rowData = worksheet.GetRow(row);
+
+        //                // Check if the row is null or all cells are empty
+        //                if (rowData == null || rowData.Cells.All(cell => cell == null || string.IsNullOrWhiteSpace(cell.ToString())))
+        //                {
+        //                    Console.WriteLine($"Skipping empty row: {row}");
+        //                    continue;
+        //                }
+
+        //                var question = new Question
+        //                {
+        //                    QuestionName = rowData.GetCell(0)?.ToString(),
+        //                    QuestionType = int.TryParse(rowData.GetCell(1)?.ToString(), out var qType) ? qType : 0,
+        //                    Skill = int.TryParse(rowData.GetCell(2)?.ToString(), out var skill) ? skill : 0,
+        //                    Explain = "",
+        //                    PartNumber = int.TryParse(rowData.GetCell(3)?.ToString(), out var part) ? part : 0,
+        //                    Answers = new List<Answer>()
+        //                };
+
+        //                var answerCell = rowData.GetCell(4)?.ToString();
+        //                if (!string.IsNullOrWhiteSpace(answerCell))
+        //                {
+        //                    // Detect if the answer is JSON or plain text
+        //                    if (answerCell.TrimStart().StartsWith("[") && answerCell.TrimEnd().EndsWith("]"))
+        //                    {
+        //                        // Attempt to parse JSON array format
+        //                        try
+        //                        {
+        //                            var answers = JsonConvert.DeserializeObject<List<Answer>>(answerCell);
+        //                            if (answers != null && answers.Any())
+        //                            {
+        //                                foreach (var answer in answers)
+        //                                {
+        //                                    // Validate individual answer
+        //                                    if (!string.IsNullOrWhiteSpace(answer.AnswerText))
+        //                                    {
+        //                                        question.Answers.Add(new Answer
+        //                                        {
+        //                                            Id = Guid.NewGuid(),
+        //                                            AnswerText = answer.AnswerText,
+        //                                            TypeCorrect = answer.TypeCorrect
+        //                                        });
+        //                                    }
+        //                                }
+        //                            }
+        //                        }
+        //                        catch (JsonException jsonEx)
+        //                        {
+        //                            return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+        //                        }
+        //                    }
+        //                    else if (answerCell.TrimStart().StartsWith("{"))
+        //                    {
+        //                        // Attempt to parse single JSON object format
+        //                        try
+        //                        {
+        //                            var answerObj = JsonConvert.DeserializeObject<Answer>(answerCell);
+        //                            if (answerObj != null && !string.IsNullOrWhiteSpace(answerObj.AnswerText))
+        //                            {
+        //                                question.Answers.Add(new Answer
+        //                                {
+        //                                    Id = Guid.NewGuid(),
+        //                                    AnswerText = answerObj.AnswerText,
+        //                                    TypeCorrect = answerObj.TypeCorrect
+        //                                });
+        //                            }
+        //                        }
+        //                        catch (JsonException jsonEx)
+        //                        {
+        //                            return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        // Plain text answer, default TypeCorrect to 0
+        //                        question.Answers.Add(new Answer
+        //                        {
+        //                            Id = Guid.NewGuid(),
+        //                            AnswerText = answerCell,
+        //                            TypeCorrect = 0 // Default value for plain text answer
+        //                        });
+        //                    }
+        //                }
+
+
+        //                questions.Add(question);
+        //            }
+        //        }
+
+        //        // Call the service method to import questions
+        //        await _testRepository.ImportQuestionAsync(questions, userId);
+        //        return Ok("Questions imported successfully.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
+
+
+
         [HttpPost("questionsBank/import")]
-        public async Task<IActionResult> ImportQuestions([FromForm] IFormFile file)
+        public async Task<IActionResult> ImportQuestionsFromTxt([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -376,106 +509,118 @@ namespace AIIL.Services.Api.Controllers
 
             try
             {
-                using (var stream = new MemoryStream())
+                using (var stream = new StreamReader(file.OpenReadStream()))
                 {
-                    await file.CopyToAsync(stream);
-                    stream.Position = 0; // Reset stream position for reading
+                    string line;
+                    Question currentQuestion = null;
 
-                    IWorkbook workbook = new XSSFWorkbook(stream);
-                    ISheet worksheet = workbook.GetSheetAt(0); // Get the first worksheet
-
-                    // Debugging log for row detection
-                    Console.WriteLine($"Total rows in worksheet (LastRowNum): {worksheet.LastRowNum}");
-
-                    for (int row = 1; row <= worksheet.LastRowNum; row++) // Start from the second row
+                    while ((line = await stream.ReadLineAsync()) != null)
                     {
-                        var rowData = worksheet.GetRow(row);
-
-                        // Check if the row is null or all cells are empty
-                        if (rowData == null || rowData.Cells.All(cell => cell == null || string.IsNullOrWhiteSpace(cell.ToString())))
+                        line = line.Trim();
+                        if (string.IsNullOrEmpty(line))
                         {
-                            Console.WriteLine($"Skipping empty row: {row}");
                             continue;
                         }
 
-                        var question = new Question
+                        if (line.StartsWith("questionName:"))
                         {
-                            QuestionName = rowData.GetCell(0)?.ToString(),
-                            QuestionType = int.TryParse(rowData.GetCell(1)?.ToString(), out var qType) ? qType : 0,
-                            Skill = int.TryParse(rowData.GetCell(2)?.ToString(), out var skill) ? skill : 0,
-                            Explain = "",
-                            PartNumber = int.TryParse(rowData.GetCell(3)?.ToString(), out var part) ? part : 0,
-                            Answers = new List<Answer>()
-                        };
+                            if (currentQuestion != null) // Save the previous question if one exists
+                            {
+                                questions.Add(currentQuestion);
+                            }
 
-                        var answerCell = rowData.GetCell(4)?.ToString();
-                        if (!string.IsNullOrWhiteSpace(answerCell))
+                            // Create new question object
+                            currentQuestion = new Question();
+                            currentQuestion.Answers = new List<Answer>();
+                            currentQuestion.QuestionName = line.Replace("questionName:", "").Trim();
+                        }
+                        else if (line.StartsWith("questionType:"))
                         {
-                            // Detect if the answer is JSON or plain text
-                            if (answerCell.TrimStart().StartsWith("[") && answerCell.TrimEnd().EndsWith("]"))
+                            var questionTypeString = line.Replace("questionType:", "").Trim();
+                            currentQuestion.QuestionType = questionTypeString switch
                             {
-                                // Attempt to parse JSON array format
-                                try
+                                "MultipleChoice" => 1,
+                                "SingleChoice" => 2,
+                                "TrueFalse" => 3,
+                                "NotGiven" => 4,
+                                _ => 0
+                            };
+                        }
+                        else if (line.StartsWith("skill:"))
+                        {
+                            string skill = line.Replace("skill:", "").Trim();
+                            currentQuestion.Skill = skill switch
+                            {
+                                "reading" => 0,
+                                "listening" => 1,
+                                "writing" => 2,
+                                "speaking" => 3,
+                                _ => 0
+                            };
+                        }
+                        else if (line.StartsWith("part:"))
+                        {
+                            currentQuestion.PartNumber = int.TryParse(line.Replace("part:", "").Trim(), out int part) ? part : 0;
+                        }
+                        else if (line.StartsWith("answers:"))
+                        {
+                            var answerString = line.Replace("answers:", "").Trim();
+
+                            if (string.IsNullOrEmpty(answerString) || answerString == "[]")
+                            {
+                                return BadRequest("Answers are required for each question.");
+                            }
+
+                            // Validate and parse answers (JSON array)
+                            try
+                            {
+                                var answers = JsonConvert.DeserializeObject<List<Answer>>(answerString);
+                                foreach (var answer in answers)
                                 {
-                                    var answers = JsonConvert.DeserializeObject<List<Answer>>(answerCell);
-                                    if (answers != null && answers.Any())
+                                    if (string.IsNullOrWhiteSpace(answer.AnswerText))
                                     {
-                                        foreach (var answer in answers)
-                                        {
-                                            // Validate individual answer
-                                            if (!string.IsNullOrWhiteSpace(answer.AnswerText))
-                                            {
-                                                question.Answers.Add(new Answer
-                                                {
-                                                    Id = Guid.NewGuid(),
-                                                    AnswerText = answer.AnswerText,
-                                                    TypeCorrect = answer.TypeCorrect
-                                                });
-                                            }
-                                        }
+                                        return BadRequest("Each answer must have non-empty text.");
                                     }
-                                }
-                                catch (JsonException jsonEx)
-                                {
-                                    return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
+                                    currentQuestion.Answers.Add(new Answer
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        AnswerText = answer.AnswerText,
+                                        TypeCorrect = answer.TypeCorrect
+                                    });
                                 }
                             }
-                            else if (answerCell.TrimStart().StartsWith("{"))
+                            catch (JsonException ex)
                             {
-                                // Attempt to parse single JSON object format
-                                try
-                                {
-                                    var answerObj = JsonConvert.DeserializeObject<Answer>(answerCell);
-                                    if (answerObj != null && !string.IsNullOrWhiteSpace(answerObj.AnswerText))
-                                    {
-                                        question.Answers.Add(new Answer
-                                        {
-                                            Id = Guid.NewGuid(),
-                                            AnswerText = answerObj.AnswerText,
-                                            TypeCorrect = answerObj.TypeCorrect
-                                        });
-                                    }
-                                }
-                                catch (JsonException jsonEx)
-                                {
-                                    return BadRequest($"JSON parsing error in answer cell: {jsonEx.Message}");
-                                }
-                            }
-                            else
-                            {
-                                // Plain text answer, default TypeCorrect to 0
-                                question.Answers.Add(new Answer
-                                {
-                                    Id = Guid.NewGuid(),
-                                    AnswerText = answerCell,
-                                    TypeCorrect = 0 // Default value for plain text answer
-                                });
+                                return BadRequest($"Error parsing answers JSON: {ex.Message}");
                             }
                         }
-
-
-                        questions.Add(question);
                     }
+
+                    // Add the last question if there was one
+                    if (currentQuestion != null)
+                    {
+                        // Validation for skill and part ranges based on skill
+                        var isValid = ValidateSkillAndPart(currentQuestion);
+                        if (!isValid)
+                        {
+                            return BadRequest("Invalid part number or question type for the given skill.");
+                        }
+
+                        // Additional validation for question types per skill
+                        var isValidType = ValidateQuestionTypeForSkill(currentQuestion);
+                        if (!isValidType)
+                        {
+                            return BadRequest("Invalid question type for the given skill.");
+                        }
+
+                        questions.Add(currentQuestion);
+                    }
+                }
+
+                // Ensure that we have questions to import
+                if (!questions.Any())
+                {
+                    return BadRequest("No valid questions found in the file.");
                 }
 
                 // Call the service method to import questions
@@ -488,6 +633,80 @@ namespace AIIL.Services.Api.Controllers
             }
         }
 
+        private bool ValidateSkillAndPart(Question question)
+        {
+            switch (question.Skill)
+            {
+                case 0: // Reading
+                    if (question.PartNumber < 1 || question.PartNumber > 3)
+                    {
+                        return false; // Reading only allows part 1, 2, or 3
+                    }
+                    break;
+                case 1: // Listening
+                    if (question.PartNumber < 1 || question.PartNumber > 4)
+                    {
+                        return false; // Listening allows part 1, 2, 3, or 4
+                    }
+                    break;
+                case 2: // Writing
+                    if (question.PartNumber < 1 || question.PartNumber > 2)
+                    {
+                        return false; // Writing only allows part 1 or 2
+                    }
+                    question.QuestionType = 0; // Writing type should default to 0
+                    break;
+                case 3: // Speaking
+                    if (question.PartNumber < 1 || question.PartNumber > 3)
+                    {
+                        return false; // Speaking only allows part 1, 2, or 3
+                    }
+                    question.QuestionType = 0; // Speaking type should default to 0
+                    break;
+                default:
+                    return false; // Invalid skill
+            }
+
+            return true;
+        }
+
+        private bool ValidateQuestionTypeForSkill(Question question)
+        {
+            switch (question.Skill)
+            {
+                case 0: // Reading
+                    if (question.QuestionType != 1 && question.QuestionType != 3 && question.QuestionType != 4)
+                    {
+                        return false; // Reading only allows MultipleChoice, TrueFalse, or NotGiven types
+                    }
+                    break;
+                case 1: // Listening
+                    if (question.QuestionType == 1) // MultipleChoice is allowed for Listening, but it must be 8
+                    {
+                        if (question.QuestionType != 8)
+                        {
+                            return false; // Listening allows MultipleChoice, but value must be 8
+                        }
+                    }
+                    else if (question.QuestionType != 2) // SingleChoice is allowed for Listening
+                    {
+                        return false;
+                    }
+                    break;
+                case 2: // Writing
+                case 3: // Speaking
+                        // Writing and Speaking cannot have MultipleChoice, SingleChoice, TrueFalse, or NotGiven
+                    if (question.QuestionType != 0)
+                    {
+                        return false;
+                    }
+                    break;
+                default:
+                    return false; // Invalid skill
+            }
+
+            return true;
+        }
 
 
         [HttpGet("{sectionType}/questionsBank/{userId}/skill/{skill}")]
@@ -591,13 +810,8 @@ namespace AIIL.Services.Api.Controllers
 
 
         [HttpPost("questionsBank")]
-        public async Task<IActionResult> CreateQuestionsAsync([FromBody] List<QuestionDto> questionModels)
+        public async Task<IActionResult> CreateQuestionsAsync([FromBody] QuestionBankModel model)
         {
-            if (questionModels == null || !questionModels.Any())
-            {
-                return BadRequest("No questions provided.");
-            }
-
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
@@ -607,17 +821,37 @@ namespace AIIL.Services.Api.Controllers
 
             try
             {
-                // Map QuestionModel to Question
-                var questions = _mapper.Map<List<Question>>(questionModels);
-
-                // Set UserId for each question
-                foreach (var question in questions)
+                var question = new Question
                 {
-                    question.UserId = userId; // Assuming the UserId is part of the Question entity
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    QuestionName = model.QuestionName,
+                    PartNumber = model.Part,
+                    Explain = string.Empty, // Set default if needed
+                    Skill = model.SkillType,
+                    QuestionType = model.QuestionType // Ensure this is added if needed
+                };
+
+                // Initialize Answers collection if not initialized
+                question.Answers = new List<Answer>();
+
+                foreach (var answerDto in model.Answers)
+                {
+                    var answer = new Answer
+                    {
+                        Id = Guid.NewGuid(),
+                        AnswerText = answerDto.AnswerText,
+                        TypeCorrect = (int)answerDto.IsCorrect, // Assuming IsCorrect is an int
+                        Question = question // EF will automatically set QuestionId
+                    };
+
+                    // Adding answer to question's answers collection
+                    question.Answers.Add(answer);
                 }
 
-                // Call the repository method to add questions
-                await _testRepository.AddQuestionsAsync(questions);
+                // Add question and its associated answers to the context
+                await _testRepository.AddQuestionsAsync(question);
+
                 return Ok("Questions created successfully.");
             }
             catch (Exception ex)
@@ -625,6 +859,7 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpDelete("questionsBank/{id}/delete")]
         public async Task<IActionResult> DeleteQuestionAsync(Guid id)
@@ -649,29 +884,16 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpPut("questionsBank/{id}/update")]
-        public async Task<IActionResult> UpdateQuestionAsync([FromRoute] Guid id, [FromBody] QuestionResponse updatedQuestion)
+        public async Task<IActionResult> UpdateQuestionAsync([FromRoute] Guid id, [FromBody] QuestionBankModel model)
         {
-            if (updatedQuestion == null)
+            if (model == null)
             {
                 return BadRequest("Question data is null.");
             }
-
-            // Check if the question exists
-            var existingQuestion = await _testRepository.GetQuestionByIdAsync(id);
-            if (existingQuestion == null)
-            {
-                return NotFound($"Question with ID {id} not found.");
-            }
-
-            // Ensure the updated question ID matches the route ID
-            if (updatedQuestion.Id != id)
-            {
-                return BadRequest("Question ID mismatch.");
-            }
-
             try
             {
-                await _testRepository.UpdateQuestionAsync(updatedQuestion);
+                await _testRepository.UpdateQuestionAsync(id,model);
+
                 return Ok($"Question with ID {id} updated successfully.");
             }
             catch (Exception ex)
@@ -679,6 +901,7 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpGet("test-by-course/{courseId}")]
         public async Task<IActionResult> GetTestsByCourseId(Guid courseId, int page = 1, int pageSize = 10)
