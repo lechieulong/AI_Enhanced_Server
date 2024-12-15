@@ -53,8 +53,6 @@ namespace API.Controllers
                 Id = Guid.NewGuid(), // Tạo ID mới cho CoursePart
                 CourseSkillId = coursePartDto.CourseSkillId,
                 Title = coursePartDto.Title,
-                ContentType = coursePartDto.ContentType,
-                ContentUrl = coursePartDto.ContentUrl,
                 Order = coursePartDto.Order
             };
 
@@ -80,10 +78,7 @@ namespace API.Controllers
             // Cập nhật các thuộc tính từ DTO
             existingCoursePart.CourseSkillId = coursePartDto.CourseSkillId;
             existingCoursePart.Title = coursePartDto.Title;
-            existingCoursePart.ContentType = coursePartDto.ContentType;
-            existingCoursePart.ContentUrl = coursePartDto.ContentUrl;
             existingCoursePart.Order = coursePartDto.Order;
-
             await _coursePartRepository.UpdateAsync(existingCoursePart);
             return NoContent();
         }

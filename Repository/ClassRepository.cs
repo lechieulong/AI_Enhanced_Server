@@ -59,7 +59,10 @@ namespace Repository
                 ClassName = newClassDto.ClassName,
                 ClassDescription = newClassDto.ClassDescription,
                 CourseId = newClassDto.CourseId,
-                IsEnabled = newClassDto.IsEnabled
+                IsEnabled = newClassDto.IsEnabled,
+                StartDate = newClassDto.StartDate,
+                EndDate= newClassDto.EndDate,
+                ImageUrl = newClassDto.ImageUrl,
             };
 
             try
@@ -189,5 +192,34 @@ namespace Repository
                 IsEnabled = classEntity.IsEnabled
             };
         }
+
+        public async Task<List<object>> GetUnenrolledClassesAsync(Guid courseId, string userId)
+        {
+            // Lấy thông tin Price và UserId từ Course
+            var courseInfo = await _dbContext.Courses
+                .Where(c => c.Id == courseId)
+                .Select(c => new { c.Price, c.UserId })
+                .FirstOrDefaultAsync();
+
+            if (courseInfo == null)
+            {
+                throw new Exception("Course not found.");
+            }
+
+            // Lấy danh sách Class chưa đăng ký
+            var classes = await _dbContext.Classes
+                .Where(c => c.CourseId == courseId && !c.Enrollments.Any(e => e.UserId == userId))
+                .Select(c => new
+                {
+                    ClassId = c.Id,
+                    ClassName = c.ClassName,
+                    Price = courseInfo.Price, // Gắn giá từ Course
+                    UserId = courseInfo.UserId // Gắn UserId từ Course
+                })
+                .ToListAsync();
+
+            return classes.Cast<object>().ToList();
+        }
+
     }
 }

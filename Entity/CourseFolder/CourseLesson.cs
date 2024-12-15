@@ -18,8 +18,7 @@ namespace Entity.CourseFolder
 
         [Required]
         public string Title { get; set; }
-
-        // Quan hệ một-nhiều với CourseLessonContent
+        public int Order { get; set; }
         public ICollection<CourseLessonContent> Contents { get; set; } = new List<CourseLessonContent>();
     }
 }

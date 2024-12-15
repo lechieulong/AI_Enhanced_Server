@@ -40,13 +40,13 @@ namespace Entity
         public string Status { get; set; }
 
         // Thời gian báo cáo được tạo
-        public DateTime CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
 
         // Thời gian báo cáo được cập nhật lần cuối
-        public DateTime UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
 
         // Thời gian báo cáo được giải quyết
-        public DateTime? ResolvedAt { get; set; }
+        public string? ResolvedAt { get; set; }
 
     }
 }

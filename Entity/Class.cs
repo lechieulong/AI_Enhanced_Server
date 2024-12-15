@@ -23,10 +23,8 @@ namespace Entity
         [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public TimeSpan? StartTime { get; set; }
-        public TimeSpan? EndTime { get; set; }
+        public string? StartDate { get; set; }
+        public string? EndDate { get; set; }
         public string? ImageUrl { get; set; }
         public bool IsEnabled { get; set; } = true;
 
@@ -34,5 +32,12 @@ namespace Entity
         public int EnrollmentCount { get; set; } = 0;
 
         public ICollection<ClassFile>? ClassFiles { get; set; }
+
+        [NotMapped]
+        public double Price { get; set; }
+
+        [NotMapped]
+        public string UserId { get; set; }
+
     }
 }

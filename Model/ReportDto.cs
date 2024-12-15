@@ -33,6 +33,12 @@ namespace Model
         public string Priority { get; set; }
 
         // Tùy chọn cho phản hồi từ hệ thống
+
         public bool FeedbackOption { get; set; }
+        // Thời gian báo cáo được tạo
+        public string CreatedAt { get; set; }
+
+        // Thời gian báo cáo được cập nhật lần cuối
+        public string UpdatedAt { get; set; }
     }
 }

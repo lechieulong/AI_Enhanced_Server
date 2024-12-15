@@ -497,17 +497,14 @@ namespace Repository
             
             if(model.ClassId != Guid.Empty && model.ClassId != null)
             {
-                foreach (var classId in model.ClassIds)
-                {
                     var classRelation = new ClassRelationShip
                     {
                         Id = Guid.NewGuid(),
                         TestId = newTest.Id,
-                        ClassId = classId
+                        ClassId = (Guid)model.ClassId
                     };
 
                     _context.ClassRelationShip.Add(classRelation);
-                }
             }
          
             _context.TestExams.Add(newTest);

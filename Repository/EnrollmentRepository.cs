@@ -61,6 +61,14 @@ namespace Repositories
             return await _context.Enrollments
                 .FirstOrDefaultAsync(e => e.CourseId == courseId && e.UserId == userId);
         }
+        public async Task<List<Guid>> GetClassIdsByEnrollment(Guid courseId, string userId)
+        {
+            return await _context.Enrollments
+                .Where(e => e.CourseId == courseId && e.UserId == userId)
+                .Select(e => e.ClassId)
+                .ToListAsync();
+
+        }
     }
 
 }

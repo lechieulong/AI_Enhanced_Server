@@ -31,8 +31,8 @@ namespace Entity.CourseFolder
         public ApplicationUser User { get; set; }
 
         public bool IsEnabled { get; set; } = true;
-        public DateTime? CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
+        public string CreatedAt { get; set; } 
+        public string UpdatedAt { get; set; } 
 
         [NotMapped]
         public List<string> Categories { get; set; } = new List<string>();
