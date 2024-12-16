@@ -142,6 +142,7 @@ builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRe
 builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddScoped<IClassFileRepository, ClassFileRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+//builder.Services.AddHostedService<LiveStreamBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>

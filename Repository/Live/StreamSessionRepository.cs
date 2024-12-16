@@ -2,6 +2,7 @@
 using Entity.Live;
 using IRepository.Live;
 using Microsoft.EntityFrameworkCore;
+using Model.Live;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,11 @@ namespace Repository.Live
         {
             _context = context;
         }
+        public async Task<StreamSession> getStreamSession(Guid liveId)
+        {
+            return await _context.StreamSessions.FirstOrDefaultAsync(o => o.LiveStreamId.Equals(liveId)&&o.Status==1);
+
+        }
         public async Task<IEnumerable<StreamSession>> getStreamSessionsIsLive()
         {
             return await _context.StreamSessions.Where(o=>o.Status==1).ToListAsync();
@@ -33,14 +39,16 @@ namespace Repository.Live
         }
         public async Task<StreamSession> UpdateStreamSessionAsync(StreamSession mode)
         {
-            var exit=await _context.StreamSessions.FirstOrDefaultAsync(o=>o.Id.Equals(mode.Id));
+            var exit=await getStreamSession(mode.LiveStreamId);
             StreamSession modee = new StreamSession()
             {
-                Id = mode.Id,
+                Id = exit.Id,
                 Status = mode.Status,
+                Name=mode.Name,
                 StartTime = mode.StartTime,
-                EndTime = mode.EndTime,
+                EndTime = mode.Status==0?DateTime.Now:null,
                 LiveStreamId = mode.LiveStreamId,
+                Type = mode.Type,
 
             };
             if (exit != null)
@@ -56,6 +64,22 @@ namespace Repository.Live
             await _context.SaveChangesAsync();
 
             return mode;
+        }
+        public async Task<(IEnumerable<StreamSession> lives, int totalCount)> GetLivesAsync(int page, int pageSize, string? searchQuery)
+        {
+
+            var totalCount = await _context.StreamSessions.Where(o => o.Status == 1).CountAsync();
+            var live = new List<StreamSession>();
+            if (searchQuery != null)
+            {
+                live = await _context.StreamSessions.Where(o => o.Status == 1&&o.Name.Contains(searchQuery)).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            }
+            else
+            {
+                live = await _context.StreamSessions.Where(o => o.Status == 1).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+
+            }
+            return (live, totalCount);
         }
 
     }

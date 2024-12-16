@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Entity.Payment;
 
 namespace Mapper
 {
@@ -82,7 +83,7 @@ namespace Mapper
                 config.CreateMap<TeacherRequestDto, TeacherRequest>();
 
                 config.CreateMap<StreamSession, StreamSessionModel>();
-                config.CreateMap<StreamSessionModel, StreamSessionModel>();
+                config.CreateMap<StreamSessionModel, StreamSession>();
                 config.CreateMap<Ticket, TicketModel>();
                 config.CreateMap<TicketModel, Ticket>();
                 config.CreateMap<Transaction, TransactionModel>();

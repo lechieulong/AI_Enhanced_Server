@@ -10,7 +10,8 @@ namespace IRepository.Live
 {
     public interface ITicketRepository
     {
-        Task<IEnumerable<Ticket>> GetActiveTicketsByLiveIdAsync(Guid LiveId);
+        Task<Ticket> GetActiveTicketsByLiveIdAsync(Guid LiveId);
         Task<Ticket> addTicketAsync(Ticket mode);
+        Task<Ticket> UpdateTicketAsync(Ticket mode);
     }
 }
