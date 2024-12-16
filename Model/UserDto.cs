@@ -18,5 +18,6 @@ namespace Model
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool LockoutEnabled { get; set; }
         public UserEducationDto? UserEducationDto { get; set; }
+        public List<string>? Roles { get; set; }
     }
 }

@@ -592,44 +592,14 @@ namespace Repository
         }
 
 
-        public async Task AddQuestionsAsync(List<Question> questions)
+        public async Task AddQuestionsAsync(Question question)
         {
-            foreach (var question in questions)
-            {
-                var newQuestion = new Question
-                {
-                    Id = Guid.NewGuid(),
-                    QuestionName = question.QuestionName,
-                    QuestionType = question.QuestionType,
-                    Skill = question.Skill,
-                    PartNumber = question.PartNumber,
-                    UserId = question.UserId, // Ensure UserId is set here
-                    Answers = new List<Answer>() // Initialize the Answers collection
-                };
+           
+            foreach(var a in question.Answers)
+                _context.Answers.Add(a);
 
-                // Check if there are any answers to add
-                if (question.Answers != null)
-                {
-                    foreach (var answer in question.Answers)
-                    {
-                        // Create a new Answer entity
-                        var newAnswer = new Answer
-                        {
-                            Id = Guid.NewGuid(), // Assign a new Guid
-                            QuestionId = newQuestion.Id, // Associate with the new question
-                            AnswerText = answer.AnswerText,
-                            TypeCorrect = answer.TypeCorrect
-                        };
-
-                        _context.Answers.Add(newAnswer); // Add to the Answers table
-                        newQuestion.Answers.Add(newAnswer); // Add to the question's Answers collection
-                    }
-                }
-
-                _context.Questions.Add(newQuestion); // Add the question to the context
-            }
-
-            await _context.SaveChangesAsync(); // Save all changes in one go
+            _context.Questions.Add(question); 
+            await _context.SaveChangesAsync(); 
         }
 
         public async Task ImportQuestionAsync(List<Question> questions, Guid userId)
@@ -810,61 +780,49 @@ namespace Repository
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
 
-        public async Task UpdateQuestionAsync(QuestionResponse updatedQuestion)
+        public async Task UpdateQuestionAsync(Guid questionId,QuestionBankModel updatedQuestion)
         {
-            // Retrieve the existing question from the database, including its answers
+            // Retrieve the existing question from the database
             var existingQuestion = await _context.Questions
-                .Include(q => q.Answers) // Include the answers related to the question
-                .FirstOrDefaultAsync(q => q.Id == updatedQuestion.Id);
+                .Include(q => q.Answers) // Include related answers
+                .FirstOrDefaultAsync(q => q.Id == questionId);
 
-            if (existingQuestion != null)
+            if (existingQuestion == null)
             {
-                // Update the question properties
-                existingQuestion.QuestionName = updatedQuestion.QuestionName;
-                existingQuestion.QuestionType = (int)updatedQuestion.QuestionType;
-                existingQuestion.Skill = updatedQuestion.Skill;
-                existingQuestion.PartNumber = updatedQuestion.PartNumber;
-
-                // Update the answers
-                // Clear existing answers only if they need to be removed
-                var existingAnswers = existingQuestion.Answers.ToList(); // Get a copy of existing answers
-
-                foreach (var answer in updatedQuestion.Answers)
-                {
-                    var existingAnswer = existingAnswers.FirstOrDefault(a => a.Id == answer.Id);
-                    if (existingAnswer != null)
-                    {
-                        // Update existing answer
-                        existingAnswer.AnswerText = answer.AnswerText;
-                        existingAnswer.TypeCorrect = answer.IsCorrect;
-                        existingAnswers.Remove(existingAnswer); // Remove from list to keep track of updates
-                    }
-                    else
-                    {
-                        // Add new answer
-                        existingQuestion.Answers.Add(new Answer
-                        {
-                            Id = Guid.NewGuid(), // Ensure a new ID is assigned if it's a new answer
-                            AnswerText = answer.AnswerText,
-                            TypeCorrect = answer.IsCorrect
-                        });
-                    }
-                }
-
-                // Remove answers that were not included in the updated question
-                foreach (var answerToRemove in existingAnswers)
-                {
-                    _context.Answers.Remove(answerToRemove);
-                }
-
-                // Save changes to the database
-                await _context.SaveChangesAsync();
+                throw new ArgumentException($"Question with ID {questionId} does not exist.");
             }
-            else
+
+            // Update the question's fields
+            existingQuestion.QuestionName = updatedQuestion.QuestionName;
+            existingQuestion.QuestionType = updatedQuestion.QuestionType;
+            existingQuestion.Skill = updatedQuestion.SkillType;
+            existingQuestion.PartNumber = updatedQuestion.Part;
+
+            // Remove all existing answers
+            var existingAnswers = existingQuestion.Answers.ToList();
+            _context.Answers.RemoveRange(existingAnswers);
+
+            // Check if there are new answers to add
+            if (updatedQuestion.Answers != null && updatedQuestion.Answers.Count > 0)
             {
-                throw new KeyNotFoundException("Question not found");
+                // Add new answers from the front-end
+                foreach (var updatedAnswerDto in updatedQuestion.Answers)
+                {
+                    var newAnswer = new Answer
+                    {
+                        AnswerText = updatedAnswerDto.AnswerText,
+                        TypeCorrect = (int)updatedAnswerDto.IsCorrect,
+                        QuestionId = existingQuestion.Id
+                    };
+                    existingQuestion.Answers.Add(newAnswer);
+                }
             }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
         }
+
+
         public async Task DeleteQuestionAsync(Guid id)
         {
             // Find the question to delete
@@ -935,10 +893,9 @@ namespace Repository
             if (existingTest == null) throw new KeyNotFoundException("TestExam not found.");
 
             existingTest.TestName = testExam.TestName;
-            existingTest.TestType = testExam.TestType;
             existingTest.StartTime = testExam.StartTime;
             existingTest.EndTime = testExam.EndTime;
-            existingTest.UpdateAt = DateTime.UtcNow;
+            existingTest.UpdateAt = DateTime.Now;
 
             _context.TestExams.Update(existingTest);
 
