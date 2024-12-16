@@ -15,5 +15,7 @@ namespace Model
         public double Price { get; set; }
         public int EnrollmentCount { get; set; }
         public double AverageRating { get; set; }
+        public string CreatedAt { get; set; }
+        public string UpdatedAt { get; set; }
     }
 }

@@ -15,5 +15,6 @@ namespace IRepository.Live
         Task<IEnumerable<StreamSession>> getStreamSessionsIsLive();
         Task<StreamSession> AddStreamSessionAsync(StreamSession mode);
         Task<StreamSession> UpdateStreamSessionAsync(StreamSession mode);
+        Task<(IEnumerable<StreamSession> lives, int totalCount)> GetLivesAsync(int page, int pageSize, string? searchQuery);
     }
 }

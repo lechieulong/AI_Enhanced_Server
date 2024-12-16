@@ -41,11 +41,6 @@ namespace API.Controllers
                 var existingEnrollment = await _db.Enrollments
                     .AnyAsync(e => e.CourseId == enrollmentRequest.CourseId && e.UserId == enrollmentRequest.UserId);
 
-                if (existingEnrollment)
-                {
-                    return BadRequest("Người dùng đã ghi danh vào khóa học này.");
-                }
-
                 var newEnrollment = new Enrollment
                 {
                     Id = Guid.NewGuid(),
@@ -114,7 +109,18 @@ namespace API.Controllers
 
             return Ok(enrollment != null);
         }
+        [HttpGet("classIds")]
+        public async Task<ActionResult<List<Guid>>> GetClassIdsByEnrollment(Guid courseId, string userId)
+        {
+            var classIds = await _enrollmentRepository.GetClassIdsByEnrollment(courseId, userId);
 
+            if (classIds == null || !classIds.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(classIds);
+        }
 
     }
 }

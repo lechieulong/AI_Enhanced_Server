@@ -13,16 +13,19 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Cryptography.Xml;
 using Microsoft.Extensions.Configuration;
 using Entity.Payment;
+using Microsoft.Extensions.Configuration;
 
 namespace Repository
 {
     public class AccountBalanceRepository : IAccountBalanceRepository
     {
+        private readonly string _checksumKey;
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public AccountBalanceRepository(AppDbContext context)
+        public AccountBalanceRepository(AppDbContext context, IConfiguration configuration)
         {
+            _checksumKey = configuration["ApiSettings:ChecksumKey"];
             _context = context;
         }
         public async Task<decimal> GetBalace(string UserId)
@@ -58,15 +61,14 @@ namespace Repository
 
             var existAccountBalance =  await _context.AccountBalances.FirstOrDefaultAsync(t => t.UserId.Equals(model.UserId));
 
-            //string data = $"UserId={model.UserId}&money={model.Balance}";
-            //string checksumKey = _configuration["AppSettings:ChecksumKey"];
+            string data = $"userid={model.UserId}&money={model.Balance}&message={model.Message}";
 
-            //var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(checksumKey));
-            
-            //var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-            //String _signature= BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-            
-            if (existAccountBalance != null/*&& signature.Equals(_signature)*/)
+            var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_checksumKey));
+
+            var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+            String _signature = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+
+            if (existAccountBalance != null && _signature.Equals(model.signature))
             {
                 var Bala = new AccountBalance
                 {

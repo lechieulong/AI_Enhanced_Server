@@ -18,11 +18,6 @@ public class CoursePart
     [Required]
     public string Title { get; set; }
 
-    [Required]
-    public string ContentType { get; set; }
-
-    public string ContentUrl { get; set; }
-
     public int Order { get; set; }
 
     [JsonIgnore]

@@ -37,8 +37,8 @@ namespace AIIL.Services.Api.Controllers
                 AttachmentUrl = reportDTO.AttachmentUrl,
                 Priority = reportDTO.Priority,
                 FeedbackOption = reportDTO.FeedbackOption,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = reportDTO.CreatedAt,
+                UpdatedAt = reportDTO.UpdatedAt,
                 Status = "pending" // Mặc định trạng thái là "pending"
             };
 
@@ -84,7 +84,7 @@ namespace AIIL.Services.Api.Controllers
                 AttachmentUrl = reportDTO.AttachmentUrl,
                 Priority = reportDTO.Priority,
                 FeedbackOption = reportDTO.FeedbackOption,
-                UpdatedAt = DateTime.UtcNow,
+                UpdatedAt = reportDTO.UpdatedAt,
                 Status = "in_progress" // Cập nhật trạng thái khi sửa
             };
 

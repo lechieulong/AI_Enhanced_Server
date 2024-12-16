@@ -15,6 +15,8 @@ using AutoMapper;
 using Model.Course;
 using System.Security.Claims;
 using Entity.Data;
+using FuzzySharp;
+
 
 namespace Auth.Controllers
 {
@@ -40,25 +42,46 @@ namespace Auth.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 8,
+            [FromQuery] string? categoryFilter = null,
+            [FromQuery] string? searchTerm = null
+        )
         {
             var totalCourses = await _repository.CountAsync();
-
             var courses = await _repository.GetAllAsync(pageNumber, pageSize);
+
+            // Lọc theo category nếu categoryFilter được truyền vào
+            if (!string.IsNullOrEmpty(categoryFilter))
+            {
+                var categoryIds = categoryFilter.Split(',');
+                courses = courses.Where(course => categoryIds.Contains(course.Categories.FirstOrDefault())).ToList();
+            }
+
+            // Lọc theo searchTerm nếu được truyền vào
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                courses = courses.Where(course =>
+                    Fuzz.PartialRatio(searchTerm, course.CourseName) > 50).ToList();
+            }
+
 
             var coursesDto = _mapper.Map<List<GetCourseListDto>>(courses);
 
             var result = new
             {
-                TotalCount = totalCourses,
+                TotalCount = coursesDto.Count(),
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalPages = (int)Math.Ceiling(totalCourses / (double)pageSize),
+                TotalPages = (int)Math.Ceiling(coursesDto.Count() / (double)pageSize),
                 Data = coursesDto
             };
 
             return Ok(result);
         }
+
 
 
         [HttpPost]
@@ -83,8 +106,8 @@ namespace Auth.Controllers
                 Categories = courseDto.Categories,
                 Price = courseDto.Price,
                 UserId = courseDto.UserId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
+                CreatedAt = courseDto.CreatedAt,
+                UpdatedAt = courseDto.UpdatedAt,
                 IsEnabled = false
             };
 
@@ -92,12 +115,15 @@ namespace Auth.Controllers
 
             foreach (var category in courseDto.Categories)
             {
+                // Lấy mô tả kỹ năng từ hàm GetSkillDescription
+                var skillDescription = GetSkillDescription(category);
+
                 var courseSkill = new CourseSkill
                 {
                     Id = Guid.NewGuid(),
                     CourseId = course.Id,
                     Type = category,
-                    Description = GetSkillDescription(category)
+                    Description = skillDescription // Gán giá trị mô tả kỹ năng
                 };
 
                 await _courseSkillRepository.AddAsync(courseSkill);
@@ -105,6 +131,7 @@ namespace Auth.Controllers
 
             return Ok(course);
         }
+
 
         private string GetSkillDescription(string category)
         {

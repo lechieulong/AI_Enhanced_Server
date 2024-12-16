@@ -55,7 +55,7 @@ namespace API.Controllers
                 Id = Guid.NewGuid(),
                 FilePath = classFileDto.FilePath,
                 ClassId = classFileDto.ClassId,
-                UploadDate = classFileDto.UploadDate == default ? DateTime.UtcNow : classFileDto.UploadDate,
+                UploadDate = classFileDto.UploadDate,
                 Topic = classFileDto.Topic,
                 Description = classFileDto.Description
             };

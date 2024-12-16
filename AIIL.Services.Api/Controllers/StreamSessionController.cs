@@ -7,6 +7,7 @@ using IRepository.Live;
 using AutoMapper;
 using Model.Live;
 using Entity.Live;
+using Entity.Migrations;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -37,6 +38,31 @@ namespace AIIL.Services.Api.Controllers
             var result = _Mapper.Map<StreamSessionModel>(Streamsession);
             return Ok(result);
         }
+        [HttpGet("lives")]
+        public async Task<IActionResult> GetLives(int page, int pageSize, string? searchQuery)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and page size must be greater than zero.");
+            }
+
+            var (Live, totalCount) = await _repository.GetLivesAsync(page, pageSize, searchQuery);
+
+            // Ensure the total count is always non-negative
+            totalCount = totalCount < 0 ? 0 : totalCount;
+
+            var response = new
+            {
+                Lives = _Mapper.Map<List<StreamSessionModel>>(Live),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize) // Calculate total pages safely
+            };
+
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateStreamSession(StreamSessionModel model)
         {
