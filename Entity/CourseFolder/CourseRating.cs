@@ -13,7 +13,7 @@ namespace Entity.CourseFolder
         public Guid CourseId { get; set; }
 
         [ForeignKey("CourseId")]
-        public Course Course { get; set; }
+        public Course? Course { get; set; }
 
         public string UserId { get; set; }
 

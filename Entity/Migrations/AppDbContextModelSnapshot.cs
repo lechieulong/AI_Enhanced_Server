@@ -573,6 +573,10 @@ namespace Entity.Migrations
                     b.Property<Guid>("LiveStreamId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -594,6 +598,9 @@ namespace Entity.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
@@ -739,11 +746,41 @@ namespace Entity.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("Entity.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AttachmentUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CreatedAt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PaymentStatus");
                     b.Property<bool>("FeedbackOption")
                         .HasColumnType("bit");
 
@@ -779,13 +816,11 @@ namespace Entity.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Transactions");
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Entity.Specialization", b =>
@@ -1135,9 +1170,6 @@ namespace Entity.Migrations
                     b.Property<DateTime>("TestDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("TestExamId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("TestId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1151,8 +1183,6 @@ namespace Entity.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TestExamId");
 
                     b.ToTable("TestResult");
                 });
@@ -1467,7 +1497,7 @@ namespace Entity.Migrations
                     b.HasOne("Entity.CourseFolder.Course", "Course")
                         .WithMany("CourseRatings")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Entity.ApplicationUser", "User")
@@ -1704,17 +1734,6 @@ namespace Entity.Migrations
                     b.HasOne("Entity.Test.TestExam", null)
                         .WithMany("SkillTests")
                         .HasForeignKey("TestExamId");
-                });
-
-            modelBuilder.Entity("Entity.Test.TestResult", b =>
-                {
-                    b.HasOne("Entity.Test.TestExam", "TestExam")
-                        .WithMany()
-                        .HasForeignKey("TestExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TestExam");
                 });
 
             modelBuilder.Entity("Entity.UserEducation", b =>

@@ -142,6 +142,12 @@ namespace Entity.Data
             modelBuilder.Entity<Ticket>()
                 .Property(t => t.Price)
                 .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<CourseRating>()
+    .HasOne(cr => cr.Course)
+    .WithMany(c => c.CourseRatings)
+    .HasForeignKey(cr => cr.CourseId)
+    .OnDelete(DeleteBehavior.Restrict);
         }
 
     }
