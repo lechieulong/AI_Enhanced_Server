@@ -23,7 +23,7 @@ namespace Repository.Live
         }
         public async Task<IEnumerable<Gift>> GetGiftAsync()
         {
-            return await _context.Gifts.ToListAsync();
+            return await _context.Gifts.OrderBy(o=>o.Price).ToListAsync();
         }
         public async Task<Gift> GetGiftByIDAsync(Guid id)
         {
