@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Utility;
 using OfficeOpenXml;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,7 +136,6 @@ namespace Repository
 
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
-            // Tìm kiếm người dùng theo UserId
             return await _db.ApplicationUsers.FindAsync(userId);
         }
         public async Task<(IEnumerable<UserDto> users, int totalCount)> GetUsersAsync(int page, int pageSize)
@@ -152,26 +152,37 @@ namespace Repository
             var totalCount = await query.Distinct().CountAsync();
 
             var users = await query
-                .Distinct()  // Loại bỏ các bản sao người dùng
+                .Distinct()
                 .OrderBy(u => u.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .AsNoTracking()  // Không theo dõi sự thay đổi của đối tượng, giúp cải thiện hiệu suất
-                .Select(u => new UserDto
-                {
-                    ID = u.Id,
-                    UserName = u.UserName,
-                    Name = u.Name,
-                    Email = u.Email,
-                    PhoneNumber = u.PhoneNumber,
-                    DOB = u.DOB,
-                    ImageURL = u.ImageURL,
-                    LockoutEnd = u.LockoutEnd,
-                    LockoutEnabled = u.LockoutEnabled
-                })
+                .AsNoTracking()
                 .ToListAsync();
 
-            return (users, totalCount);
+            var userDtos = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userDto = new UserDto
+                {
+                    ID = user.Id,
+                    UserName = user.UserName,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    DOB = user.DOB,
+                    ImageURL = user.ImageURL,
+                    LockoutEnd = user.LockoutEnd,
+                    LockoutEnabled = user.LockoutEnabled,
+                    Roles = roles.ToList()
+                };
+
+                userDtos.Add(userDto);
+            }
+
+            return (userDtos, totalCount);
         }
 
         public async Task LockUserAsync(string userId, int durationInMinutes)

@@ -938,10 +938,9 @@ namespace Repository
             if (existingTest == null) throw new KeyNotFoundException("TestExam not found.");
 
             existingTest.TestName = testExam.TestName;
-            existingTest.TestType = testExam.TestType;
             existingTest.StartTime = testExam.StartTime;
             existingTest.EndTime = testExam.EndTime;
-            existingTest.UpdateAt = DateTime.UtcNow;
+            existingTest.UpdateAt = DateTime.Now;
 
             _context.TestExams.Update(existingTest);
 
