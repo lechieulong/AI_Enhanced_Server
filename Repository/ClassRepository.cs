@@ -214,7 +214,7 @@ namespace Repository
                     ClassId = c.Id,
                     ClassName = c.ClassName,
                     Price = courseInfo.Price, // Gắn giá từ Course
-                    UserId = courseInfo.UserId // Gắn UserId từ Course
+                    TeacherID = courseInfo.UserId // Gắn UserId từ Course
                 })
                 .ToListAsync();
 
