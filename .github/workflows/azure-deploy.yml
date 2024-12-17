@@ -22,15 +22,15 @@ jobs:
 
     # 3. Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore ./AI_Enhanced_Server/AIIL.Services.Api/AIIL.Services.Api.csproj
+      run: dotnet restore ./AIIL.Services.Api/AIIL.Services.Api.csproj
 
     # 4. Build the application
     - name: Build application
-      run: dotnet build ./AI_Enhanced_Server/AIIL.Services.Api/AIIL.Services.Api.csproj --no-restore --configuration Release
+      run: dotnet build ./AIIL.Services.Api/AIIL.Services.Api.csproj --no-restore --configuration Release
 
     # 5. Publish the application
     - name: Publish application
-      run: dotnet publish ./AI_Enhanced_Server/AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release -o ./publish
+      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release -o ./publish
 
     # 6. Deploy to Azure Web App
     - name: Deploy to Azure Web App
