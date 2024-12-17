@@ -1,4 +1,6 @@
-﻿using Entity.TeacherFolder;
+﻿using Entity;
+using Entity.TeacherFolder;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,8 @@ namespace IRepository
     public interface ITeacherRatingRepository
     {
         // Thêm một rating mới
-        Task<TeacherRating> CreateRatingAsync(TeacherRating rating);
+        Task CreateRatingAsync(TeacherRating rating);
+        Task<IEnumerable<TopRatedTeacherDto>> GetTopRatedTeachersAsync();
 
         Task<IEnumerable<TeacherRating>> GetAllRatingsAsync();
     }
