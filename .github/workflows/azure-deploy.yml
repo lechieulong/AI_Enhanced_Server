@@ -1,0 +1,46 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main  # Thay "main" bằng nhánh chính của bạn nếu cần
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Lấy mã nguồn từ GitHub
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Cài đặt .NET Core SDK
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0'  # Thay bằng phiên bản .NET Core phù hợp (ví dụ, 6.x hoặc 7.x)
+
+    # 3. Khôi phục dependencies
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # 4. Build ứng dụng
+    - name: Build application
+      run: dotnet build --no-restore --configuration Release
+
+    # 5. Chạy kiểm thử (nếu có)
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal
+
+    # 6. Publish ứng dụng
+    - name: Publish application
+      run: dotnet publish -c Release -o ./publish
+
+    # 7. Triển khai lên Azure
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: "AIILAPI"        # Tên Azure App Service của bạn
+        slot-name: "production"              # Hoặc staging nếu dùng deployment slots
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./publish
