@@ -36,8 +36,8 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: "AIILAPI"  # Tên ứng dụng Azure của bạn
-        slot-name: "production"  # Đây là môi trường duy nhất bạn có nếu không có slots
+        app-name: "AIILAPI"
+        slot-name: "production"
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ./publish
+        package: ./AIIL.Services.Api/publish
 
