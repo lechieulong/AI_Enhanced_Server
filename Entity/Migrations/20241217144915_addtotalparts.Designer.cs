@@ -4,6 +4,7 @@ using Entity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217144915_addtotalparts")]
+    partial class addtotalparts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,9 +71,6 @@ namespace Entity.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<double>("AverageRating")
-                        .HasColumnType("float");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -94,12 +94,6 @@ namespace Entity.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool?>("LockoutForever")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LockoutReason")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -120,9 +114,6 @@ namespace Entity.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<int>("RatingCount")
-                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -884,37 +875,6 @@ namespace Entity.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("TeacherAvailableSchedules");
-                });
-
-            modelBuilder.Entity("Entity.TeacherFolder.TeacherRating", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LearnerID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("RatingValue")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Review")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TeacherRatings");
                 });
 
             modelBuilder.Entity("Entity.TeacherRequest", b =>
@@ -1713,17 +1673,6 @@ namespace Entity.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Entity.TeacherFolder.TeacherRating", b =>
-                {
-                    b.HasOne("Entity.ApplicationUser", "User")
-                        .WithMany("TeacherRatings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entity.TeacherRequest", b =>
                 {
                     b.HasOne("Entity.ApplicationUser", "User")
@@ -1893,8 +1842,6 @@ namespace Entity.Migrations
                     b.Navigation("SentGifts");
 
                     b.Navigation("TeacherAvailableSchedules");
-
-                    b.Navigation("TeacherRatings");
 
                     b.Navigation("TeacherRequest");
 
