@@ -18,6 +18,8 @@ namespace Entity
         public DateTime? DOB { get; set; }
         public double AverageRating { get; set; } = 0;
         public int RatingCount { get; set; } = 0;
+        public string? LockoutReason { get; set; }
+        public bool? LockoutForever { get; set; }
         public UserEducation? UserEducation { get; set; }
         public TeacherRequest? TeacherRequest { get; set; }
         public ICollection<Event>? Events { get; set; }

@@ -54,7 +54,7 @@ namespace AIIL.Services.Api.Controllers
 
             try
             {
-               
+               //var cc = nu
                     var result = await _azureService.ExtractTextFromImageAsync(imageFile);
                     return Ok(new { extractedText = result });
             }

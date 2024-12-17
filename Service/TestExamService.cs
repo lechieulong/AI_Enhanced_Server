@@ -5,11 +5,13 @@ using IService;
 using Microsoft.EntityFrameworkCore;
 using Model.Test;
 using Model.Utility;
+using Newtonsoft.Json;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Service
@@ -229,7 +231,8 @@ namespace Service
                 TestDate = DateTime.UtcNow,
                 TimeMinutesTaken = model.TimeMinutesTaken,
                 SecondMinutesTaken = model.TimeSecondsTaken,
-                AttemptNumber = attemptNumber
+                AttemptNumber = attemptNumber,
+                TotalParts = JsonConvert.SerializeObject(model.TotalParts)
             };
 
             await _testExamRepository.SaveTestResultAsync(testResult);

@@ -1,0 +1,42 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main  # Change "main" to your primary branch if necessary
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout code from GitHub
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Set up .NET SDK
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'  # Use latest 8.0.x SDK version
+
+    # 3. Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore ./AIIL.Services.Api/AIIL.Services.Api.csproj
+
+    # 4. Build the application
+    - name: Build application
+      run: dotnet build ./AIIL.Services.Api/AIIL.Services.Api.csproj --no-restore --configuration Release
+
+    # 5. Publish the application
+    - name: Publish application
+      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release -o ./publish
+
+    # 6. Deploy to Azure Web App
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: "AIILAPI"  # Replace with your Azure App Service name
+        slot-name: "production"  # Use "staging" if using deployment slots
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./publish

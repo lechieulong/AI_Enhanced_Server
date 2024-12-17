@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Model;
 using Model.Test;
 using Model.Utility;
+using Newtonsoft.Json;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -983,6 +984,7 @@ namespace Repository
                             Id = tr.Id,
                             TestId = tr.TestId,
                             UserId = tr.UserId,
+
                             SkillType = tr.SkillType,
                             Score = tr.Score,
                             NumberOfCorrect = tr.NumberOfCorrect,
@@ -993,7 +995,8 @@ namespace Repository
                             AttemptNumber = tr.AttemptNumber,
                             TestName = te.TestName,
                             UserName = user.Name,
-                            UserEmail = user.Email
+                            UserEmail = user.Email,
+                            TotalParts = JsonConvert.DeserializeObject<List<int>>(tr.TotalParts)
                         };
 
             // Get total count
