@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Entity;
 using Entity.Data;
 using Entity.TeacherFolder;
 using IRepository;
@@ -25,6 +26,7 @@ namespace AIIL.Services.Api.Controllers
         {
             var rating = new TeacherRating
             {
+                Id = Guid.NewGuid(),
                 UserId = dto.UserId,
                 LearnerID = dto.LearnerID,
                 RatingValue = dto.RatingValue,
@@ -32,18 +34,8 @@ namespace AIIL.Services.Api.Controllers
                 RatedAt = dto.RatedAt,
             };
 
-            var createdRating = await _repository.CreateRatingAsync(rating);
-
-            var createdRatingDto = new TeacherRatingDto
-            {
-                UserId = createdRating.UserId,
-                LearnerID = createdRating.LearnerID,
-                RatingValue = createdRating.RatingValue,
-                Review = createdRating.Review,
-                RatedAt = createdRating.RatedAt,
-            };
-
-            return CreatedAtAction(nameof(GetAllRatings), new { id = createdRating.Id }, createdRatingDto);
+            await _repository.CreateRatingAsync(rating);
+            return Ok(new { Message = "Rating added successfully." });
         }
 
 
@@ -81,5 +73,13 @@ namespace AIIL.Services.Api.Controllers
 
             return Ok(ratingsDto);
         }
+        [HttpGet("TopRatedTeachers")]
+        public async Task<ActionResult<IEnumerable<TopRatedTeacherDto>>> GetTopRatedTeachers()
+        {
+            var topTeachers = await _repository.GetTopRatedTeachersAsync();
+            return Ok(topTeachers);
+        }
+
+
     }
 }

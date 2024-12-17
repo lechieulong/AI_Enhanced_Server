@@ -22,11 +22,11 @@ jobs:
 
     # 3. Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore ./AIIL.Services.Api/AIIL.Services.Api.csproj
+      run: dotnet restore
 
     # 4. Build the application
     - name: Build application
-      run: dotnet build ./AIIL.Services.Api/AIIL.Services.Api.csproj --no-restore --configuration Release
+      run: dotnet build
 
     # 5. Publish the application
     - name: Publish application
