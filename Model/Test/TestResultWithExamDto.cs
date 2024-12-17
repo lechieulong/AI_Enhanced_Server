@@ -22,6 +22,7 @@ namespace Model.Test
         public string TestName { get; set; } 
         public string UserName { get; set; }
         public string UserEmail { get; set; }
+        public List<int> TotalParts { get; set; }
     }
 
 }

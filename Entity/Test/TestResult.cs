@@ -20,5 +20,7 @@ namespace Entity.Test
         public int SecondMinutesTaken { get; set; }
         public int AttemptNumber { get; set; }
 
+        public string TotalParts { get; set; }
+
     }
 }
