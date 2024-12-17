@@ -141,6 +141,7 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<ICourseLessonContentRepository, CourseLessonContentRepository>();
 builder.Services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
 builder.Services.AddScoped<IClassFileRepository, ClassFileRepository>();
+builder.Services.AddScoped<ITeacherRatingRepository, TeacherRatingRepository>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
 //builder.Services.AddHostedService<LiveStreamBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
