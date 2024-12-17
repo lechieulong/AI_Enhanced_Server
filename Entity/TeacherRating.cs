@@ -23,6 +23,6 @@ namespace Entity.TeacherFolder
 
         public string Review { get; set; } // Nội dung bình luận từ người dùng (tùy chọn)
 
-        public DateTime RatedAt { get; set; } = DateTime.UtcNow; // Thời gian đánh giá
+        public string RatedAt { get; set; } // Thời gian đánh giá
     }
 }
