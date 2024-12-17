@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Entity.CourseFolder;
+using Entity.TeacherFolder;
 namespace Entity.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
@@ -60,6 +61,8 @@ namespace Entity.Data
         public DbSet<CourseLesson> CourseLessons { get; set; }
         public DbSet<CourseLessonContent> CourseLessonContents { get; set; }
         public DbSet<CourseRating> CourseRatings { get; set; }
+
+        public DbSet<TeacherRating> TeacherRatings { get; set; }
         public DbSet<ClassFile> ClassFiles { get; set; }
         public DbSet<Report> Reports { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

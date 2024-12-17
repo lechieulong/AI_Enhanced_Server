@@ -154,6 +154,18 @@ namespace AIIL.Services.Api.Controllers
                 path = $"/{id}";
                 useCourseStorage = true;
             }
+            else if (type.Equals("reportLiveStream", StringComparison.OrdinalIgnoreCase))
+            {
+                containerName = "reportLiveStream";
+                path = $"/{id}";
+                useCourseStorage = true;
+            }
+            else if (type.Equals("reportTeacher", StringComparison.OrdinalIgnoreCase))
+            {
+                containerName = "reportTeacher";
+                path = $"/{id}";
+                useCourseStorage = true;
+            }
             else
             {
                 return BadRequest("Invalid type. Valid types are 'courseLesson', 'class', or 'course'.");
@@ -180,7 +192,5 @@ namespace AIIL.Services.Api.Controllers
                 }
             }
         }
-
-
     }
 }

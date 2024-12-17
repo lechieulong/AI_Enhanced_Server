@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entity.CourseFolder;
+using Entity.TeacherFolder;
 
 namespace Entity
 {
@@ -15,6 +16,8 @@ namespace Entity
         public string Name { get; set; }
         public string? ImageURL { get; set; }
         public DateTime? DOB { get; set; }
+        public double AverageRating { get; set; } = 0;
+        public int RatingCount { get; set; } = 0;
         public UserEducation? UserEducation { get; set; }
         public TeacherRequest? TeacherRequest { get; set; }
         public ICollection<Event>? Events { get; set; }
@@ -28,5 +31,6 @@ namespace Entity
         public AccountBalance? AccountBalances { get; set; }
         public ICollection<User_Gift>? SentGifts { get; set; }
         public ICollection<User_Gift>? ReceivedGifts { get; set; }
+        public ICollection<TeacherRating> TeacherRatings { get; set; } = new List<TeacherRating>();
     }
 }
