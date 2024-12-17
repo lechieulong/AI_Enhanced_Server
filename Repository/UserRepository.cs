@@ -185,15 +185,57 @@ namespace Repository
             return (userDtos, totalCount);
         }
 
-        public async Task LockUserAsync(string userId, int durationInMinutes)
+        public async Task LockUserAsync(string userId, int? durationValue, string durationUnit, bool lockoutForever, string lockoutReason)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                //Lock user in durationInMinutes
-                user.LockoutEnd = DateTime.UtcNow.AddMinutes(durationInMinutes);
+                if (lockoutForever)
+                {
+                    // Lock the user indefinitely
+                    user.LockoutEnd = DateTimeOffset.MaxValue;
+                    user.LockoutForever = true;
+                    user.LockoutReason = lockoutReason;
+                }
+                else
+                {
+                    // Calculate lockout duration
+                    var lockoutDuration = CalculateLockoutDuration(durationValue, durationUnit);
+                    if (lockoutDuration.HasValue)
+                    {
+                        user.LockoutEnd = DateTime.UtcNow.Add(lockoutDuration.Value);
+                        user.LockoutForever = false;
+                        user.LockoutReason = lockoutReason;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid lockout duration or unit.");
+                    }
+                }
+
                 await _userManager.UpdateAsync(user);
             }
+            else
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+        }
+
+
+        private TimeSpan? CalculateLockoutDuration(int? durationValue, string durationUnit)
+        {
+            if (durationValue == null || durationValue <= 0 || string.IsNullOrWhiteSpace(durationUnit))
+            {
+                return null;
+            }
+
+            return durationUnit.ToLower() switch
+            {
+                "minutes" => TimeSpan.FromMinutes(durationValue.Value),
+                "hours" => TimeSpan.FromHours(durationValue.Value),
+                "days" => TimeSpan.FromDays(durationValue.Value),
+                _ => null // Invalid unit
+            };
         }
 
         public async Task UnlockUserAsync(string userId)

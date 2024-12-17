@@ -199,19 +199,28 @@ namespace AIIL.Services.Api.Controllers
         [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> LockUser([FromBody] LockUserRequestDto request)
         {
-            if (request == null || string.IsNullOrEmpty(request.UserId) || request.DurationInMinutes <= 0)
-            {
-                return BadRequest("Invalid request data.");
-            }
-
-            var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
-                return NotFound("User not found.");
+                return NotFound(new { message = "User not found." });
             }
 
-            await _userRepository.LockUserAsync(request.UserId, request.DurationInMinutes);
-            return Ok("User locked successfully.");
+            try
+            {
+                await _userRepository.LockUserAsync(
+                    request.UserId,
+                    request.DurationValue,
+                    request.DurationUnit,
+                    request.LockoutForever,
+                    request.LockoutReason
+                );
+
+                return Ok(new { message = "User locked successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("unlock/{userId}")]
