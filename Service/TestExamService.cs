@@ -33,12 +33,13 @@ namespace Service
 
         public async Task<IEnumerable<TestExam>> GetPagedAdminTests(int pageNumber, int pageSize)
         {
-            string cacheKey = $"AdminTests:Page:{pageNumber}:Size:{pageSize}";
+            string cacheKey = $"testadmin";
 
             var cachedData = await _redisService.GetAsync(cacheKey);
-            if (!string.IsNullOrEmpty(cachedData))
+            if (!string.IsNullOrEmpty(cachedData) && JsonConvert.DeserializeObject<IEnumerable<TestExam>>(cachedData).Any())
             {
-                return JsonConvert.DeserializeObject<IEnumerable<TestExam>>(cachedData);
+                var data = JsonConvert.DeserializeObject<IEnumerable<TestExam>>(cachedData);
+                return data.Skip(pageNumber).Take(pageSize);
             }
 
             var tests = await _testExamRepository.GetPagedAdminTests(pageNumber, pageSize);
@@ -415,10 +416,17 @@ namespace Service
 
         public async Task<TestModel> CreateTestAsync(Guid userId, TestModel model, int role)
         {
+            string cacheKey = $"testadmin";
+
             var isExistedTestName = await _testExamRepository.CheckExistedName(userId, model.TestName);
             if (isExistedTestName)
             {
                 throw new Exception("Duplicate name");
+            }
+
+            if(role == 1)
+            {
+                await _redisService.DeleteAsync(cacheKey);
             }
             return await _testExamRepository.AddTestAsync(userId, model, role);
         }
