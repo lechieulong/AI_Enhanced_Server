@@ -20,14 +20,35 @@ namespace Service
     {
         private readonly ITestExamRepository _testExamRepository;
         private readonly IGeminiService _geminiService;
-
+        private readonly RedisService _redisService;
         private readonly IMapper _mapper;
 
-        public TestExamService(ITestExamRepository testExamRepository, IGeminiService geminiService)
+        public TestExamService(ITestExamRepository testExamRepository, IGeminiService geminiService, RedisService redisService)
         {
             _testExamRepository = testExamRepository;
             _geminiService = geminiService;
+            _redisService = redisService;
         }
+
+
+        public async Task<IEnumerable<TestExam>> GetPagedAdminTests(int pageNumber, int pageSize)
+        {
+            string cacheKey = $"AdminTests:Page:{pageNumber}:Size:{pageSize}";
+
+            var cachedData = await _redisService.GetAsync(cacheKey);
+            if (!string.IsNullOrEmpty(cachedData))
+            {
+                return JsonConvert.DeserializeObject<IEnumerable<TestExam>>(cachedData);
+            }
+
+            var tests = await _testExamRepository.GetPagedAdminTests(pageNumber, pageSize);
+
+            var serializedData = JsonConvert.SerializeObject(tests);
+            await _redisService.SetAsync(cacheKey, serializedData, TimeSpan.FromMinutes(30)); // Set cache expiry as needed
+
+            return tests;
+        }
+
 
         public async Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model)
         {

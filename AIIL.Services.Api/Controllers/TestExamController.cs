@@ -166,11 +166,24 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpGet("admintests")]
-        public async Task<IEnumerable<TestModel>> GetAdminTests()
+        public async Task<IActionResult> GetAdminTests([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            // Validate parameters
+            if (pageNumber <= 0 || pageSize <= 0)
+                return BadRequest("Page number and size must be greater than 0");
 
-            var tests = await _testRepository.GetAdminTests();
-            return _mapper.Map<IEnumerable<TestModel>>(tests);
+            var pagedTests = await _testExamService.GetPagedAdminTests(pageNumber, pageSize);
+
+            // Include total count for pagination metadata
+            var totalCount = await _testRepository.GetTotalAdminTestsCount();
+            var response = new
+            {
+                Data = pagedTests,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return Ok(response);
         }
 
 
