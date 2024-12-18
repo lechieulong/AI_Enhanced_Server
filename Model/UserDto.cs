@@ -16,6 +16,7 @@ namespace Model
         public DateTime? DOB { get; set; }
         public string? ImageURL { get; set; }
         public DateTimeOffset? LockoutEnd { get; set; }
+        public string? LockReason { get; set; }
         public bool LockoutEnabled { get; set; }
         public UserEducationDto? UserEducationDto { get; set; }
         public List<string>? Roles { get; set; }

@@ -11,7 +11,7 @@ namespace Model
         public string UserId { get; set; }
         public string LockoutReason { get; set; }
         public bool LockoutForever { get; set; }
-        public int DurationValue { get; set; } // Optional: Duration value for custom locks
+        public int DurationValue { get; set; }
         public string DurationUnit { get; set; }
     }
 }
