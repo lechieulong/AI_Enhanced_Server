@@ -175,6 +175,7 @@ namespace Repository
                     DOB = user.DOB,
                     ImageURL = user.ImageURL,
                     LockoutEnd = user.LockoutEnd,
+                    LockReason = user.LockoutReason,
                     LockoutEnabled = user.LockoutEnabled,
                     Roles = roles.ToList()
                 };
@@ -221,7 +222,6 @@ namespace Repository
             }
         }
 
-
         private TimeSpan? CalculateLockoutDuration(int? durationValue, string durationUnit)
         {
             if (durationValue == null || durationValue <= 0 || string.IsNullOrWhiteSpace(durationUnit))
@@ -231,9 +231,12 @@ namespace Repository
 
             return durationUnit.ToLower() switch
             {
-                "minutes" => TimeSpan.FromMinutes(durationValue.Value),
-                "hours" => TimeSpan.FromHours(durationValue.Value),
-                "days" => TimeSpan.FromDays(durationValue.Value),
+                "minute" => TimeSpan.FromMinutes(durationValue.Value),
+                "hour" => TimeSpan.FromHours(durationValue.Value),
+                "day" => TimeSpan.FromDays(durationValue.Value),
+                "week" => TimeSpan.FromDays(durationValue.Value * 7),  // 1 tuần = 7 ngày
+                "month" => TimeSpan.FromDays(durationValue.Value * 30), // 1 tháng = 30 ngày (ước tính)
+                "year" => TimeSpan.FromDays(durationValue.Value * 365), // 1 nam = 365 ngày (ước tính)
                 _ => null // Invalid unit
             };
         }
