@@ -12,6 +12,7 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        public Task<int> GetTotalAdminTestsCount();
 
         public Task UpdateExplainSection(Guid sectionId, string explain);
         Task<List<Section>> GetSectionsByPartId(Guid partId);
@@ -34,7 +35,7 @@ namespace IRepository
         Task<TestModel> AddTestAsync(Guid userId, TestModel model, int role);
         Task<bool> CheckExistedName(Guid userId, string testName);
         Task<IEnumerable<TestExam>> GetAllTestsAsync(Guid userId);
-        Task<IEnumerable<TestExam>> GetAdminTests();
+        Task<IEnumerable<TestExam>> GetPagedAdminTests(int pageNumber,int pageSize);
         Task<TestExam> GetTestAsync(Guid id);
         Task<List<TestResult>> GetResultTest( Guid userId, List<Guid> ids);
         Task<TestExam> GetTestBySecionCourseId(Guid id);

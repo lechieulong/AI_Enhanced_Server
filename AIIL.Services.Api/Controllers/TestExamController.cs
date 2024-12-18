@@ -146,7 +146,7 @@ namespace AIIL.Services.Api.Controllers
             // Lấy tất cả các claims liên quan đến vai trò
             var userRoleClaims = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
 
-            int role = userRoleClaims.Contains(SD.Teacher) && userRoleClaims.Contains(SD.Admin) ? 1 : 0;
+            int role = userRoleClaims.Contains(SD.Admin) ? 1 : 0;
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
             {
@@ -166,11 +166,24 @@ namespace AIIL.Services.Api.Controllers
         }
 
         [HttpGet("admintests")]
-        public async Task<IEnumerable<TestModel>> GetAdminTests()
+        public async Task<IActionResult> GetAdminTests([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 6)
         {
+            // Validate parameters
+            if (pageNumber <= 0 || pageSize <= 0)
+                return BadRequest("Page number and size must be greater than 0");
 
-            var tests = await _testRepository.GetAdminTests();
-            return _mapper.Map<IEnumerable<TestModel>>(tests);
+            var pagedTests = await _testExamService.GetPagedAdminTests(pageNumber, pageSize);
+
+            // Include total count for pagination metadata
+            var totalCount = await _testRepository.GetTotalAdminTestsCount();
+            var response = new
+            {
+                Data = pagedTests,
+                TotalCount = pagedTests.Count() == 0 ? 0 : totalCount,
+                TotalPages = pagedTests.Count() == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return Ok(response);
         }
 
 
