@@ -34,6 +34,10 @@ namespace Repository
             _azureService = azureService;
             _serviceProvider = serviceProvider;
         }
+        public async Task<List<TestExam>> getAll()
+        {
+           return await _context.TestExams.ToListAsync();
+        }
         public async Task SaveUserAnswerAsync(List<UserAnswers> userAnswers)
         {
             await _context.UserAnswers.AddRangeAsync(userAnswers);
