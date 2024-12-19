@@ -1,25 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Entity.Live
+namespace Model.Live
 {
-    public class LiveStream
+    public class LiveStreamModel
     {
-        [Key]
         public Guid Id { get; set; }
         public String UserId { get; set; }
         public int Status { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
-        [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; }
-        public ICollection<StreamSession>? StreamSessions { get; set; }
-        public ICollection<Ticket>? Tickets { get; set; }
     }
 }

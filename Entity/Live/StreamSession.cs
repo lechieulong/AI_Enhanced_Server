@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Entity.Live
@@ -21,6 +22,7 @@ namespace Entity.Live
 
         // Navigation property
         [ForeignKey("LiveStreamId")]
+        [JsonIgnore]
         public LiveStream? LiveStream { get; set; }
     }
 }

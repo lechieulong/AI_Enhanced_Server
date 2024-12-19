@@ -7,7 +7,6 @@ using IRepository.Live;
 using AutoMapper;
 using Model.Live;
 using Entity.Live;
-using Entity.Migrations;
 
 namespace AIIL.Services.Api.Controllers
 {
