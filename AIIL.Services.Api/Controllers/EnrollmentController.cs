@@ -47,6 +47,7 @@ namespace API.Controllers
                     CourseId = enrollmentRequest.CourseId,
                     UserId = enrollmentRequest.UserId,
                     ClassId = enrollmentRequest.ClassId,
+                    EnrollAt = enrollmentRequest.EnrollAt,
                 };
 
                 _db.Enrollments.Add(newEnrollment);
