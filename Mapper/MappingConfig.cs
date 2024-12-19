@@ -51,6 +51,8 @@ namespace Mapper
                 config.CreateMap<TestExam, TestModel>();
                 config.CreateMap<TestExam, TestUpdateDto>();
                 config.CreateMap<TestUpdateDto, TestExam>();
+                config.CreateMap<LiveStream, LiveStreamModel>();
+                config.CreateMap<LiveStreamModel, LiveStream>();
 
                 config.CreateMap<Question, QuestionResponse>()
                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers));

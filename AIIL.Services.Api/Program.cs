@@ -23,6 +23,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http.Features;
+using AIIL.Services.Api.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -125,7 +126,7 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
 });
 
 
-
+builder.Services.AddScoped<ILiveStreamRepository, LiveStreamRepository>();
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
