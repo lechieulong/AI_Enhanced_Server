@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Entity;
+using IRepository;
 using IService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Repositories;
 
 public class NotificationBackgroundService : BackgroundService
 {
@@ -32,18 +36,48 @@ public class NotificationBackgroundService : BackgroundService
 
         using (var scope = _serviceScopeFactory.CreateScope())
         {
-            //var emailSenderService = scope.ServiceProvider.GetRequiredService<IEmailSenderService>();
+            var testExamRepository = scope.ServiceProvider.GetRequiredService<ITestExamRepository>();
+            var enrollRepository = scope.ServiceProvider.GetRequiredService<IEnrollmentRepository>();
+            var userExamRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var _emailSender= scope.ServiceProvider.GetRequiredService<IEmailSender>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             try
             {
-                //await emailSenderService.SendEmailRemindMemberAsync("nguyensy23112311@gmail.com", "Check background service.");
-                _logger.LogInformation("Reminder email sent successfully.");
+                var tests = await testExamRepository.getAll();
+
+                foreach (var test in tests)
+                {
+                    DateTime now = DateTime.Now;
+                    DateTime startTime = test.StartTime;
+
+                    // Chỉ lấy ngày và giờ
+                    DateTime nowDateHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+                    DateTime startDateHour = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, 0, 0);
+
+                    if (test.TestType == 2 && startDateHour == nowDateHour)
+                    {
+                        var courses = await enrollRepository.GetEnrollmentsByCourse(test.CourseId);
+                        foreach (var course in courses)
+                        {
+                            var user = await userManager.FindByIdAsync(course.UserId);
+
+                            if (user != null)
+                            {
+                                await _emailSender.SendEmailAsync(user.Email, "Remind: Final Exam", "It's time for your final exam!");
+                            }
+                        }
+                    }
+                }
+
+                _logger.LogInformation("Processed all tests successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while sending reminder email.");
+                _logger.LogError(ex, "An error occurred while processing tests.");
             }
         }
     }
 }
+
 
