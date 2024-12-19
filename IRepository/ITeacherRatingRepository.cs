@@ -16,5 +16,6 @@ namespace IRepository
         Task<IEnumerable<TopRatedTeacherDto>> GetTopRatedTeachersAsync();
 
         Task<IEnumerable<TeacherRating>> GetAllRatingsAsync();
+        Task<bool> HasLearnerRatedTeacherAsync(string userId, string learnerId);
     }
 }

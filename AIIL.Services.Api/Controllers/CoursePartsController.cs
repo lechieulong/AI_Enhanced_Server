@@ -47,19 +47,24 @@ namespace API.Controllers
                 return BadRequest("Invalid course part data.");
             }
 
+            // Tìm giá trị Order cao nhất trong cùng CourseSkillId
+            var maxOrder = await _coursePartRepository
+                .GetMaxOrderByCourseSkillIdAsync(coursePartDto.CourseSkillId);
+
             // Chuyển đổi từ CoursePartDto sang CoursePart entity
             var coursePart = new CoursePart
             {
                 Id = Guid.NewGuid(), // Tạo ID mới cho CoursePart
                 CourseSkillId = coursePartDto.CourseSkillId,
                 Title = coursePartDto.Title,
-                Order = coursePartDto.Order
+                Order = maxOrder + 1 // Order tăng dần
             };
 
             // Lưu CoursePart vào cơ sở dữ liệu
             await _coursePartRepository.AddAsync(coursePart);
             return CreatedAtAction(nameof(GetById), new { id = coursePart.Id }, coursePart);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] CoursePartDto coursePartDto)

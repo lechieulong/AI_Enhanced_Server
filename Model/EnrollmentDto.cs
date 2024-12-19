@@ -12,6 +12,7 @@ namespace Model
         public string UserId { get; set; }
 
         public Guid ClassId { get; set; }
+        public string EnrollAt { get; set; }
 
         //public string ClassId { get; set; }
     }

@@ -33,6 +33,16 @@ namespace Repository
             await _context.SaveChangesAsync();
             return coursePart;
         }
+        public async Task<int> GetMaxOrderByCourseSkillIdAsync(Guid courseSkillId)
+        {
+            // Lấy giá trị lớn nhất của Order theo CourseSkillId
+            return await _context.Set<CoursePart>()
+                .Where(cp => cp.CourseSkillId == courseSkillId)
+                .Select(cp => cp.Order)
+                .DefaultIfEmpty(0) // Nếu không có bản ghi nào, trả về 0
+                .MaxAsync();
+        }
+
 
         public async Task<CoursePart> UpdateAsync(CoursePart coursePart)
         {

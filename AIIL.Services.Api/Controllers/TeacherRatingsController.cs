@@ -79,6 +79,12 @@ namespace AIIL.Services.Api.Controllers
             var topTeachers = await _repository.GetTopRatedTeachersAsync();
             return Ok(topTeachers);
         }
+        [HttpGet("CheckIfRated")]
+        public async Task<ActionResult<bool>> CheckIfRated(string userId, string learnerId)
+        {
+            var hasRated = await _repository.HasLearnerRatedTeacherAsync(userId, learnerId);
+            return Ok(hasRated);
+        }
 
 
     }

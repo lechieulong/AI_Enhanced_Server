@@ -28,5 +28,7 @@ namespace Entity
         [ForeignKey("UserId")]
         [JsonIgnore]
         public ApplicationUser User { get; set; }
+
+        public string EnrollAt { get; set; }
     }
 }

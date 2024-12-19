@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Model;
 using NPOI.Util;
+using Repositories;
 using Repository;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,14 @@ namespace AIIL.Services.Api.Controllers
     [ApiController]
     public class ClassAPIController : ControllerBase
     {
+        private readonly IEnrollmentRepository _enrollmentRepository;
         private readonly IClassRepository _classRepository;
         private readonly ResponseDto _response;
         private readonly IMapper _mapper;
         private readonly ITestExamRepository _testExamRepository;
-        public ClassAPIController(IClassRepository classRepository, IMapper mapper, ITestExamRepository testExamRepository)
+        public ClassAPIController(IClassRepository classRepository, IMapper mapper, ITestExamRepository testExamRepository, IEnrollmentRepository enrollmentRepository)
         {
+            _enrollmentRepository = enrollmentRepository;
             _mapper = mapper;
             _response = new ResponseDto();
             _classRepository = classRepository;
@@ -128,6 +131,7 @@ namespace AIIL.Services.Api.Controllers
         {
             try
             {
+                // Kiểm tra xem lớp có tồn tại trong cơ sở dữ liệu không
                 var classEntity = await _classRepository.GetByIdAsync(id);
                 if (classEntity == null)
                 {
@@ -136,7 +140,18 @@ namespace AIIL.Services.Api.Controllers
                     return _response;
                 }
 
+                // Lấy danh sách Enrollment có classId trùng với id cần xoá
+                var enrollmentsToDelete = await _enrollmentRepository.GetByClassIdAsync(id);
+
+                // Xóa thông tin Enrollment có liên quan
+                if (enrollmentsToDelete.Any())
+                {
+                    await _enrollmentRepository.DeleteRangeAsync(enrollmentsToDelete);
+                }
+
+                // Xóa lớp
                 await _classRepository.DeleteAsync(id);
+
                 _response.IsSuccess = true; // Trả về trạng thái thành công
             }
             catch (Exception ex)
@@ -146,6 +161,7 @@ namespace AIIL.Services.Api.Controllers
             }
             return _response;
         }
+
 
         [HttpGet("course/{courseId:Guid}/classes")]
         public async Task<ActionResult<ResponseDto>> GetByCourseId(Guid courseId)
