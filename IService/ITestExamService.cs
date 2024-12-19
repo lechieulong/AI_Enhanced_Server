@@ -13,5 +13,6 @@ namespace IService
         Task<Dictionary<string, object>> GetExplainByTestId(TestExplainRequestDto model);
         Task<IEnumerable<TestExam>> GetPagedAdminTests( int pageNumber, int pageSize);
         //Task CreateSkillsAsync(Guid userId,Guid testId, Dictionary<string, SkillDto> model);
+        Task<(IEnumerable<TestResultWithExamDto>, int)> GetTestResultByUserIdAsync(Guid courseId, string userId);
     }
 }

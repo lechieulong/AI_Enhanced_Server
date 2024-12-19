@@ -959,7 +959,8 @@ namespace AIIL.Services.Api.Controllers
                 {
                     return BadRequest("User not found.");
                 }
-                var (testResults, totalCount) = await _testRepository.GetTestResultByUserIdAsync(courseId, userIdClaim);
+
+                var (testResults, totalCount) = await _testExamService.GetTestResultByUserIdAsync(courseId, userIdClaim);
 
                 return Ok(new
                 {
@@ -972,6 +973,7 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpGet("test-results/{testId}")]
         //[Authorize]
