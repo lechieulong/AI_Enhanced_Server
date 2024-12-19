@@ -48,6 +48,7 @@ namespace AIIL.Services.Api.Controllers
                 return BadRequest(model);
             }
             var gift = _Mapper.Map<Gift>(model);
+            gift.CreatedDate = DateTime.Now;
             var result = await _repository.AddGiftAsync(gift);
             return Ok(_Mapper.Map<GiftModel>(result));
         }

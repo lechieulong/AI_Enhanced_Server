@@ -667,12 +667,22 @@ namespace Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TestExam>> GetAdminTests()
+        public async Task<IEnumerable<TestExam>> GetPagedAdminTests(int pageNumber, int pageSize)
         {
             return await _context.TestExams
                 .Where(test => test.TestCreateBy == 1)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
+
+        public async Task<int> GetTotalAdminTestsCount()
+        {
+            return await _context.TestExams
+                .Where(test => test.TestCreateBy == 1)
+                .CountAsync();
+        }
+
 
         public async Task UpdateExplainSection(Guid sectionId, string explain)
         {

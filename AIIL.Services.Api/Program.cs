@@ -23,6 +23,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http.Features;
+using AIIL.Services.Api.Controllers;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,15 +39,14 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 });
 
 
-
-
-
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddSingleton<RedisService>(sp => new RedisService(builder.Configuration.GetConnectionString("RedisConnection")));
 
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -102,7 +103,6 @@ builder.Services.AddScoped<IUserEducationRepository, UserEducationRepository>();
 builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 builder.Services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
 builder.Services.AddScoped<IBookedScheduleSessionRepository, BookedScheduleSessionRepository>();
-builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<ITestExamRepository, TestExamRepository>();
 builder.Services.AddScoped<ITestExamService, TestExamService>();
 
@@ -126,7 +126,7 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
 });
 
 
-
+builder.Services.AddScoped<ILiveStreamRepository, LiveStreamRepository>();
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
