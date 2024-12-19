@@ -113,7 +113,6 @@ builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository
 builder.Services.AddScoped<IAzureService, AzureService>();
 builder.Services.AddScoped<IGeminiService, GeminiService>();
 
-
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -123,8 +122,6 @@ builder.Services.AddScoped<IBlogStorageService>(provider =>
     // Truyền cả hai Connection String vào Service
     return new BlobStorageService(azureBlobStorage, azureBlobStorageCourse);
 });
-
-
 
 builder.Services.AddScoped<IStreamSessionRepository, StreamSessionRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();

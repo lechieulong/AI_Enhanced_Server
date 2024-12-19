@@ -88,6 +88,7 @@ namespace Mapper
                 config.CreateMap<TicketModel, Ticket>();
                 config.CreateMap<Transaction, TransactionModel>();
                 config.CreateMap<TransactionModel, Transaction>();
+                config.CreateMap<Balance_History, BalanceHistoryDto>();
                 config.CreateMap<Gift, GiftModel>();
                 config.CreateMap<GiftModel, Gift>();
                 config.CreateMap<User_Gift, User_GiftModel>();
