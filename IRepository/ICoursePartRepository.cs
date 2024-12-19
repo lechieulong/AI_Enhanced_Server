@@ -14,6 +14,7 @@ namespace IRepository
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<CoursePart>> GetByCourseIdAsync(Guid courseId);
         Task<IEnumerable<CoursePart>> GetByCourseSkillIdAsync(Guid courseSkillId); // New method
+        Task<int> GetMaxOrderByCourseSkillIdAsync(Guid courseSkillId);
     }
 
 }

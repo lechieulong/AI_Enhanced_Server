@@ -79,5 +79,11 @@ namespace Repository
 
             return topTeachers;
         }
+        public async Task<bool> HasLearnerRatedTeacherAsync(string userId, string learnerId)
+        {
+            return await Task.FromResult(
+                _context.TeacherRatings.Any(r => r.UserId == userId && r.LearnerID == learnerId)
+            );
+        }
     }
 }

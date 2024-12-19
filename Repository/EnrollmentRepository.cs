@@ -69,6 +69,16 @@ namespace Repositories
                 .ToListAsync();
 
         }
+        public async Task<IEnumerable<Enrollment>> GetByClassIdAsync(Guid classId)
+        {
+            return await _context.Enrollments.Where(e => e.ClassId == classId).ToListAsync();
+        }
+
+        public async Task DeleteRangeAsync(IEnumerable<Enrollment> enrollments)
+        {
+            _context.Enrollments.RemoveRange(enrollments);
+            await _context.SaveChangesAsync();
+        }
     }
 
 }
