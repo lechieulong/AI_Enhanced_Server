@@ -156,13 +156,18 @@ builder.Services.AddCors(options =>
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FrontendUrls").Get<string[]>();
 
     options.AddPolicy("AllowMyOrigin",
-        policy => policy.WithOrigins(allowedOrigins)
+        policy => policy.WithOrigins(
+            "https://aiilprep.azurewebsites.net",
+             "https://generativelanguage.googleapis.com",
+      "https://computervisionresourcehydra.cognitiveservices.azure.com",
+       "https://rtc-api.zego.im"
+                        )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .SetIsOriginAllowed(origin => true)
                         .AllowCredentials());
 });
-
+ 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
