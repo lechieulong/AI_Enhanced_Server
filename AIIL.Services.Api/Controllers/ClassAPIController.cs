@@ -77,9 +77,7 @@ namespace AIIL.Services.Api.Controllers
             if (classDto == null ||
                 string.IsNullOrWhiteSpace(classDto.ClassName) ||
                 string.IsNullOrWhiteSpace(classDto.ClassDescription) ||
-                classDto.CourseId == Guid.Empty ||
-                string.IsNullOrWhiteSpace(classDto.StartDate) ||
-                string.IsNullOrWhiteSpace(classDto.EndDate))
+                classDto.CourseId == Guid.Empty)
             {
                 return BadRequest("Invalid class data.");
             }
@@ -90,10 +88,7 @@ namespace AIIL.Services.Api.Controllers
                     ClassName = classDto.ClassName,
                     ClassDescription = classDto.ClassDescription,
                     CourseId = classDto.CourseId,
-                    StartDate = classDto.StartDate,
-                    EndDate = classDto.EndDate,
                     IsEnabled = classDto.IsEnabled,
-                    ImageUrl = classDto.ImageUrl,
             };
 
                 var createdClass = await _classRepository.CreateAsync(classEntity);

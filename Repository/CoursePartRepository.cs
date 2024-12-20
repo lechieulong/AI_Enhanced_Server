@@ -33,17 +33,21 @@ namespace Repository
             await _context.SaveChangesAsync();
             return coursePart;
         }
-        public async Task<int> GetMaxOrderByCourseSkillIdAsync(Guid courseSkillId)
+        public async Task<List<int>> GetOrdersByCourseSkillIdAsync(Guid courseSkillId)
         {
-            // Lấy giá trị lớn nhất của Order theo CourseSkillId
-            return await _context.Set<CoursePart>()
+            return await _context.CourseParts
                 .Where(cp => cp.CourseSkillId == courseSkillId)
                 .Select(cp => cp.Order)
-                .DefaultIfEmpty(0) // Nếu không có bản ghi nào, trả về 0
-                .MaxAsync();
+                .ToListAsync();
         }
 
-
+        public async Task<int> GetMaxOrderByCourseSkillIdAsync(Guid courseSkillId)
+        {
+            return await _context.CourseParts
+                .Where(cp => cp.CourseSkillId == courseSkillId)
+                .Select(cp => (int?)cp.Order) // Sử dụng nullable để tránh lỗi khi không có giá trị
+                .MaxAsync() ?? 0; // Trả về 0 nếu không có giá trị nào
+        }
         public async Task<CoursePart> UpdateAsync(CoursePart coursePart)
         {
             _context.Set<CoursePart>().Update(coursePart);
