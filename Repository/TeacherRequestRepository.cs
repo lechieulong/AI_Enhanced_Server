@@ -51,32 +51,36 @@ namespace Repository
                 throw new InvalidOperationException("You have registered education information before, please wait for approval.");
             }
 
-            // Sử dụng transaction để đảm bảo tất cả các bước đều thực hiện thành công hoặc rollback nếu có lỗi
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
+            // Sử dụng ExecutionStrategy để bao bọc giao dịch
+            var executionStrategy = _context.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                _context.UserEducations.Add(userEducation);
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                if (userEducation.Specializations != null && userEducation.Specializations.Any())
+                try
                 {
-                    foreach (var specialization in userEducation.Specializations)
+                    _context.UserEducations.Add(userEducation);
+
+                    if (userEducation.Specializations != null && userEducation.Specializations.Any())
                     {
-                        _context.Entry(specialization).State = EntityState.Unchanged;
+                        foreach (var specialization in userEducation.Specializations)
+                        {
+                            _context.Entry(specialization).State = EntityState.Unchanged;
+                        }
                     }
+
+                    _context.TeacherRequests.Add(teacherRequest);
+
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
                 }
-
-                _context.TeacherRequests.Add(teacherRequest);
-
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new Exception("An error occurred while adding the teacher request and related information.", ex);
-            }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("An error occurred while adding the teacher request and related information.", ex);
+                }
+            });
         }
 
         public async Task<TestExam> GetRandomAdminTestAsync()
