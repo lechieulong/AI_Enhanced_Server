@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using System.Security.Cryptography;
 using Model;
 using Microsoft.IdentityModel.Tokens;
+using IService;
 
 namespace AIIL.Services.Api.Controllers
 {
@@ -27,11 +28,12 @@ namespace AIIL.Services.Api.Controllers
         public ZegoAPIController(IConfiguration configuration, IStreamSessionRepository repository)
         {
             _callbackSecret = configuration["ApiSettings:CallbackSecret"];
-
+            _Repository = repository;
         }
         [HttpPost("VerifyRoomClose")]
         public async Task<IActionResult> VerifyRoomClose([FromBody] RoomCloseRequest requestData)
         {
+
             try
             {
                 if (requestData==null)
