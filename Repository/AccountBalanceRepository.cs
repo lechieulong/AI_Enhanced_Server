@@ -109,5 +109,46 @@ namespace Repository
                 .OrderByDescending(bh => bh.CreateDate)
                 .ToListAsync();
         }
+
+        public async Task<Boolean> UpdateBalance(AccountBalaceModel model)
+        {
+
+            var existAccountBalance = await _context.AccountBalances.FirstOrDefaultAsync(t => t.UserId.Equals(model.UserId));
+
+
+
+
+            if (existAccountBalance != null )
+            {
+                var Bala = new AccountBalance
+                {
+                    Id = existAccountBalance.Id,
+                    Balance = existAccountBalance.Balance + model.Balance,
+                    LastUpdated = DateTime.Now,
+                    UserId = model.UserId
+
+                };
+
+                var history = new Balance_History
+                {
+                    Id = Guid.NewGuid(),
+                    AccountBalanceId = existAccountBalance.Id,
+                    amount = model.Balance,
+                    Description = model.Message,
+                    Type = model.Type,
+                    CreateDate = DateTime.Now,
+
+                };
+                _context.Balance_Historys.Add(history);
+                _context.Entry(existAccountBalance).CurrentValues.SetValues(Bala);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
     }
 }
