@@ -17,5 +17,6 @@ namespace IRepository
         Task<Boolean> UpdateBalanceAsync(AccountBalaceModel mode);
 
         Task<IEnumerable<Balance_History>> GetBalanceHistoryByUserIdAsync(string userId);
+        Task<Boolean> UpdateBalance(AccountBalaceModel model);
     }
 }
