@@ -23,5 +23,7 @@ namespace IRepository
         Task<bool> CheckLecturerOfCourse(string userId, Guid courseId);
         Task UpdateCourseRatingAsync(Guid courseId);
         Task AddRatingAsync(CourseRating rating);
+        Task<bool> HasClassesAsync(Guid courseId);
+
     }
 }

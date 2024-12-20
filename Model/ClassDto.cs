@@ -8,9 +8,8 @@ namespace Model
         public string ClassName { get; set; }
         public string ClassDescription { get; set; }
         public Guid CourseId { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
         public bool IsEnabled { get; set; } = true;
         public int EnrollmentCount { get; set; }
     }
 }
+    

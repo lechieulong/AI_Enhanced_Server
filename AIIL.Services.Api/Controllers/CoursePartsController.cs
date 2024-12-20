@@ -42,26 +42,26 @@ namespace API.Controllers
         {
             // Kiểm tra dữ liệu đầu vào
             if (coursePartDto == null || coursePartDto.CourseSkillId == Guid.Empty ||
-                string.IsNullOrWhiteSpace(coursePartDto.Title) || string.IsNullOrWhiteSpace(coursePartDto.ContentType))
+                string.IsNullOrWhiteSpace(coursePartDto.Title))
             {
                 return BadRequest("Invalid course part data.");
             }
 
-            // Tìm giá trị Order cao nhất trong cùng CourseSkillId
-            var maxOrder = await _coursePartRepository
-                .GetMaxOrderByCourseSkillIdAsync(coursePartDto.CourseSkillId);
+            // Lấy giá trị Order cao nhất của CoursePart
+            var maxOrder = await _coursePartRepository.GetMaxOrderByCourseSkillIdAsync(coursePartDto.CourseSkillId);
 
-            // Chuyển đổi từ CoursePartDto sang CoursePart entity
+            // Tạo đối tượng CoursePart mới
             var coursePart = new CoursePart
             {
-                Id = Guid.NewGuid(), // Tạo ID mới cho CoursePart
+                Id = Guid.NewGuid(), // Tạo ID mới
                 CourseSkillId = coursePartDto.CourseSkillId,
                 Title = coursePartDto.Title,
-                Order = maxOrder + 1 // Order tăng dần
+                Order = maxOrder + 1 // Tăng giá trị Order
             };
 
-            // Lưu CoursePart vào cơ sở dữ liệu
+            // Lưu đối tượng vào cơ sở dữ liệu
             await _coursePartRepository.AddAsync(coursePart);
+
             return CreatedAtAction(nameof(GetById), new { id = coursePart.Id }, coursePart);
         }
 
@@ -71,7 +71,7 @@ namespace API.Controllers
         {
             // Kiểm tra dữ liệu đầu vào
             if (coursePartDto == null || id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(coursePartDto.Title) || string.IsNullOrWhiteSpace(coursePartDto.ContentType))
+                string.IsNullOrWhiteSpace(coursePartDto.Title))
             {
                 return BadRequest("Invalid course part data.");
             }
