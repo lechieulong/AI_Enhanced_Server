@@ -197,8 +197,12 @@ namespace AIIL.Services.Api.Controllers
         [HttpPost("{userId}/result")]
         public async Task<IActionResult> GetResultTest([FromRoute]Guid  userId, [FromBody] ResultPayloadDto request)
         {
-          
-            var test = await _testRepository.GetResultTest( userId, request.SkillResultIds);
+
+            var guids = request.SkillResultIds
+                      .Select(skillResult => skillResult.Id)
+                      .ToList();
+
+            var test = await _testRepository.GetResultTest( userId, guids);
             return Ok(test);
         }
 

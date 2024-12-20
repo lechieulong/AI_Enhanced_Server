@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Entity.Migrations;
 using Entity.Test;
 using IRepository;
 using IService;
+using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.EntityFrameworkCore;
 using Model.Test;
 using Model.Utility;
@@ -77,21 +79,40 @@ namespace Service
         {
             var result = new Dictionary<string, object>();
 
-            List<Skill> sortedSkills;
+            var sortedSkills = new List<Skill>();
 
             // Determine the skills to process
-            if (model.SkillId != null && model.SkillId != Guid.Empty)
+            //if (model.SkillId != null && model.SkillId != Guid.Empty)
+            //{
+            //    var skill = await _testExamRepository.GetSkillExplainByIdAsync(model.SkillId.Value, model.TotalPartsSubmit);
+            //    if (skill == null) return result;
+            //    sortedSkills = new List<Skill> { skill };
+            //}
+            //else
+            //{
+            //    var skills = await _testExamRepository.GetSkillsExplainByTestIdAsync(model.TestId , model.TotalPartsSubmit);
+            //    if (skills == null || !skills.Any()) return result; // No skills found
+            //    sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
+            //}
+
+
+            foreach (var skillResult in model.SkillResultIds)
             {
-                var skill = await _testExamRepository.GetSkillExplainByIdAsync(model.SkillId.Value, model.TotalPartsSubmit);
-                if (skill == null) return result;
-                sortedSkills = new List<Skill> { skill };
+                Guid skillId = skillResult.SkillId; // Access the Id of the SkillResult
+                List<int> totalParts = skillResult.TotalParts; // Access the TotalParts of the SkillResult
+
+                var skillDetails = await _testExamRepository.GetSkillExplainByIdAsync(skillId, totalParts);
+                if (skillDetails != null)
+                {
+                    sortedSkills.Add(skillDetails);
+                }
             }
-            else
+
+            if (sortedSkills.Count <= 0)
             {
-                var skills = await _testExamRepository.GetSkillsExplainByTestIdAsync(model.TestId , model.TotalPartsSubmit);
-                if (skills == null || !skills.Any()) return result; // No skills found
-                sortedSkills = skills.OrderBy(skill => skill.Type).ToList();
+                sortedSkills.OrderBy(skill => skill.Type).ToList();
             }
+
 
             // Fetch user answers
             var userAnswers = await _testExamRepository.GetUserAnswersByTestId(model.TestId, model.UserId);
@@ -190,7 +211,7 @@ namespace Service
         }
 
         
-        public async Task<TestResult> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
+        public async Task<TestResultWithExamDto> CalculateScore(Guid testId, Guid userId, SubmitTestDto model)
         {
             var skillType = model.UserAnswers.Values.First().Skill;
 
@@ -269,6 +290,7 @@ namespace Service
                 UserId = userId,
                 TestId = testId,
                 SkillType = skillType,
+                SkillId = model.UserAnswers.Values.First().SkillId,
                 Score = !writingSpeakingCondition ? ScaleScore(totalScore, model.TotalQuestions) : skillScore,
                 NumberOfCorrect = totalCorrectAnswer,
                 TotalQuestion = model.TotalQuestions,
@@ -280,7 +302,25 @@ namespace Service
             };
 
             await _testExamRepository.SaveTestResultAsync(testResult);
-            return testResult;
+
+            var response = new TestResultWithExamDto
+            {
+                Id = testResult.Id,
+                UserId = testResult.UserId,
+                TestId = testResult.TestId,
+                SkillType = testResult.SkillType,
+                SkillId = testResult.SkillId,
+                Score = testResult.Score,
+                NumberOfCorrect = testResult.NumberOfCorrect,
+                TotalQuestion = testResult.TotalQuestion,
+                TestDate = testResult.TestDate,
+                TimeMinutesTaken = testResult.TimeMinutesTaken,
+                SecondMinutesTaken = testResult.SecondMinutesTaken,
+                AttemptNumber = testResult.AttemptNumber,
+                TotalParts = JsonConvert.DeserializeObject<List<int>>(testResult.TotalParts)
+            };
+
+            return response;
         }
 
         private async Task<bool> ValidateAnswer(Guid questionId, List<AnswerDto> usewrAnswers, int sectionType, int skill)
