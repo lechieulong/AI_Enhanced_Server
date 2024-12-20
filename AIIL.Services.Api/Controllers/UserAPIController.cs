@@ -433,5 +433,21 @@ namespace AIIL.Services.Api.Controllers
                 return StatusCode(500, _response);
             }
         }
+
+        [HttpGet("Analysis")]
+        [Authorize]
+        public async Task<IActionResult> Analysis()
+        {
+            try
+            {
+                var dashboardData = await _userRepository.Analysis();
+
+                return Ok(dashboardData);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error occurred. Please try again.");
+            }
+        }
     }
 }

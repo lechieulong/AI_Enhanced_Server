@@ -22,5 +22,6 @@ namespace IRepository
         Task<IEnumerable<UserFromFileDto>> ImportUserAsync(IFormFile file);
         Task<ApplicationUser> GetUserEducationByUSerName(string username);
         Task<string> UpdateRole(string username);
+        Task<DashboardDto> Analysis();
     }
 }

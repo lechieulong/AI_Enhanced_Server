@@ -46,8 +46,8 @@ namespace Repository.Live
             await _context.SaveChangesAsync();
 
             return LiveStream;
-
         }
+
         public async Task<LiveStream> UpdateLiveStreamAsync(LiveStream model)
         {
 
