@@ -7,6 +7,7 @@ using Entity.Test;
 using IRepository;
 using IService;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +33,10 @@ namespace Repository
             _mapper = mapper;
             _azureService = azureService;
             _serviceProvider = serviceProvider;
+        }
+        public async Task<List<TestExam>> getAll()
+        {
+           return await _context.TestExams.ToListAsync();
         }
         public async Task SaveUserAnswerAsync(List<UserAnswers> userAnswers)
         {
@@ -944,7 +949,7 @@ namespace Repository
             return (tests, totalCount);
         }
 
-        public async Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultByUserIdAsync(Guid courseId, string userId)
+        public async Task<(IEnumerable<TestResultWithExamDto>, int)> GetTestResultByUserIdAsync(Guid courseId, string userId)
         {
             var query = _context.TestResult
                 .Join(
@@ -953,7 +958,8 @@ namespace Repository
                     te => te.Id,
                     (tr, te) => new { TestResult = tr, TestExam = te }
                 )
-                .Where(joined =>  joined.TestResult.UserId == Guid.Parse(userId))
+                .Where(joined => joined.TestResult.UserId == Guid.Parse(userId)
+                                 && joined.TestExam.CourseId == courseId)
                 .Select(joined => new
                 {
                     TestResult = joined.TestResult,
@@ -977,11 +983,12 @@ namespace Repository
                 TimeMinutesTaken = item.TestResult.TimeMinutesTaken,
                 SecondMinutesTaken = item.TestResult.SecondMinutesTaken,
                 AttemptNumber = item.TestResult.AttemptNumber,
-                TestName = item.TestExam.TestName,  // assuming `Title` is a property of `TestExam`
+                TestName = item.TestExam.TestName,
             });
 
             return (result, totalCount);
         }
+
 
         public async Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultOfTest(Guid testId)
         {
