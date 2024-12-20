@@ -217,8 +217,7 @@ namespace Service
 
             if (skillType == 2)
             {
-                //model = await _geminiService.ScoreAndExplain(model);
-                Console.WriteLine("sdf");
+                model = await _geminiService.ScoreAndExplain(model);
             }
            
            
