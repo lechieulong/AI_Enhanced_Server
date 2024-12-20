@@ -42,8 +42,10 @@ namespace AIIL.Services.Api.Controllers
         public async Task<ActionResult<IEnumerable<CourseLessonContent>>> GetByCourseLessonId(Guid courseLessonId)
         {
             var contents = await _courseLessonContentRepository.GetByCourseLessonIdAsync(courseLessonId);
-            return Ok(contents);
+            var sortedContents = contents.OrderBy(c => c.Order); // Sắp xếp theo Order tăng dần
+            return Ok(sortedContents);
         }
+
 
         [HttpPost]
         public async Task<ActionResult<CourseLessonContent>> Create([FromBody] CourseLessonContentDto courseLessonContentDto)
