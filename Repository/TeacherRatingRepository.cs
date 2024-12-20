@@ -70,11 +70,12 @@ namespace Repository
                 select new TopRatedTeacherDto
                 {
                     UserName = user.UserName,
+                    FullName = user.Name,
                     ImageURL = user.ImageURL,
                     AverageRating = user.AverageRating,
                     RatingCount = user.RatingCount
                 }
-            ).Take(8) // Giới hạn kết quả trả về chỉ 8 người
+            ).Take(6) // Giới hạn kết quả trả về chỉ 8 người
             .ToListAsync();
 
             return topTeachers;

@@ -72,17 +72,17 @@ namespace AIIL.Services.Api.Controllers
             var streamsessionexist = await _repository.getStreamSession(model.LiveStreamId);
             if (streamsessionexist != null) {
 
-                var result = _Mapper.Map<StreamSessionModel>(streamsessionexist);
-                return Ok(result);
+                streamsessionexist.Status = 0;
+                streamsessionexist.EndTime = DateTime.Now;
+                await _repository.UpdateStreamSessionAsync(streamsessionexist);
             }
-            else
-            {
+            
             model.Id = Guid.NewGuid();
             model.StartTime = DateTime.Now;
             var Streamsession = _Mapper.Map<StreamSession>(model);
             var result = await _repository.AddStreamSessionAsync(Streamsession);
             return Ok(model);
-            }
+            
             
         }
         [HttpPut]

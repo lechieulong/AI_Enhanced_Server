@@ -12,6 +12,7 @@ namespace IRepository
 {
     public interface ITestExamRepository
     {
+        Task<List<TestExam>> getAll();
         public Task<int> GetTotalAdminTestsCount();
 
         public Task UpdateExplainSection(Guid sectionId, string explain);

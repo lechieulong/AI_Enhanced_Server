@@ -11,6 +11,7 @@ namespace Model
     public class TeacherAvailableScheduleDto
     {
         public Guid Id { get; set; }
+        public string Content { get; set; }
         public DateTime StartTime { get; set; }
         public int Minutes { get; set; }
         // 0 is availabe, 1 is pending, 2 is booked
