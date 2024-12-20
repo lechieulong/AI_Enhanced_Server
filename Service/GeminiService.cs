@@ -44,7 +44,7 @@ namespace Service
 
         public async Task<SubmitTestDto> ScoreAndExplain(SubmitTestDto model)
         {
-            var client = _clientFactory.CreateClient();
+            var client = _clientFactory.CreateClient("GoogleApi");
 
             foreach (var userAnswer in model.UserAnswers.Values)
             {
