@@ -30,8 +30,6 @@ namespace Repository
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate,
                     IsEnabled = c.IsEnabled
                 }).ToListAsync();
         }
@@ -60,9 +58,6 @@ namespace Repository
                 ClassDescription = newClassDto.ClassDescription,
                 CourseId = newClassDto.CourseId,
                 IsEnabled = newClassDto.IsEnabled,
-                StartDate = newClassDto.StartDate,
-                EndDate= newClassDto.EndDate,
-                ImageUrl = newClassDto.ImageUrl,
             };
 
             try
@@ -110,8 +105,6 @@ namespace Repository
             existingClass.ClassName = updatedClassDto.ClassName;
             existingClass.ClassDescription = updatedClassDto.ClassDescription;
             existingClass.CourseId = updatedClassDto.CourseId;
-            existingClass.StartDate = updatedClassDto.StartDate;
-            existingClass.EndDate = updatedClassDto.EndDate;
             existingClass.IsEnabled = updatedClassDto.IsEnabled;
 
             _dbContext.Classes.Update(existingClass);
@@ -122,8 +115,6 @@ namespace Repository
                 ClassName = existingClass.ClassName,
                 ClassDescription = existingClass.ClassDescription,
                 CourseId = existingClass.CourseId,
-                StartDate = existingClass.StartDate,
-                EndDate = existingClass.EndDate,
                 IsEnabled = existingClass.IsEnabled
             };
         }
@@ -151,9 +142,8 @@ namespace Repository
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate,
-                    IsEnabled = c.IsEnabled
+                    IsEnabled = c.IsEnabled,
+                    EnrollmentCount = c.EnrollmentCount
                 })
                 .ToListAsync();
         }
@@ -167,8 +157,6 @@ namespace Repository
                     ClassName = c.ClassName,
                     ClassDescription = c.ClassDescription,
                     CourseId = c.CourseId,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate,
                     IsEnabled = c.IsEnabled
                 })
                 .ToListAsync();
@@ -187,8 +175,6 @@ namespace Repository
                 ClassName = classEntity.ClassName,
                 ClassDescription = classEntity.ClassDescription,
                 CourseId = classEntity.CourseId,
-                StartDate = classEntity.StartDate,
-                EndDate = classEntity.EndDate,
                 IsEnabled = classEntity.IsEnabled
             };
         }

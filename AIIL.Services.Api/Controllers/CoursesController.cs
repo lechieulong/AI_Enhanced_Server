@@ -108,7 +108,8 @@ namespace Auth.Controllers
                 UserId = courseDto.UserId,
                 CreatedAt = courseDto.CreatedAt,
                 UpdatedAt = courseDto.UpdatedAt,
-                IsEnabled = false
+                IsEnabled = false,
+                ImageUrl = courseDto.ImageUrl,
             };
 
             await _repository.CreateAsync(course);
@@ -289,15 +290,26 @@ namespace Auth.Controllers
         [HttpPut("{courseId:guid}/update-status")]
         public async Task<IActionResult> UpdateCourseEnabledStatus(Guid courseId, [FromBody] bool isEnabled)
         {
+
             var course = await _repository.GetByIdAsync(courseId);
             if (course == null)
             {
                 return NotFound("Course not found.");
             }
 
+            var hasClasses = await _repository.HasClassesAsync(courseId);
+
+            // Nếu không có class và cố gắng chuyển từ false sang true, không cho phép
+            if (hasClasses && isEnabled)
+            {
+                return BadRequest("Cannot enable course without any classes.");
+            }
+
+            // Nếu từ true chuyển về false thì vẫn cho phép
             await _repository.UpdateCourseEnabledStatusAsync(courseId, isEnabled);
             return Ok(new { courseId, IsEnabled = isEnabled });
         }
+
 
 
         [HttpGet("courseLessonContent/{courseLessonContentId}/courseId")]
