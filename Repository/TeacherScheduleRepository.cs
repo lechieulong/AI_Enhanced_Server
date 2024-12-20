@@ -104,6 +104,7 @@ namespace Repository
             {
                 throw new KeyNotFoundException("The schedule to update was not found.");
             }
+            existingSchedule.Content = updatedSchedule.Content;
             existingSchedule.StartTime = updatedSchedule.StartTime;
             existingSchedule.Minutes = updatedSchedule.Minutes;
             existingSchedule.Price = updatedSchedule.Price;

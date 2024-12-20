@@ -11,6 +11,7 @@ namespace Entity
     public class TeacherAvailableSchedule
     {
         public Guid Id { get; set; }
+        public string Content { get; set; }
         public DateTime StartTime { get; set; }
         public int Minutes { get; set; }
         public Int64 Price { get; set; }
