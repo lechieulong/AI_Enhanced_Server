@@ -64,6 +64,7 @@ namespace IRepository
         Task<List<TestExam>> GetTestExamsByClassIdAsync(Guid classId);
         Task<List<TestExam>> GetTestExamsBySkillIdCourseIdAsync(Guid skillIdCourse);
         Task<(IEnumerable<TestResultWithExamDto> testResults, int totalCount)> GetTestResultOfTest(Guid testId);
+        Task<TestResult> GetTestResultOfTest4(Guid Userid);
 
     }
 }

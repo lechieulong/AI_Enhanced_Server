@@ -23,7 +23,6 @@ namespace Repository
     {
         private readonly string _checksumKey;
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
 
         public AccountBalanceRepository(AppDbContext context, IConfiguration configuration)
         {

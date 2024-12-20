@@ -190,6 +190,9 @@ namespace Repository
                 await _context.SaveChangesAsync();
             }
         }
-
+        public async Task<bool> HasClassesAsync(Guid courseId)
+        {
+            return await _context.Classes.AnyAsync(c => c.CourseId == courseId);
+        }
     }
 }

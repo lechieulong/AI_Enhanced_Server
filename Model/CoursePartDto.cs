@@ -9,10 +9,6 @@ namespace Entity.CourseFolder
     {
         public Guid CourseSkillId { get; set; } 
         public string Title { get; set; }
-        public string ContentType { get; set; }
-
-        public string ContentUrl { get; set; }
-
         public int Order { get; set; }
     }
 }

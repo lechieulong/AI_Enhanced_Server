@@ -64,7 +64,26 @@ public class NotificationBackgroundService : BackgroundService
 
                             if (user != null)
                             {
-                                await _emailSender.SendEmailAsync(user.Email, "Remind: Final Exam", "It's time for your final exam!");
+                                string subject = "Reminder: Your exam is now open!";
+                                string examLink = $"https://aiilprep.azurewebsites.net/testDetail/{test.Id}";
+                                string body = $@"
+            <html>
+                <body>
+                    <h2>Hello!</h2>
+                    <p>This is a friendly reminder that your exam is now open:</p>
+                    <p><strong>Exam details:</strong></p>
+                    <ul>
+                        <li>Exam Name: <strong>{test.TestName}</strong></li>
+                        <li>Start Time: <strong>{test.StartTime}</strong></li>
+                        <li>Submission Deadline: <strong>{test.EndTime}</strong></li>
+                    </ul>
+                    <p>Please click the link below to start your exam:</p>
+                    <p><a href='{examLink}' target='_blank'>Start the Exam</a></p>
+                    <p>Good luck and do your best!</p>
+                    <p>Best regards,<br>Your Support Team</p>
+                </body>
+            </html>";
+                                await _emailSender.SendEmailAsync(user.Email, subject, body);
                             }
                         }
                     }

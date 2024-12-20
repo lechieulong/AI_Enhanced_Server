@@ -1031,5 +1031,20 @@ namespace Repository
             return (testResults, totalCount);
         }
 
+        public async Task<TestResult> GetTestResultOfTest4(Guid Userid)
+        {
+            var testresults=await _context.TestResult.Where(u=>u.UserId.Equals(Userid)).ToListAsync();
+            
+                foreach (var testresult in testresults)
+                {
+                var test = await GetTestAsync(testresult.TestId);
+                if(test != null&& test.TestType == 4)
+                {
+                    return testresult;
+                }
+                }
+            return null;
+            
+        }
     }
 }
