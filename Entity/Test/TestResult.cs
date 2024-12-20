@@ -11,7 +11,8 @@ namespace Entity.Test
         public Guid Id { get; set; } 
         public Guid TestId { get; set; }
         public Guid UserId { get; set; }
-        public int SkillType { get; set; } 
+        public int SkillType { get; set; }
+        public Guid SkillId { get; set; }
         public Decimal Score { get; set; }
         public int NumberOfCorrect { get; set; } 
         public int TotalQuestion { get; set; }
