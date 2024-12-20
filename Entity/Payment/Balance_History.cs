@@ -18,6 +18,7 @@ namespace Entity.Payment
         public decimal amount {  get; set; }
 
         public string Description {  get; set; }
+        public string Type { get; set; }
 
         public DateTime CreateDate { get; set; }
         [ForeignKey("AccountBalanceId")]

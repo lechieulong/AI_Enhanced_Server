@@ -41,10 +41,16 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-builder.Services.AddDbContext<AppDbContext>(option =>
-{
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,           // Maximum number of retry attempts
+            maxRetryDelay: TimeSpan.FromSeconds(10), // Time to wait before retrying
+            errorNumbersToAdd: null     // Error numbers that should trigger a retry
+        )
+    )
+);
 
 builder.Services.AddSingleton<RedisService>(sp => new RedisService(builder.Configuration.GetConnectionString("RedisConnection")));
 
@@ -113,7 +119,6 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITeacherScheduleRepository, TeacherScheduleRepository>();
 builder.Services.AddScoped<IAzureService, AzureService>();
 builder.Services.AddScoped<IGeminiService, GeminiService>();
-
 
 builder.Services.AddScoped<IBlogStorageService>(provider =>
 {

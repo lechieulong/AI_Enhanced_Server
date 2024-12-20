@@ -15,6 +15,8 @@ namespace Model.Payment
         public decimal Balance { get; set; }
 
         public string Message { get; set; }
+
+        public string Type { get; set; }
         public string signature { get; set; }
 
     }

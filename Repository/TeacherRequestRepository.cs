@@ -4,11 +4,13 @@ using Entity;
 using Entity.Data;
 using Entity.Test;
 using IRepository;
+using IRepository.Live;
 using IService;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.Utility;
+using Repository.Live;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,10 +25,12 @@ namespace Repository
         private readonly AppDbContext _context;
         private readonly IEmailSenderService _emailSenderService;
         private readonly IAuthRepository _authRepository;
-        public TeacherRequestRepository(AppDbContext db, IEmailSenderService emailSenderService, IAuthRepository authRepository)
+        private readonly ILiveStreamRepository _liveStreamRepository;
+        public TeacherRequestRepository(AppDbContext db, IEmailSenderService emailSenderService, IAuthRepository authRepository, ILiveStreamRepository liveStreamRepository)
         {
             _emailSenderService = emailSenderService;
             _authRepository = authRepository;
+            _liveStreamRepository = liveStreamRepository;
             _context = db;
         }
         public async Task AddRequestAsync(TeacherRequest teacherRequest, UserEducation userEducation)
@@ -196,6 +200,8 @@ namespace Repository
                             // Handle role assignment failure (logging, exception, etc.)
                             throw new InvalidOperationException($"Failed to assign role to {user.Email}");
                         }
+
+                        await _liveStreamRepository.AddLiveStreamAsync(Guid.Parse(request.UserId));
                         await _emailSenderService.SendApproveTeacherRequestEmail(user.Email, user.Name, request.Description);
                     }
                     else if (request.Status == (int)RequestStatusEnum.Reject) // Status is 2

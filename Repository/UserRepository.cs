@@ -72,28 +72,27 @@ namespace Repository
 
         public async Task<IEnumerable<TeacherSearchDto>> SearchTeachersAsync(string searchText)
         {
-            var allUsers = await _db.ApplicationUsers.ToListAsync();
+            var searchPattern = $"%{searchText}%";
 
-            var teacherUsers = new List<TeacherSearchDto>();
-            foreach (var user in allUsers)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
+            var teacherUsers = await (from user in _db.ApplicationUsers
+                                      join userRole in _db.UserRoles on user.Id equals userRole.UserId
+                                      join role in _db.Roles on userRole.RoleId equals role.Id
+                                      where role.Name == SD.Teacher &&
+                                            !(from ur in _db.UserRoles
+                                              join r in _db.Roles on ur.RoleId equals r.Id
+                                              where ur.UserId == user.Id && r.Name == SD.Admin
+                                              select ur).Any() &&
+                                            (EF.Functions.Like(user.UserName, searchPattern) ||
+                                             EF.Functions.Like(user.Email, searchPattern) ||
+                                             EF.Functions.Like(user.Name, searchPattern))
+                                      select new TeacherSearchDto
+                                      {
+                                          Name = user.Name,
+                                          UserName = user.UserName,
+                                          ImageURL = user.ImageURL
+                                      }).ToListAsync();
 
-                if (roles.Contains(SD.Teacher) &&
-                    (user.UserName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                     user.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                     user.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
-                {
-                    teacherUsers.Add(new TeacherSearchDto
-                    {
-                        Name = user.Name,
-                        UserName = user.UserName,
-                        ImageURL = user.ImageURL
-                    });
-                }
-            }
-
-            return teacherUsers.Take(5);
+            return teacherUsers;
         }
 
         public async Task<UserDto> GetUserProfileByUsernameAsync(string username)
@@ -322,6 +321,33 @@ namespace Repository
 
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
             return token;
+        }
+
+        public async Task<DashboardDto> Analysis()
+        {
+            var totalUsers = await _db.ApplicationUsers.CountAsync();
+
+            var totalTeachers = await (from user in _db.ApplicationUsers
+                                       join userRole in _db.UserRoles on user.Id equals userRole.UserId
+                                       join role in _db.Roles on userRole.RoleId equals role.Id
+                                       where role.Name == "Teacher"
+                                       select user)
+                            .CountAsync();
+
+            var courses = await _db.Courses
+                .CountAsync();
+
+            var totalEnrollments = await _db.Enrollments.CountAsync();
+
+            var dashboardDto = new DashboardDto
+            {
+                TotalUser = totalUsers,
+                TotalTeachers = totalTeachers,
+                Courses = courses,
+                TotalEnrollments = totalEnrollments
+            };
+
+            return dashboardDto;
         }
     }
 }

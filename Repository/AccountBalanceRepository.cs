@@ -14,6 +14,8 @@ using System.Security.Cryptography.Xml;
 using Microsoft.Extensions.Configuration;
 using Entity.Payment;
 using Microsoft.Extensions.Configuration;
+using Entity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Repository
 {
@@ -61,7 +63,7 @@ namespace Repository
 
             var existAccountBalance =  await _context.AccountBalances.FirstOrDefaultAsync(t => t.UserId.Equals(model.UserId));
 
-            string data = $"userid={model.UserId}&money={model.Balance}&message={model.Message}";
+            string data = $"userid={model.UserId}&money={model.Balance}&message={model.Message}&type={model.Type}";
 
             var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_checksumKey));
 
@@ -85,6 +87,7 @@ namespace Repository
                     AccountBalanceId = existAccountBalance.Id,
                     amount = model.Balance,
                     Description = model.Message,
+                    Type=model.Type,
                     CreateDate = DateTime.Now,
 
                 };
@@ -99,6 +102,13 @@ namespace Repository
             }           
 
         }
-
+        public async Task<IEnumerable<Balance_History>> GetBalanceHistoryByUserIdAsync(string userId)
+        {
+            return await _context.Balance_Historys
+                .Include(bh => bh.AccountBalance)
+                .Where(bh => bh.AccountBalance != null && bh.AccountBalance.UserId == userId)
+                .OrderByDescending(bh => bh.CreateDate)
+                .ToListAsync();
+        }
     }
 }
