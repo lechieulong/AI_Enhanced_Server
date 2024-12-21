@@ -249,7 +249,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                 // Log request payload
                 Console.WriteLine("Request Payload:");
                 Console.WriteLine(JsonConvert.SerializeObject(requestData, Formatting.Indented));
-
+                client.DefaultRequestHeaders.Add("Client-ID", "189214968639-396q766kp8o9qfjmbk9tnnlg480e9qmo.apps.googleusercontent.com");
                 var response = await client.PostAsync(
                     _apiUrl,
                     new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
