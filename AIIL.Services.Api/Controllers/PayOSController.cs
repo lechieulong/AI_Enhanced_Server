@@ -63,7 +63,7 @@ namespace TransactionValidationApi.Controllers
             }
             else
             {
-                return BadRequest(new { success = true });
+                return Ok(new { success = false });
             }
         }
 
