@@ -35,6 +35,10 @@ namespace AIIL.Services.Api.Controllers
         public async Task<IActionResult> ScoreSpeaking([FromBody] SpeakingModel model)
         {
 
+            if (model == null)
+            {
+                return BadRequest($"Payload is invalid or null Answer: {model.Answer}, QuestionName: {model.QuestionName}, PartNumber: {model.PartNumber}.");
+            }
             try
             {
 
