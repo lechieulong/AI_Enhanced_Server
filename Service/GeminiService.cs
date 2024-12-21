@@ -38,7 +38,7 @@ namespace Service
         {
             _clientFactory = httpClientFactory;
             _testExamRepository = testExamRepository;
-            _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAkFBzNmOixBE8Elh-nNseThbJZMJAMc_A";
+            _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAafcsKbt9C0XjKtLvGFQ5nG9IHm-sRtyU";
             _azureService = azureService;
         }
 
@@ -217,84 +217,105 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
         public async Task<SpeakingResponseDto> ScoreSpeaking(SpeakingModel speakingModel)
         {
-            if (string.IsNullOrEmpty(speakingModel.Answer) || string.IsNullOrEmpty(speakingModel.QuestionName) || speakingModel.PartNumber <= 0)
+            var speakingExplains = new SpeakingResponseDto
             {
-                throw new ArgumentException($"Invalid input data. Answer: {speakingModel.Answer}. Please ensure all fields are filled correctly.");
-            }
+                Answer = speakingModel.Answer,
+                QuestionName = speakingModel.QuestionName
+            };
 
-
-            var speakingExplains = new SpeakingResponseDto();
-            speakingExplains.Answer = speakingModel.Answer;
-            speakingExplains.QuestionName = speakingModel.QuestionName;
-
-            var client = _clientFactory.CreateClient();
-            var requestData = new
+            try
             {
-                contents = new[]
-                 {
+                // Log input model details
+                Console.WriteLine("Input Model:");
+                Console.WriteLine(JsonConvert.SerializeObject(speakingModel, Formatting.Indented));
+
+                var client = _clientFactory.CreateClient();
+
+                // Build the request data
+                var requestData = new
+                {
+                    contents = new[]
+                    {
                 new
                 {
                     parts = new[]
                     {
-                        new { text = BuildPromptSpeaking(speakingModel.QuestionName, speakingModel.Answer,speakingModel.PartNumber)
-
-                        }
+                        new { text = BuildPromptSpeaking(speakingModel.QuestionName, speakingModel.Answer, speakingModel.PartNumber) }
                     }
                 }
-                }
-            };
-
-            var response = await client.PostAsync(
-                _apiUrl,
-                new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
-            );
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"API call failed with status code: {response.StatusCode}");
             }
+                };
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                // Log request payload
+                Console.WriteLine("Request Payload:");
+                Console.WriteLine(JsonConvert.SerializeObject(requestData, Formatting.Indented));
 
-            // Extract Overall Score and Feedback
-            var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
+                var response = await client.PostAsync(
+                    _apiUrl,
+                    new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+                );
 
-            if (!string.IsNullOrEmpty(result))
+                // Log response status
+                Console.WriteLine($"Response Status: {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Log error details
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error Response Content: {errorContent}");
+                    throw new Exception($"API call failed with status code: {response.StatusCode}, Content: {errorContent}");
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                // Log raw API response
+                Console.WriteLine("API Response Content:");
+                Console.WriteLine(responseContent);
+
+                var aiResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                // Extract result
+                var result = aiResponse?.candidates[0]?.content?.parts[0]?.text?.ToString();
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    // Use regular expressions to extract the required fields
+                    var scoreMatch = Regex.Match(result, @"\*\*Overall Band Score:\*\*\s*([\d\.]+)");
+                    if (scoreMatch.Success)
+                    {
+                        speakingExplains.Score = scoreMatch.Groups[1].Value ?? "0";
+                    }
+
+                    var feedbackMatch = Regex.Match(result, @"\*\*Feedback:\*\*\s*([\s\S]+?)\*\*Suggestions for Improvement:\*\*");
+                    var feedback = feedbackMatch.Success ? feedbackMatch.Groups[1].Value.Trim() : string.Empty;
+
+                    var suggestionsMatch = Regex.Match(result, @"\*\*Suggestions for Improvement:\*\*\s*([\s\S]+)");
+                    var suggestions = suggestionsMatch.Success ? suggestionsMatch.Groups[1].Value.Trim() : string.Empty;
+
+                    speakingExplains.Explain = (string.IsNullOrEmpty(feedback) || string.IsNullOrEmpty(suggestions))
+                        ? "No explanation available!"
+                        : $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
+                }
+                else
+                {
+                    Console.WriteLine("No valid result in API response.");
+                    speakingExplains.Explain = "AI did not return a valid response.";
+                }
+            }
+            catch (Exception ex)
             {
-                // Use a regular expression to extract the Overall Score
-                var scoreMatch = Regex.Match(result, @"\*\*Overall Band Score:\*\*\s*([\d\.]+)");
-                if (scoreMatch.Success)
-                {
-                    var overallScore = scoreMatch.Groups[1].Value;
-                    speakingExplains.Score = overallScore ?? "0";  // Assign the Overall Band Score
-                }
+                // Log exception details
+                Console.WriteLine("An error occurred:");
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
-                // Extract Feedback
-                var feedbackMatch = Regex.Match(result, @"\*\*Feedback:\*\*\s*([\s\S]+?)\*\*Suggestions for Improvement:\*\*");
-                string feedback = string.Empty;
-                if (feedbackMatch.Success)
-                {
-                    feedback = feedbackMatch.Groups[1].Value.Trim();
-                }
-
-                // Extract Suggestions for Improvement
-                var suggestionsMatch = Regex.Match(result, @"\*\*Suggestions for Improvement:\*\*\s*([\s\S]+)");
-                string suggestions = string.Empty;
-                if (suggestionsMatch.Success)
-                {
-                    suggestions = suggestionsMatch.Groups[1].Value.Trim();
-                }
-
-                // Concatenate Feedback and Suggestions into Explain field
-                speakingExplains.Explain = (string.IsNullOrEmpty(feedback) || string.IsNullOrEmpty(suggestions))
-       ? "No available for explain now! "
-       : $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
-
+                // Return detailed error information in the response
+                speakingExplains.Explain = $"An error occurred while processing: {ex.Message}";
             }
 
             return speakingExplains;
         }
+
 
 
         //        private string BuildPromptSpeaking(string questionName, string answer, int part)
