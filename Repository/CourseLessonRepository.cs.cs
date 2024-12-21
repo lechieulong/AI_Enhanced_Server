@@ -58,5 +58,13 @@ namespace Repository
                 .ToListAsync();
 
         }
+
+        public async Task<int> GetMaxOrderByCoursePartIdAsync(Guid coursePartId)
+        {
+            return await _context.CourseLessons
+                .Where(cp => cp.CoursePartId == coursePartId)
+                .Select(cp => (int?)cp.Order) // Sử dụng nullable để tránh lỗi khi không có giá trị
+                .MaxAsync() ?? 0; // Trả về 0 nếu không có giá trị nào
+        }
     }
 }

@@ -6,6 +6,7 @@ using Entity.CourseFolder;
 using IRepository;
 using Model;
 using Repository;
+using Model.Course;
 
 namespace API.Controllers
 {
@@ -39,18 +40,19 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CourseLesson>> Create([FromBody] CourseLessonDto courseLessonDto)
+        public async Task<ActionResult<CourseLesson>> Create([FromBody] Model.CourseLessonDto courseLessonDto)
         {
             if (courseLessonDto == null || courseLessonDto.CoursePartId == Guid.Empty || string.IsNullOrWhiteSpace(courseLessonDto.Title))
             {
                 return BadRequest("Invalid course lesson data.");
             }
-
+            var maxOrder = await _courseLessonRepository.GetMaxOrderByCoursePartIdAsync(courseLessonDto.CoursePartId);
             var courseLesson = new CourseLesson
             {
                 Id = Guid.NewGuid(),
                 CoursePartId = courseLessonDto.CoursePartId,
-                Title = courseLessonDto.Title
+                Title = courseLessonDto.Title,
+                Order = maxOrder + 1
             };
 
             var createdCourseLesson = await _courseLessonRepository.AddAsync(courseLesson);
@@ -58,7 +60,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CourseLessonDto courseLessonDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] Model.CourseLessonDto courseLessonDto)
         {
             if (courseLessonDto == null || id == Guid.Empty || string.IsNullOrWhiteSpace(courseLessonDto.Title))
             {
