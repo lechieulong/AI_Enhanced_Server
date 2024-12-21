@@ -30,7 +30,7 @@ jobs:
 
     # 5. Publish the application
     - name: Publish application
-      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release -o ./publish
+      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release --output ./publish
 
     # 6. Deploy to Azure Web App
     - name: Deploy to Azure Web App
