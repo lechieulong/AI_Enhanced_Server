@@ -29,8 +29,8 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     # 5. Publish the application
-    - name: Build and Publish
-      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release --output ./publish
+    - name: Publish application
+      run: dotnet publish ./AIIL.Services.Api/AIIL.Services.Api.csproj --configuration Release -o ./publish
 
     # 6. Deploy to Azure Web App
     - name: Deploy to Azure Web App
@@ -40,4 +40,3 @@ jobs:
         slot-name: "production"
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ./publish
-

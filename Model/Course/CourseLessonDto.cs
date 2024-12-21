@@ -11,5 +11,6 @@ namespace Model.Course
         public Guid Id { get; set; }
         public string Title { get; set; }
         public List<CourseLessonContentDto> Contents { get; set; }
+        public int Order { get; set; }
     }
 }

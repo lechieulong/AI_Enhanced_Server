@@ -13,5 +13,6 @@ namespace IRepository
         Task<CourseLesson> UpdateAsync(CourseLesson courseLesson);
         Task<IEnumerable<CourseLesson>> GetByCoursePartIdAsync(Guid coursePartId);
         Task<bool> DeleteAsync(Guid id);
+        Task<int> GetMaxOrderByCoursePartIdAsync(Guid coursePartId);
     }
 }

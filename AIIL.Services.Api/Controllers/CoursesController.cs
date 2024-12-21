@@ -300,7 +300,7 @@ namespace Auth.Controllers
             var hasClasses = await _repository.HasClassesAsync(courseId);
 
             // Nếu không có class và cố gắng chuyển từ false sang true, không cho phép
-            if (hasClasses && isEnabled)
+            if (!hasClasses && isEnabled)
             {
                 return BadRequest("Cannot enable course without any classes.");
             }
