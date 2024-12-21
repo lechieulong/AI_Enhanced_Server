@@ -158,8 +158,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowMyOrigin",
         policy => policy.WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+                        .AllowAnyHeader());
 });
 
 builder.Services.AddEndpointsApiExplorer();
