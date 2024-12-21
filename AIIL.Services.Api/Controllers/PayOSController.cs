@@ -49,7 +49,7 @@ namespace TransactionValidationApi.Controllers
                         UserId = oder.UserId,
                     };
                     _accountBalance.UpdateBalance(ba);
-                    return Ok(new { IsValid = true });
+                    return Ok(new { success = true });
                 }
                 else
                 {
@@ -59,11 +59,11 @@ namespace TransactionValidationApi.Controllers
 
                 }
                 
-                return Ok(new { IsValid = true });
+                return Ok(new { success = true });
             }
             else
             {
-                return BadRequest(new { IsValid = false });
+                return BadRequest(new { success = true });
             }
         }
 
