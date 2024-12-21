@@ -38,6 +38,8 @@ namespace TransactionValidationApi.Controllers
                 if (transactionData.Code.Equals("00"))
                 {
                  var oder = await _transaction.GetTransactionByIdAsync(transactionData.OrderCode);
+                    if (oder != null)
+                    {
                     oder.PaymentStatus = "PAID";
                     await _transaction.UpdateTransactionAsync(_mapper.Map<TransactionModel>(oder));
                     var ba = new AccountBalaceModel
@@ -48,7 +50,9 @@ namespace TransactionValidationApi.Controllers
                         Type = "deposit",
                         UserId = oder.UserId,
                     };
-                    _accountBalance.UpdateBalance(ba);
+                    await _accountBalance.UpdateBalance(ba);
+                    }
+                    
                     return Ok(new { success = true });
                 }
                 else
@@ -63,7 +67,7 @@ namespace TransactionValidationApi.Controllers
             }
             else
             {
-                return Ok(new { success = false });
+                return Ok(new { success = true });
             }
         }
 
