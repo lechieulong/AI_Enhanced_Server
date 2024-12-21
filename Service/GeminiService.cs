@@ -261,7 +261,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                 if (scoreMatch.Success)
                 {
                     var overallScore = scoreMatch.Groups[1].Value;
-                    speakingExplains.Score = overallScore;  // Assign the Overall Band Score
+                    speakingExplains.Score = overallScore ?? "0";  // Assign the Overall Band Score
                 }
 
                 // Extract Feedback
@@ -281,142 +281,188 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                 }
 
                 // Concatenate Feedback and Suggestions into Explain field
-                speakingExplains.Explain = $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
+                speakingExplains.Explain = (string.IsNullOrEmpty(feedback) || string.IsNullOrEmpty(suggestions))
+       ? "No available for explain now! "
+       : $"{feedback}\n\nSuggestions for Improvement:\n{suggestions}";
+
             }
 
             return speakingExplains;
         }
 
- 
-//        private string BuildPromptSpeaking(string questionName, string answer, int part)
-//        {
-//            return $@"
-//### You are an expert in IELTS speaking comprehension. Based on the following context Part {part} Question:
-//**Question:** {questionName}
 
-//**User's Response:** 
-//{answer}
+        //        private string BuildPromptSpeaking(string questionName, string answer, int part)
+        //        {
+        //            return $@"
+        //### You are an expert in IELTS speaking comprehension. Based on the following context Part {part} Question:
+        //**Question:** {questionName}
 
-//Please evaluate the response based on the following criteria and give your answer base on {part} and {questionName}:
+        //**User's Response:** 
+        //{answer}
 
-//1. **Task Relevance:**
-//   - Does the response directly and fully address the question?
-//   - How much of the response is off-topic or irrelevant? This is the most important factor when determining the score.
+        //Please evaluate the response based on the following criteria and give your answer base on {part} and {questionName}:
 
-//2. **Task Response:**
-//   - Does the response provide clear arguments and relevant examples to support its points?
-//   - Are the arguments well-developed and logically presented?
+        //1. **Task Relevance:**
+        //   - Does the response directly and fully address the question?
+        //   - How much of the response is off-topic or irrelevant? This is the most important factor when determining the score.
 
-//3. **Coherence and Cohesion:**
-//   - Is the response well-structured, with a clear introduction, body, and conclusion (if applicable)?
-//   - Are ideas logically organized, and is there a clear flow between ideas and sentences?
-//   - Are appropriate transition words and cohesive devices used?
+        //2. **Task Response:**
+        //   - Does the response provide clear arguments and relevant examples to support its points?
+        //   - Are the arguments well-developed and logically presented?
 
-//4. **Lexical Resource:**
-//   - Is the vocabulary varied and used accurately?
-//   - Are there any errors in word choice, spelling, or repetition? Are more sophisticated words used where possible?
+        //3. **Coherence and Cohesion:**
+        //   - Is the response well-structured, with a clear introduction, body, and conclusion (if applicable)?
+        //   - Are ideas logically organized, and is there a clear flow between ideas and sentences?
+        //   - Are appropriate transition words and cohesive devices used?
 
-//5. **Grammatical Range and Accuracy:**
-//   - Are a variety of sentence structures used effectively?
-//   - Are there any significant grammatical errors (e.g., tense errors, incorrect article usage, sentence fragments)?
+        //4. **Lexical Resource:**
+        //   - Is the vocabulary varied and used accurately?
+        //   - Are there any errors in word choice, spelling, or repetition? Are more sophisticated words used where possible?
 
-//### Evaluation Format:
-//- **Overall Score:** [Numeric score only, e.g., 3.0, 6.5, 7.5]
-//- **Feedback:**
-//  - **Task Relevance:** [Provide feedback here]
-//  - **Task Response:** [Provide feedback here]
-//  - **Coherence and Cohesion:** [Provide feedback here]
-//  - **Lexical Resource:** [Provide feedback here]
-//  - **Grammatical Range and Accuracy:** [Provide feedback here]
-// - **AI Answer:** [Provide answer base on question]
-//- **Suggestions for Improvement:** 
-//  - [Provide actionable and specific tips for improvement]
+        //5. **Grammatical Range and Accuracy:**
+        //   - Are a variety of sentence structures used effectively?
+        //   - Are there any significant grammatical errors (e.g., tense errors, incorrect article usage, sentence fragments)?
 
-//### Important Notes:
-//- Task Relevance is the most important factor in determining the score. If the response does not directly address the question, the overall score should be lowered accordingly.
-//- Make sure the feedback is constructive and detailed for the user to improve.
-//";
-//        }
+        //### Evaluation Format:
+        //- **Overall Score:** [Numeric score only, e.g., 3.0, 6.5, 7.5]
+        //- **Feedback:**
+        //  - **Task Relevance:** [Provide feedback here]
+        //  - **Task Response:** [Provide feedback here]
+        //  - **Coherence and Cohesion:** [Provide feedback here]
+        //  - **Lexical Resource:** [Provide feedback here]
+        //  - **Grammatical Range and Accuracy:** [Provide feedback here]
+        // - **AI Answer:** [Provide answer base on question]
+        //- **Suggestions for Improvement:** 
+        //  - [Provide actionable and specific tips for improvement]
+
+        //### Important Notes:
+        //- Task Relevance is the most important factor in determining the score. If the response does not directly address the question, the overall score should be lowered accordingly.
+        //- Make sure the feedback is constructive and detailed for the user to improve.
+        //";
+        //        }
 
 
 
 
         private string BuildPromptSpeaking(string questionName, string answer, int part)
         {
+            // Check if the answer is null or empty, and if so, return an appropriate message.
+            if (string.IsNullOrEmpty(answer))
+            {
+                            return $@"
+                    ### You are an expert in IELTS Speaking.
+        
+                    **Context:** Part {part} of the IELTS Speaking test.
+
+                    **Question:** {questionName}
+
+                    **User's Response:**
+                    [No Answer Provided]
+
+                    **Evaluate the response based on the following IELTS Speaking criteria and give your answer:**
+
+                    **1. Coherence:**
+                    - No response provided, so coherence cannot be assessed.
+
+                    **2. Lexical Resource:**
+                    - No response provided, so lexical resource cannot be assessed.
+
+                    **3. Grammatical Range and Accuracy:**
+                    - No response provided, so grammatical range and accuracy cannot be assessed.
+
+                    **4. Pronunciation:**
+                    - No response provided, so pronunciation cannot be assessed.
+
+                    ### Evaluation Format:
+                    - **Overall Band Score:** [0.0]
+                    - **Coherence:** [0.0]
+                    - **Lexical Resource:** [0.0]
+                    - **Grammatical Range and Accuracy:** [0.0]
+                    - **Pronunciation:** [0.0]
+
+                    **Feedback:**
+                    - **Strengths:** No response to evaluate.
+                    - **Weaknesses:** No response to evaluate.
+                    - **Suggestions for Improvement:** Please provide a response to be evaluated.
+                    ";
+            }
+
             return $@"
-        ### You are an expert in IELTS Speaking. 
-        **Context:** Part {part} of the IELTS Speaking test.
+    ### You are an expert in IELTS Speaking. 
+    **Context:** Part {part} of the IELTS Speaking test.
 
-        **Question:** {questionName}
+    **Question:** {questionName}
 
-        **User's Response:**
-        {answer}
+    **User's Response:**
+    {answer}
 
 
-        **Evaluate the response based on the following IELTS Speaking criteria and give your answer :**
+    **Evaluate the response based on the following IELTS Speaking criteria and give your answer :**
 
-        **1 Coherence:**
-           
-           - **Coherence:** 
-              - Is the response well-organized and easy to follow? 
-              - Are ideas presented in a logical order with clear connections between them? 
-              - Are appropriate discourse markers (e.g., 'firstly,' 'however,' 'in conclusion') used effectively?
+    **1 Coherence:**
+       
+       - **Coherence:** 
+          - Is the response well-organized and easy to follow? 
+          - Are ideas presented in a logical order with clear connections between them? 
+          - Are appropriate discourse markers (e.g., 'firstly,' 'however,' 'in conclusion') used effectively?
 
-        **2. Lexical Resource:**
-           - **Vocabulary Range:**
-              - Does the speaker use a wide range of vocabulary, including less common and more sophisticated words? 
-              - Are there any noticeable repetitions or limited vocabulary?
-           - **Accuracy:**
-              - Is the vocabulary used accurately and appropriately in context? 
-              - Are there any errors in word choice or spelling?
+    **2. Lexical Resource:**
+       - **Vocabulary Range:**
+          - Does the speaker use a wide range of vocabulary, including less common and more sophisticated words? 
+          - Are there any noticeable repetitions or limited vocabulary?
+       - **Accuracy:**
+          - Is the vocabulary used accurately and appropriately in context? 
+          - Are there any errors in word choice or spelling?
 
-        **3. Grammatical Range and Accuracy:**
-           - **Range:**
-              - Does the speaker use a variety of grammatical structures, including complex sentences? 
-              - Can they effectively use different tenses and verb forms?
-           - **Accuracy:**
-              - Are there any grammatical errors, such as subject-verb agreement, pronoun use, or article usage? 
-              - How significant are the errors and how much do they impact communication?
+    **3. Grammatical Range and Accuracy:**
+       - **Range:**
+          - Does the speaker use a variety of grammatical structures, including complex sentences? 
+          - Can they effectively use different tenses and verb forms?
+       - **Accuracy:**
+          - Are there any grammatical errors, such as subject-verb agreement, pronoun use, or article usage? 
+          - How significant are the errors and how much do they impact communication?
 
-        **4. Pronunciation:**
-           - **Clarity:**
-              - Is the speaker's pronunciation clear and easy to understand? 
-              - Are individual sounds pronounced accurately?
-           - **Fluency:**
-              - Does the speaker maintain a natural and fluent rhythm and intonation? 
-              - Are there any noticeable problems with stress or intonation that affect communication?
+    **4. Pronunciation:**
+       - **Clarity:**
+          - Is the speaker's pronunciation clear and easy to understand? 
+          - Are individual sounds pronounced accurately?
+       - **Fluency:**
+          - Does the speaker maintain a natural and fluent rhythm and intonation? 
+          - Are there any noticeable problems with stress or intonation that affect communication?
 
-        ### Evaluation Format:
+    ### Evaluation Format:
 
-        - **Overall Band Score:** [Numeric score only, e.g., 3.0, 6.5, 7.5,8.5]
-        - **Coherence:** [Numeric score only, e.g., 3.0, 6.5, 7.5,8.5]
-        - **Lexical Resource:** [Numeric score only, e.g., 3.0, 6.5, 7.5,8.5]
-        - **Grammatical Range and Accuracy:** [Numeric score only, e.g., 3.0, 6.5, 7.5,8.5]
-        - **Pronunciation:** [Numeric score only, e.g., 3.0, 6.5, 7.5,8.5]
+    - **Overall Band Score:** [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Coherence:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Lexical Resource:** [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Grammatical Range and Accuracy:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Pronunciation:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
 
-        **Feedback:**
-           - **Strengths:** [Highlight positive aspects of the response]
-           - **Weaknesses:** [Identify areas for improvement with specific examples]
-           - **Suggestions for Improvement:** [Provide actionable and specific tips for improving each criterion]
+    **Feedback:**
+       - **Strengths:** [Highlight positive aspects of the response]
+       - **Weaknesses:** [Identify areas for improvement with specific examples]
+       - **Suggestions for Improvement:** [Provide actionable and specific tips for improving each criterion]
         **Suggestion Answer** [Provide best answer]
-        ### Important Notes:
+    ### Important Notes:
 
-        - All four criteria are equally important in determining the overall band score.
-        - Consider the speaker's performance holistically and how it impacts overall communication. 
-        - Provide constructive and specific feedback to help the speaker improve their English.
+     - Scores must be based **exclusively** on the user's response and the alignment with the question.
+    - Do not include Suggestions for Improvement in the calculation of any scores.
+    - The feedback and suggestions should be constructive and focus on areas where the response could improve.
+    - Be **conservative in scoring** and do not give high marks unless the response is **exceptionally well-organized**, clear, and grammatically accurate.
 
-        ### Scoring Considerations (for AI):
+    ### Scoring Considerations (for AI):
 
-        - **Part 1:** Focus on fluency, coherence, and lexical resource, as this part emphasizes interaction and basic communication.
-        - **Part 2:** Prioritize lexical resource, grammatical range and accuracy, and coherence, as this part requires sustained speech and more complex language.
-        - **Part 3:** Emphasize lexical resource, grammatical range and accuracy, and fluency and coherence, as this part involves more abstract discussion and deeper analysis.
+    - **Part 1:** Focus on fluency, coherence, and lexical resource, as this part emphasizes interaction and basic communication.
+    - **Part 2:** Prioritize lexical resource, grammatical range and accuracy, and coherence, as this part requires sustained speech and more complex language.
+    - **Part 3:** Emphasize lexical resource, grammatical range and accuracy, and fluency and coherence, as this part involves more abstract discussion and deeper analysis.
 
-        - Use a combination of rule-based systems and machine learning models to assess the different aspects of the response.
-        - Consider using natural language processing techniques to analyze the text for fluency, coherence, and grammatical accuracy.
-        - Implement a scoring rubric that maps specific linguistic features to band scores according to the official IELTS band descriptors.
+    - Use a combination of rule-based systems and machine learning models to assess the different aspects of the response.
+    - Consider using natural language processing techniques to analyze the text for fluency, coherence, and grammatical accuracy.
+    - Implement a scoring rubric that maps specific linguistic features to band scores according to the official IELTS band descriptors.
 
-        This refined prompt provides a more comprehensive and accurate framework for evaluating IELTS Speaking responses. By considering all four criteria and their sub-components, the AI can provide more insightful and helpful feedback to the user.";
+    This refined prompt provides a more comprehensive and accurate framework for evaluating IELTS Speaking responses. By considering all four criteria and their sub-components, the AI can provide more insightful and helpful feedback to the user.";
         }
+
 
 
 
