@@ -69,21 +69,10 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] CoursePartDto coursePartDto)
         {
-            // Kiểm tra dữ liệu đầu vào
-            if (coursePartDto == null || id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(coursePartDto.Title))
-            {
-                return BadRequest("Invalid course part data.");
-            }
-
             var existingCoursePart = await _coursePartRepository.GetByIdAsync(id);
-            if (existingCoursePart == null)
-                return NotFound();
 
             // Cập nhật các thuộc tính từ DTO
-            existingCoursePart.CourseSkillId = coursePartDto.CourseSkillId;
             existingCoursePart.Title = coursePartDto.Title;
-            existingCoursePart.Order = coursePartDto.Order;
             await _coursePartRepository.UpdateAsync(existingCoursePart);
             return NoContent();
         }

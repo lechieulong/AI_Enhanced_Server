@@ -30,10 +30,10 @@ namespace Repository
 
         public async Task<IEnumerable<CourseLessonContent>> GetByCourseLessonIdAsync(Guid courseLessonId)
         {
-            return await _context.Set<CourseLessonContent>()
+            return await _context.CourseLessonContents
                 .Where(c => c.CourseLessonId == courseLessonId)
-                .OrderBy(c => c.Order)
-                .ToListAsync();
+                .OrderBy(c => c.Order) // Sắp xếp theo Order tăng dần
+                .ToListAsync(); 
         }
 
         public async Task<CourseLessonContent> AddAsync(CourseLessonContent courseLessonContent)
