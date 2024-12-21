@@ -161,8 +161,8 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("AllowMyOrigin",
         policy => policy.WithOrigins(allowedOrigins)
-                        .AllowAnyHeader()
                         .AllowAnyMethod()
+                        .AllowAnyHeader()
                         .AllowCredentials());
 });
 

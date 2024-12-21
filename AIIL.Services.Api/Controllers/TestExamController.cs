@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Service;
 using Model.Utility;
 using Microsoft.AspNetCore.Authorization;
-using Model; // For .xlsx files
+using Model;
 namespace AIIL.Services.Api.Controllers
 {
     [Route("api/test")]
