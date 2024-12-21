@@ -58,6 +58,7 @@ namespace Repository
                 .Include(b => b.TeacherAvailableSchedule)
                 .ThenInclude(t => t.Teacher)
                 .Where(b => b.TeacherAvailableSchedule.TeacherId == userId)
+                //.OrderBy(b => b.BookedDate)
                 .ToListAsync();
         }
 
@@ -68,6 +69,7 @@ namespace Repository
                 .Include(b => b.TeacherAvailableSchedule)
                 .ThenInclude(t => t.Teacher)
                 .Where(b => b.LearnerId == userId)
+                //.OrderBy(b => b.BookedDate)
                 .ToListAsync();
         }
 
