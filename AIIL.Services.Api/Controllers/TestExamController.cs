@@ -135,6 +135,7 @@ namespace AIIL.Services.Api.Controllers
         public async Task<IActionResult> CalculateScore([FromRoute] Guid testId, [FromRoute] Guid userId, [FromBody] SubmitTestDto model)
         {
             var result = await _testExamService.CalculateScore(testId, userId, model);
+            //var cc = 0
             return Ok(result);
         }
 

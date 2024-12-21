@@ -151,6 +151,10 @@ builder.Services.AddHostedService<NotificationBackgroundService>();
 //builder.Services.AddHostedService<LiveStreamBackgroundService>();
 builder.Services.AddHostedService<StatusBackgroundService>();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("GoogleApi", client =>
+{
+    client.BaseAddress = new Uri("https://generativelanguage.googleapis.com");
+});
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FrontendUrls").Get<string[]>();
