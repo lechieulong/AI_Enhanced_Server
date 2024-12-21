@@ -217,6 +217,12 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
         public async Task<SpeakingResponseDto> ScoreSpeaking(SpeakingModel speakingModel)
         {
+            if (string.IsNullOrEmpty(speakingModel.Answer) || string.IsNullOrEmpty(speakingModel.QuestionName) || speakingModel.PartNumber <= 0)
+            {
+                throw new ArgumentException($"Invalid input data. Answer: {speakingModel.Answer}. Please ensure all fields are filled correctly.");
+            }
+
+
             var speakingExplains = new SpeakingResponseDto();
             speakingExplains.Answer = speakingModel.Answer;
             speakingExplains.QuestionName = speakingModel.QuestionName;
