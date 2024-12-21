@@ -38,7 +38,7 @@ namespace Service
         {
             _clientFactory = httpClientFactory;
             _testExamRepository = testExamRepository;
-            _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBNzlJKB4l_hh_nIR266DdgZpDpEA6iIUs";
+            _apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAkFBzNmOixBE8Elh-nNseThbJZMJAMc_A";
             _azureService = azureService;
         }
 
