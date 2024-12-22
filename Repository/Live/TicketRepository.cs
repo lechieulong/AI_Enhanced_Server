@@ -30,7 +30,7 @@ namespace Repository.Live
         }
         public async Task<Ticket> addTicketAsync(Ticket mode)
         {
-            _context.Tickets.Add(mode);
+             _context.Tickets.Add(mode);
             await _context.SaveChangesAsync();
             return mode;
 
