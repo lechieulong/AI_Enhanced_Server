@@ -49,15 +49,16 @@ namespace Service
             foreach (var userAnswer in model.UserAnswers.Values)
             {
 
-                var part  = await _testExamRepository.GetPartNumber(userAnswer.PartId.Value);
+                var part = await _testExamRepository.GetPartNumber(userAnswer.PartId.Value);
                 var questionName = await _testExamRepository.GetQuestionNameById(userAnswer.QuestionId);
                 var descriptionDiagram = string.Empty;
-                if (part.PartNumber == 1) {
+                if (part.PartNumber == 1)
+                {
                     descriptionDiagram = await _azureService.ExtractTextFromImageAsync(part.Image);
-                    }
+                }
 
-                var finalPrompt = part.PartNumber == 2 ? BuildPrompt(questionName, userAnswer.Answers[0].AnswerText, part.PartNumber) 
-                                            : BuildPromptWithOCR(questionName,descriptionDiagram, userAnswer.Answers[0].AnswerText,part.PartNumber);
+                var finalPrompt = part.PartNumber == 2 ? BuildPrompt(questionName, userAnswer.Answers[0].AnswerText, part.PartNumber)
+                                            : BuildPromptWithOCR(questionName, descriptionDiagram, userAnswer.Answers[0].AnswerText, part.PartNumber);
 
                 var requestData = new
                 {
@@ -94,7 +95,7 @@ namespace Service
                     // Use a regular expression to extract the Overall Score
                     var scoreMatch = Regex.Match(result, @"\*\*Overall Score:\*\*\s*([\d\.]+)");
                     if (scoreMatch.Success)
-                   {
+                    {
                         var overallScore = scoreMatch.Groups[1].Value;
                         userAnswer.OverallScore = overallScore;
                     }
@@ -126,7 +127,7 @@ namespace Service
         }
 
 
-       
+
 
         private string BuildPrompt(string questionName, string answer, int task)
         {
@@ -212,7 +213,7 @@ Please evaluate the response based on the following criteria:
 
 Now, please evaluate the user's response based on the criteria above. Remember, Task Relevance is the most important factor when determining the score. If the answer doesn't directly address the question, the overall score should be lowered accordingly.
 ";
-    }
+        }
 
 
         public async Task<SpeakingResponseDto> ScoreSpeaking(SpeakingModel speakingModel)
@@ -376,7 +377,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
             // Check if the answer is null or empty, and if so, return an appropriate message.
             if (string.IsNullOrEmpty(answer))
             {
-                            return $@"
+                return $@"
                     ### You are an expert in IELTS Speaking.
         
                     **Context:** Part {part} of the IELTS Speaking test.
@@ -495,7 +496,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
 
         public async Task ExplainListeningAndReading(Guid partId, int skillType)
-        
+
         {
             var sections = await _testExamRepository.GetSectionsByPartId(partId);
 
@@ -512,7 +513,8 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                                           (skillType == 1 && !listeningKey.Contains(section.SectionType));
 
 
-                foreach (var sq in section.SectionQuestions) {
+                foreach (var sq in section.SectionQuestions)
+                {
 
                     var correctAnswers = await _testExamRepository.GetCorrectAnswers(sq.Question.Id, section.SectionType, skillType);
                     if (isHasSectionContext)
@@ -526,7 +528,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                     }
                     else
                     {
-                        if(skillType == 0 && (section.SectionType == 2 || section.SectionType == 3))
+                        if (skillType == 0 && (section.SectionType == 2 || section.SectionType == 3))
                         {
                             prompts.AppendLine($"Question: {correctAnswers[0].AnswerText} - this is a question for True, False, or Not Given.");
                             prompts.AppendLine($"Is it correct?: {(correctAnswers[0].TypeCorrect == 1 ? "Correct" : correctAnswers[0].TypeCorrect == 0 ? "Incorrect" : "Not Given")}");
@@ -540,10 +542,10 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                         }
                     }
                 }
-             
+
 
                 if (skillType == 0)
-                 {
+                {
                     var context = await _testExamRepository.GetContentText(partId);
                     if (isHasSectionContext)
                         finalPrompt = BuildExplainReadingPromptWithSectionContext(prompts.ToString(), context, sectionContext);
@@ -551,24 +553,24 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                         finalPrompt = BuildExplainReadingPrompt(prompts.ToString(), context);
                 }
                 else
-                    {
+                {
                     string script = string.Empty;
                     var part = await _testExamRepository.GetPartNumber(partId);
 
 
-                    while (part.AudioProcessingStatus == 0) 
+                    while (part.AudioProcessingStatus == 0)
                     {
-                        await Task.Delay(2000); 
+                        await Task.Delay(2000);
                         part = await _testExamRepository.GetPartNumber(partId);
                     }
 
-                   
-                     script = part.ScriptAudio;
+
+                    script = part.ScriptAudio;
                     if (isHasSectionContext)
-                             finalPrompt = BuildExplainListeningPrompt(prompts.ToString(), script);
+                        finalPrompt = BuildExplainListeningPrompt(prompts.ToString(), script);
                     else
                         finalPrompt = BuildExplainLíteningPromptWithSectionContext(prompts.ToString(), script, sectionContext);
-                    }
+                }
 
 
                 var requestData = new
@@ -664,7 +666,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
         private string BuildExplainLíteningPromptWithSectionContext(string prompts, string transcriptAudio, string sectionContext)
         {
-                        return $@"
+            return $@"
             You are an expert in listening comprehension. Based on the following audio transcript, the associated questions, and the contextual information provided, offer a detailed explanation for each correct answer. 
 
             Audio Transcript:
@@ -686,7 +688,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
             Provide thorough and structured explanations that align with the expectations of a listening comprehension expert.
             ";
-                    }
+        }
 
 
 
