@@ -85,8 +85,6 @@ namespace AIIL.Services.Api.Controllers
             }
 
         [HttpPost("upload")]
-        [RequestSizeLimit(100_000_000)] // Allow up to 100 MB
-        [RequestFormLimits(MultipartBodyLengthLimit = 100_000_000)] // Multipart form limits
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
