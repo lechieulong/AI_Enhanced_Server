@@ -249,7 +249,7 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                 // Log request payload
                 Console.WriteLine("Request Payload:");
                 Console.WriteLine(JsonConvert.SerializeObject(requestData, Formatting.Indented));
-
+                client.DefaultRequestHeaders.Add("Client-ID", "189214968639-396q766kp8o9qfjmbk9tnnlg480e9qmo.apps.googleusercontent.com");
                 var response = await client.PostAsync(
                     _apiUrl,
                     new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
@@ -459,11 +459,11 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
 
     ### Evaluation Format:
 
-    - **Overall Band Score:** [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
-    - **Coherence:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
-    - **Lexical Resource:** [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
-    - **Grammatical Range and Accuracy:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
-    - **Pronunciation:**  [Numeric score only, e.g., 3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Overall Band Score:** [Numeric score only, e.g., 1.0.2.0,2.5,3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Coherence:**  [Numeric score only, e.g., 1.0.2.0,2.5,3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Lexical Resource:** [Numeric score only, e.g., 1.0.2.0,2.5,3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Grammatical Range and Accuracy:**  [Numeric score only, e.g., 1.0.2.0,2.5,3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
+    - **Pronunciation:**  [Numeric score only, e.g., 1.0.2.0,2.5,3.0,4.0,4.5,5.0 6.5,,7.0 7.5,8.5]
 
     **Feedback:**
        - **Strengths:** [Highlight positive aspects of the response]
