@@ -1009,6 +1009,7 @@ namespace Repository
                             UserId = tr.UserId,
 
                             SkillType = tr.SkillType,
+                            SkillId = tr.SkillId,
                             Score = tr.Score,
                             NumberOfCorrect = tr.NumberOfCorrect,
                             TotalQuestion = tr.TotalQuestion,
