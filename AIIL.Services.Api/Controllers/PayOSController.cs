@@ -63,11 +63,11 @@ namespace TransactionValidationApi.Controllers
 
                 }
                 
-                return Ok(new { success = true });
+                return Ok(new { success = false });
             }
             else
             {
-                return Ok(new { success = true });
+                return Ok(new { success = false });
             }
         }
 
