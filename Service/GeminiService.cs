@@ -556,11 +556,11 @@ Now, please evaluate the user's response based on the criteria above. Remember, 
                     var part = await _testExamRepository.GetPartNumber(partId);
 
 
-                    while (part.AudioProcessingStatus == 0) 
-                    {
-                        await Task.Delay(2000); 
-                        part = await _testExamRepository.GetPartNumber(partId);
-                    }
+                    //while (part.AudioProcessingStatus == 0) 
+                    //{
+                    //    await Task.Delay(2000); 
+                    //    part = await _testExamRepository.GetPartNumber(partId);
+                    //}
 
                    
                      script = part.ScriptAudio;
