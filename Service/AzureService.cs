@@ -11,10 +11,10 @@ namespace Service
 {
     public class AzureService : IAzureService
     {
-        private readonly string apiKey = "DNF18zNqjBGtitKePhRWMhQBaEtZ2BiGftBuQI7ldYYqUIdyoCKKJQQJ99ALACqBBLyXJ3w3AAAFACOGAalp";
+        private readonly string apiKey = "";
         private readonly string endpoint = "https://computervisionresourcehydra.cognitiveservices.azure.com/";
         private readonly ComputerVisionClient _visionClient;
-        private string subscriptionKey = "F8SeRNFIaj8X04HEyQv6HfeqcMEL0hfYisdGMd00NACJckxX0jetJQQJ99ALACqBBLyXJ3w3AAAYACOGD3km";
+        private string subscriptionKey = "";
         private string region = "southeastasia";
 
         public AzureService()
